@@ -43,7 +43,7 @@ func Encode(src []rune) ([]byte, error) {
 type ErrInvalidRune rune
 
 func (e ErrInvalidRune) Error() string {
-	return fmt.Sprintf("ucs2: invalid rune: 0x%04x", uint32(e))
+	return fmt.Sprintf("ucs2: invalid rune: %U", rune(e))
 }
 
 var (

@@ -163,7 +163,7 @@ func TestErrInvalidUTF8(t *testing.T) {
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			err := gsm7.ErrInvalidUTF8(p)
-			expected := fmt.Sprintf("gsm7: invalid utf8 '%c' (0x%04x)", rune(err), int(err))
+			expected := fmt.Sprintf("gsm7: invalid utf8 '%c' (%U)", rune(err), int(err))
 			s := err.Error()
 			if s != expected {
 				t.Errorf("failed to stringify %02x, expected '%s', got '%s'", p, expected, s)

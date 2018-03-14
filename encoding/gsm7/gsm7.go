@@ -138,5 +138,5 @@ func (e ErrInvalidSeptet) Error() string {
 type ErrInvalidUTF8 rune
 
 func (e ErrInvalidUTF8) Error() string {
-	return fmt.Sprintf("gsm7: invalid utf8 '%c' (0x%04x)", rune(e), int(e))
+	return fmt.Sprintf("gsm7: invalid utf8 '%c' (%U)", rune(e), int(e))
 }

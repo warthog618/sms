@@ -76,7 +76,7 @@ func TestErrInvalidRune(t *testing.T) {
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			err := ucs2.ErrInvalidRune(p)
-			expected := fmt.Sprintf("ucs2: invalid rune: 0x%04x", p)
+			expected := fmt.Sprintf("ucs2: invalid rune: %U", p)
 			s := err.Error()
 			if s != expected {
 				t.Errorf("failed to stringify %x, expected '%s', got '%s'", p, expected, s)
