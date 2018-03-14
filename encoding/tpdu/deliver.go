@@ -48,7 +48,7 @@ func (d *Deliver) MarshalBinary() ([]byte, error) {
 		return nil, EncodeError("oa", err)
 	}
 	b = append(b, oa...)
-	b = append(b, d.pid, byte(d.dcs))
+	b = append(b, d.pid, d.dcs)
 	scts, err := d.scts.MarshalBinary()
 	if err != nil {
 		return nil, EncodeError("scts", err)
@@ -84,7 +84,7 @@ func (d *Deliver) UnmarshalBinary(src []byte) error {
 	if len(src) <= ri {
 		return DecodeError("dcs", ri, ErrUnderflow)
 	}
-	d.SetDCS(DCS(src[ri]))
+	d.dcs = src[ri]
 	ri++
 	if len(src) < ri+7 {
 		return DecodeError("scts", ri, ErrUnderflow)

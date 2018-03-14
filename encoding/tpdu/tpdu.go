@@ -29,7 +29,7 @@ type TPDU interface {
 type BaseTPDU struct {
 	firstOctet byte
 	pid        byte
-	dcs        DCS
+	dcs        byte
 	udh        UserDataHeader
 	// ud contains the short message from the User Data.
 	// It does not include the User Data Header, which is provided in udh.
@@ -79,12 +79,12 @@ func (d DCS) Compressed() bool {
 
 // Alphabet returns the alphabet field from the DCS of the SMS TPDU.
 func (p *BaseTPDU) Alphabet() (Alphabet, error) {
-	return p.dcs.Alphabet()
+	return DCS(p.dcs).Alphabet()
 }
 
 // DCS returns the TPDU dcs field.
 func (p *BaseTPDU) DCS() DCS {
-	return p.dcs
+	return DCS(p.dcs)
 }
 
 // FirstOctet returns the TPDU firstOctet field.
@@ -104,7 +104,7 @@ func (p *BaseTPDU) MTI() MessageType {
 
 // SetDCS sets the TPDU dcs field.
 func (p *BaseTPDU) SetDCS(dcs DCS) {
-	p.dcs = dcs
+	p.dcs = byte(dcs)
 }
 
 // SetFirstOctet sets the TPDU firstOctet field.

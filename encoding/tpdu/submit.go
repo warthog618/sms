@@ -58,7 +58,7 @@ func (s *Submit) MarshalBinary() ([]byte, error) {
 		return nil, EncodeError("da", err)
 	}
 	b = append(b, da...)
-	b = append(b, s.pid, byte(s.dcs))
+	b = append(b, s.pid, s.dcs)
 	if s.vp.Format != VpfNotPresent {
 		vp, verr := s.vp.MarshalBinary()
 		if verr != nil {
@@ -101,7 +101,7 @@ func (s *Submit) UnmarshalBinary(src []byte) error {
 	if len(src) <= ri {
 		return DecodeError("dcs", ri, ErrUnderflow)
 	}
-	s.SetDCS(DCS(src[ri]))
+	s.dcs = src[ri]
 	ri++
 	vpf := ValidityPeriodFormat((s.firstOctet >> 3) & 0x3)
 	n, err = s.vp.UnmarshalBinary(src[ri:], vpf)

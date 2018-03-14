@@ -68,7 +68,7 @@ func (d *DeliverReport) MarshalBinary() ([]byte, error) {
 		b = append(b, d.pid)
 	}
 	if d.pi&0x02 == 0x02 {
-		b = append(b, byte(d.dcs))
+		b = append(b, d.dcs)
 	}
 	if d.pi&0x4 == 0x4 {
 		ud, err := d.encodeUserData()
@@ -108,7 +108,7 @@ func (d *DeliverReport) UnmarshalBinary(src []byte) error {
 		if len(src) <= ri {
 			return DecodeError("dcs", ri, ErrUnderflow)
 		}
-		d.SetDCS(DCS(src[ri]))
+		d.dcs = src[ri]
 		ri++
 	}
 	d.udhiMask = 0x04

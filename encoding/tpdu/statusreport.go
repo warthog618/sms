@@ -132,7 +132,7 @@ func (s *StatusReport) MarshalBinary() ([]byte, error) {
 		b = append(b, s.pid)
 	}
 	if s.pi&0x02 == 0x02 {
-		b = append(b, byte(s.dcs))
+		b = append(b, s.dcs)
 	}
 	if s.pi&0x4 == 0x4 {
 		ud, err := s.encodeUserData()
@@ -198,7 +198,7 @@ func (s *StatusReport) UnmarshalBinary(src []byte) error {
 		if len(src) <= ri {
 			return DecodeError("dcs", ri, ErrUnderflow)
 		}
-		s.SetDCS(DCS(src[ri]))
+		s.dcs = src[ri]
 		ri++
 	}
 	if s.pi&0x04 == 0x04 {
