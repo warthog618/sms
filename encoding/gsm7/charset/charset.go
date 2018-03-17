@@ -7,8 +7,14 @@ package charset
 
 import "fmt"
 
+// Decoder provides a mapping from GSM7 byte to UTF8 rune.
+type Decoder map[byte]rune
+
+// Encoder provides a mapping from UTF8 rune to GSM7 byte.
+type Encoder map[rune]byte
+
 // Display prints the character set for a given character set decoder.
-func Display(m map[byte]rune) {
+func Display(m Decoder) {
 	specials := map[rune]string{
 		'\n':   "LF",
 		'\r':   "CR",

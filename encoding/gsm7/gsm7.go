@@ -8,6 +8,7 @@ package gsm7
 import (
 	"fmt"
 
+	"github.com/warthog618/sms/encoding/gsm7/charset"
 	"github.com/warthog618/sms/encoding/gsm7/charset/basic"
 )
 
@@ -18,15 +19,15 @@ const (
 
 // Decoder converts from GSM7 to UTF-8 using a particular character set.
 type Decoder struct {
-	set    map[byte]rune
-	ext    map[byte]rune
+	set    charset.Decoder
+	ext    charset.Decoder
 	strict bool
 }
 
 // Encoder converts from UTF-8 to GSM7 using a particular character set.
 type Encoder struct {
-	set map[rune]byte
-	ext map[rune]byte
+	set charset.Encoder
+	ext charset.Encoder
 }
 
 // NewDecoder returns a new GSM7 decoder which uses the basic (default) character set.
@@ -78,13 +79,13 @@ func (d *Decoder) Decode(src []byte) ([]byte, error) {
 }
 
 // WithCharset replaces the character set map used by the Decoder.
-func (d Decoder) WithCharset(set map[byte]rune) Decoder {
+func (d Decoder) WithCharset(set charset.Decoder) Decoder {
 	d.set = set
 	return d
 }
 
 // WithExtCharset replaces the extension character set map used by the Decoder.
-func (d Decoder) WithExtCharset(ext map[byte]rune) Decoder {
+func (d Decoder) WithExtCharset(ext charset.Decoder) Decoder {
 	d.ext = ext
 	return d
 }
@@ -118,13 +119,13 @@ func (e *Encoder) Encode(src []byte) ([]byte, error) {
 }
 
 // WithCharset replaces the character set map used by the Encoder.
-func (e Encoder) WithCharset(set map[rune]byte) Encoder {
+func (e Encoder) WithCharset(set charset.Encoder) Encoder {
 	e.set = set
 	return e
 }
 
 // WithExtCharset replaces the extension character set map used by the Encoder.
-func (e Encoder) WithExtCharset(ext map[rune]byte) Encoder {
+func (e Encoder) WithExtCharset(ext charset.Encoder) Encoder {
 	e.ext = ext
 	return e
 }

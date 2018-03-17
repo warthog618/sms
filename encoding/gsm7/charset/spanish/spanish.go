@@ -5,24 +5,20 @@
 
 package spanish
 
-// Decoder provides a mapping from GSM7 byte to UTF8 rune.
-type Decoder map[byte]rune
-
-// Encoder provides a mapping from UTF8 rune to GSM7 byte.
-type Encoder map[rune]byte
+import "github.com/warthog618/sms/encoding/gsm7/charset"
 
 // NewExtDecoder returns the extension mapping table from GSM7 to UTF8.
-func NewExtDecoder() Decoder {
+func NewExtDecoder() charset.Decoder {
 	return dext
 }
 
 // NewExtEncoder returns the extention mapping table from UTF8 to GSM7.
-func NewExtEncoder() Encoder {
+func NewExtEncoder() charset.Encoder {
 	return eext
 }
 
 var (
-	dext = Decoder{
+	dext = charset.Decoder{
 		0x09: 'ç',
 		0x0a: '\f',
 		0x0d: '\n',
@@ -44,11 +40,11 @@ var (
 		0x6f: 'ó',
 		0x75: 'ú',
 	}
-	eext Encoder
+	eext charset.Encoder
 )
 
 func init() {
-	eext = make(Encoder, len(dext))
+	eext = make(charset.Encoder, len(dext))
 	for k, v := range dext {
 		eext[v] = k
 	}

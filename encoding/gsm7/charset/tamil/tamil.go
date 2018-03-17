@@ -5,34 +5,30 @@
 
 package tamil
 
-// Decoder provides a mapping from GSM7 byte to UTF8 rune.
-type Decoder map[byte]rune
-
-// Encoder provides a mapping from UTF8 rune to GSM7 byte.
-type Encoder map[rune]byte
+import "github.com/warthog618/sms/encoding/gsm7/charset"
 
 // NewDecoder returns the mapping table from GSM7 to UTF8.
-func NewDecoder() Decoder {
+func NewDecoder() charset.Decoder {
 	return dset
 }
 
 // NewExtDecoder returns the extension mapping table from GSM7 to UTF8.
-func NewExtDecoder() Decoder {
+func NewExtDecoder() charset.Decoder {
 	return dext
 }
 
 // NewEncoder returns the mapping table from UTF8 to GSM7.
-func NewEncoder() Encoder {
+func NewEncoder() charset.Encoder {
 	return eset
 }
 
 // NewExtEncoder returns the extention mapping table from UTF8 to GSM7.
-func NewExtEncoder() Encoder {
+func NewExtEncoder() charset.Encoder {
 	return eext
 }
 
 var (
-	dset = Decoder{
+	dset = charset.Decoder{
 		0x01: '\u0b82',
 		0x02: '\u0b83',
 		0x03: '\u0b85',
@@ -137,7 +133,7 @@ var (
 		0x7e: '\u0bf2',
 		0x7f: '\u0bf9',
 	}
-	dext = Decoder{
+	dext = charset.Decoder{
 		0x00: '@',
 		0x01: '£',
 		0x02: '$',
@@ -218,16 +214,16 @@ var (
 		0x5a: 'Z',
 		0x65: '€',
 	}
-	eset Encoder
-	eext Encoder
+	eset charset.Encoder
+	eext charset.Encoder
 )
 
 func init() {
-	eset = make(Encoder, len(dset))
+	eset = make(charset.Encoder, len(dset))
 	for k, v := range dset {
 		eset[v] = k
 	}
-	eext = make(Encoder, len(dext))
+	eext = make(charset.Encoder, len(dext))
 	for k, v := range dext {
 		if ko, ok := eext[v]; !ok || ko > k {
 			eext[v] = k
