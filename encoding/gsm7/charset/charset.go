@@ -13,6 +13,41 @@ type Decoder map[byte]rune
 // Encoder provides a mapping from UTF8 rune to GSM7 byte.
 type Encoder map[rune]byte
 
+// NationalLanguageIdentifier indicates the character set in use, as defined in
+// 3GPP TS 23.038 Section 6.2.1.2.4.
+type NationalLanguageIdentifier int
+
+const (
+	// Default character set.
+	Default NationalLanguageIdentifier = iota
+	// Turkish character set.
+	Turkish
+	// Spanish character set
+	Spanish
+	// Portuguese character set
+	Portuguese
+	// Bengali character set
+	Bengali
+	// Gujaranti character set
+	Gujaranti
+	// Hindi character set
+	Hindi
+	// Kannada character set
+	Kannada
+	// Malayalam character set
+	Malayalam
+	// Oriya character set
+	Oriya
+	// Punjabi character set
+	Punjabi
+	// Tamil character set
+	Tamil
+	// Telugu character set
+	Telugu
+	// Urdu character set
+	Urdu
+)
+
 // Display prints the character set for a given character set decoder.
 func Display(m Decoder) {
 	specials := map[rune]string{
