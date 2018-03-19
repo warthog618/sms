@@ -68,6 +68,9 @@ func (a *Address) UnmarshalBinary(src []byte) (int, error) {
 	case TonAlphanumeric:
 		// l is digits, i.e. GSM7 septets, and so requires conversion to octets....
 		ol := (l*7 + 7) / 8
+		if len(src) < ri+ol {
+			return len(src), DecodeError("addr", ri, ErrUnderflow)
+		}
 		u := gsm7.Unpack7Bit(src[ri:ri+ol], 0)
 		d := gsm7.NewDecoder().WithExtCharset(nil).Strict() // without escapes
 		baddr, err := d.Decode(u)
@@ -93,6 +96,14 @@ func (a *Address) UnmarshalBinary(src []byte) (int, error) {
 	}
 	a.TOA = toa
 	return ri, nil
+}
+
+// Number returns the stringified number corresponding to the Address.
+func (a Address) Number() string {
+	if a.TypeOfNumber() == TonInternational {
+		return "+" + a.Addr
+	}
+	return a.Addr
 }
 
 // NumberingPlan extracts the NPI field from the TOA.

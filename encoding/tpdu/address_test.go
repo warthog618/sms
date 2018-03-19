@@ -80,6 +80,8 @@ func TestAddressUnmarshalBinary(t *testing.T) {
 			tpdu.DecodeError("addr", 2, tpdu.ErrUnderflow)},
 		{"invalid alpha bar", []byte{10, 0xd1, 0xED, 0xF2, 0x7C, 0x03, 0x9c, 0x87, 0xCF, 0xE5, 0x39}, tpdu.Address{}, 2,
 			tpdu.DecodeError("addr", 2, gsm7.ErrInvalidSeptet(0x40))},
+		{"underflow alpha", []byte{10, 0xd1, 0xCF, 0xE5, 0x39}, tpdu.Address{}, 5,
+			tpdu.DecodeError("addr", 2, tpdu.ErrUnderflow)},
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
