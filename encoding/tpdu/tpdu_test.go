@@ -28,12 +28,12 @@ func TestDCSAlphabet(t *testing.T) {
 			dcsAlphabetPattern{0x00 | m, tpdu.Alpha7Bit, nil},
 			dcsAlphabetPattern{0x04 | m, tpdu.Alpha8Bit, nil},
 			dcsAlphabetPattern{0x08 | m, tpdu.AlphaUCS2, nil},
-			dcsAlphabetPattern{0x0c | m, tpdu.AlphaReserved, nil},
+			dcsAlphabetPattern{0x0c | m, tpdu.Alpha7Bit, nil},
 		)
 	}
 	for i := 0x80; i < 0xc0; i++ {
 		patterns = append(patterns,
-			dcsAlphabetPattern{byte(i), tpdu.AlphaReserved, tpdu.ErrInvalid},
+			dcsAlphabetPattern{byte(i), tpdu.Alpha7Bit, tpdu.ErrInvalid},
 		)
 	}
 	for i := 0xc0; i < 0xe0; i++ {
@@ -109,8 +109,8 @@ func TestBaseTPDUAlphabet(t *testing.T) {
 		dcsAlphabetPattern{0x00, tpdu.Alpha7Bit, nil},
 		dcsAlphabetPattern{0x04, tpdu.Alpha8Bit, nil},
 		dcsAlphabetPattern{0x08, tpdu.AlphaUCS2, nil},
-		dcsAlphabetPattern{0x0c, tpdu.AlphaReserved, nil},
-		dcsAlphabetPattern{0x80, tpdu.AlphaReserved, tpdu.ErrInvalid},
+		dcsAlphabetPattern{0x0c, tpdu.Alpha7Bit, nil},
+		dcsAlphabetPattern{0x80, tpdu.Alpha7Bit, tpdu.ErrInvalid},
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {

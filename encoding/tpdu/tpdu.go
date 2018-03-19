@@ -6,24 +6,8 @@
 package tpdu
 
 import (
-	"encoding"
-
 	"github.com/warthog618/sms/encoding/gsm7"
 )
-
-// TPDU represents the minimal interface provided by TPDU implementations.
-type TPDU interface {
-	encoding.BinaryMarshaler
-	encoding.BinaryUnmarshaler
-	// MTI provides a clue as to the underlying TPDU type.
-	MTI() MessageType
-	// Alphabet defines how the UD field is encoded.
-	Alphabet() (Alphabet, error)
-	// UDH provides the UserDataHeader, which is optional and so may be empty.
-	UDH() UserDataHeader
-	// UD provides the UserData, the format of which depends on the Alphabet.
-	UD() UserData
-}
 
 // BaseTPDU is the base type for SMS TPDUs.
 type BaseTPDU struct {
@@ -55,6 +39,9 @@ func (d DCS) Alphabet() (Alphabet, error) {
 	switch {
 	case d&0x80 == 0x00: // 0xxx
 		alpha = Alphabet((d >> 2) & 0x3)
+		if alpha == AlphaReserved {
+			alpha = Alpha7Bit
+		}
 	case d&0xe0 == 0xc0: // 110x
 	// is 7bit
 	case d&0xf0 == 0xe0: // 1110
@@ -64,7 +51,7 @@ func (d DCS) Alphabet() (Alphabet, error) {
 			alpha = Alpha8Bit
 		} // else 7bit
 	default: // includes 10xx reserved coding groups
-		return AlphaReserved, ErrInvalid
+		return Alpha7Bit, ErrInvalid
 	}
 	return alpha, nil
 }
