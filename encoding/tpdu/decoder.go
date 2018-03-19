@@ -6,6 +6,8 @@
 package tpdu
 
 import (
+	"encoding"
+
 	"github.com/pkg/errors"
 )
 
@@ -29,25 +31,21 @@ func NewDecoder(opts ...DecoderOption) (*Decoder, error) {
 	return d, nil
 }
 
-// NewDecoderMO creates a new Decoder that supports all decoders required for
-// PDUs received at the SC.
-func NewDecoderMO() (*Decoder, error) {
-	return NewDecoder(
-		RegisterCommandDecoder,
-		RegisterDeliverReportDecoder,
-		RegisterSubmitDecoder,
-	)
-}
+// TPDU represents the minimal interface provided by TPDU implementations.
+type TPDU interface {
+	encoding.BinaryMarshaler
+	encoding.BinaryUnmarshaler
+	// MTI provides a clue as to the underlying TPDU type.
+	MTI() MessageType
+	// Alphabet defines how the UD field is encoded.
+	Alphabet() (Alphabet, error)
 
-// NewDecoderMT creates a new Decoder that supports all decoders required for
-// PDUs received at the MS.
-func NewDecoderMT() (*Decoder, error) {
-	return NewDecoder(
-		RegisterDeliverDecoder,
-		RegisterReservedDecoder,
-		RegisterSubmitReportDecoder,
-		RegisterStatusReportDecoder,
-	)
+	SetUD(UserData)
+	SetUDH(UserDataHeader)
+	// UD provides the UserData, the format of which depends on the Alphabet.
+	UD() UserData
+	// UDH provides the UserDataHeader, which is optional and so may be empty.
+	UDH() UserDataHeader
 }
 
 // ConcreteDecoder is a function that decodes a binary TPDU into a particular TPDU struct.

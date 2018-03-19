@@ -38,30 +38,6 @@ func TestNewDecoder(t *testing.T) {
 	}
 }
 
-func TestNewDecoderMO(t *testing.T) {
-	d, err := tpdu.NewDecoderMO()
-	if err != nil {
-		t.Errorf("error crearing decoder: %v", err)
-	}
-	if d == nil {
-		t.Error("failed to create decoder")
-	}
-	// !!! should check it has the correct set of decoders by performing a decode of
-	// an example of each type...
-}
-
-func TestNewDecoderMT(t *testing.T) {
-	d, err := tpdu.NewDecoderMT()
-	if err != nil {
-		t.Errorf("error crearing decoder: %v", err)
-	}
-	if d == nil {
-		t.Error("failed to create decoder")
-	}
-	// !!! should check it has the correct set of decoders by performing a decode of
-	// an example of each type...
-}
-
 func TestDecoderRegisterDecoder(t *testing.T) {
 	d, err := tpdu.NewDecoder()
 	if err != nil {
