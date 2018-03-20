@@ -3,32 +3,10 @@
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
 
-package bengali
-
-import "github.com/warthog618/sms/encoding/gsm7/charset"
-
-// NewDecoder returns the mapping table from GSM7 to UTF8.
-func NewDecoder() charset.Decoder {
-	return dset
-}
-
-// NewExtDecoder returns the extension mapping table from GSM7 to UTF8.
-func NewExtDecoder() charset.Decoder {
-	return dext
-}
-
-// NewEncoder returns the mapping table from UTF8 to GSM7.
-func NewEncoder() charset.Encoder {
-	return eset
-}
-
-// NewExtEncoder returns the extention mapping table from UTF8 to GSM7.
-func NewExtEncoder() charset.Encoder {
-	return eext
-}
+package charset
 
 var (
-	dset = charset.Decoder{
+	bengaliDecoder = Decoder{
 		0x00: '\u0981',
 		0x01: '\u0982',
 		0x02: '\u0983',
@@ -145,7 +123,7 @@ var (
 		0x7e: '\u09f0',
 		0x7f: '\u09f1',
 	}
-	dext = charset.Decoder{
+	bengaliExtDecoder = Decoder{
 		0x00: '@',
 		0x01: '£',
 		0x02: '$',
@@ -231,19 +209,14 @@ var (
 		0x5a: 'Z',
 		0x65: '€',
 	}
-	eset charset.Encoder
-	eext charset.Encoder
+	bengaliEncoder    Encoder
+	bengaliExtEncoder Encoder
 )
 
-func init() {
-	eset = make(charset.Encoder, len(dset))
-	for k, v := range dset {
-		eset[v] = k
-	}
-	eext = make(charset.Encoder, len(dext))
-	for k, v := range dext {
-		if ko, ok := eext[v]; !ok || ko > k {
-			eext[v] = k
-		}
-	}
+func generateBengaliEncoder() Encoder {
+	return generateEncoder(bengaliDecoder)
+}
+
+func generateBengaliExtEncoder() Encoder {
+	return generateEncoder(bengaliExtDecoder)
 }

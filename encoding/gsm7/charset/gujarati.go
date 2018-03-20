@@ -3,32 +3,10 @@
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
 
-package gujarati
-
-import "github.com/warthog618/sms/encoding/gsm7/charset"
-
-// NewDecoder returns the mapping table from GSM7 to UTF8.
-func NewDecoder() charset.Decoder {
-	return dset
-}
-
-// NewExtDecoder returns the extension mapping table from GSM7 to UTF8.
-func NewExtDecoder() charset.Decoder {
-	return dext
-}
-
-// NewEncoder returns the mapping table from UTF8 to GSM7.
-func NewEncoder() charset.Encoder {
-	return eset
-}
-
-// NewExtEncoder returns the extention mapping table from UTF8 to GSM7.
-func NewExtEncoder() charset.Encoder {
-	return eext
-}
+package charset
 
 var (
-	dset = charset.Decoder{
+	gujaratiDecoder = Decoder{
 		0x00: '\u0a81',
 		0x01: '\u0a82',
 		0x02: '\u0a83',
@@ -151,7 +129,7 @@ var (
 		0x7e: '\u0ae3',
 		0x7f: '\u0af1',
 	}
-	dext = charset.Decoder{
+	gujaratiExtDecoder = Decoder{
 		0x00: '@',
 		0x01: '£',
 		0x02: '$',
@@ -225,19 +203,14 @@ var (
 		0x5a: 'Z',
 		0x65: '€',
 	}
-	eset charset.Encoder
-	eext charset.Encoder
+	gujaratiEncoder    Encoder
+	gujaratiExtEncoder Encoder
 )
 
-func init() {
-	eset = make(charset.Encoder, len(dset))
-	for k, v := range dset {
-		eset[v] = k
-	}
-	eext = make(charset.Encoder, len(dext))
-	for k, v := range dext {
-		if ko, ok := eext[v]; !ok || ko > k {
-			eext[v] = k
-		}
-	}
+func generateGujaratiEncoder() Encoder {
+	return generateEncoder(gujaratiDecoder)
+}
+
+func generateGujaratiExtEncoder() Encoder {
+	return generateEncoder(gujaratiExtDecoder)
 }

@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	"github.com/warthog618/sms/encoding/gsm7/charset"
-	"github.com/warthog618/sms/encoding/gsm7/charset/basic"
 )
 
 const (
@@ -30,14 +29,14 @@ type Encoder struct {
 	ext charset.Encoder
 }
 
-// NewDecoder returns a new GSM7 decoder which uses the basic (default) character set.
+// NewDecoder returns a new GSM7 decoder which uses the default character set.
 func NewDecoder() Decoder {
-	return Decoder{basic.NewDecoder(), basic.NewExtDecoder(), false}
+	return Decoder{charset.DefaultDecoder(), charset.DefaultExtDecoder(), false}
 }
 
-// NewEncoder returns a new GSM7 encoder which uses the basic (default) character set.
+// NewEncoder returns a new GSM7 encoder which uses the default character set.
 func NewEncoder() Encoder {
-	return Encoder{basic.NewEncoder(), basic.NewExtEncoder()}
+	return Encoder{charset.DefaultEncoder(), charset.DefaultExtEncoder()}
 }
 
 // Decode converts the src from unpacked GSM7 to UTF-8.
@@ -130,12 +129,14 @@ func (e Encoder) WithExtCharset(ext charset.Encoder) Encoder {
 	return e
 }
 
+// ErrInvalidSeptet indicates a septet cannot be decoded.
 type ErrInvalidSeptet byte
 
 func (e ErrInvalidSeptet) Error() string {
 	return fmt.Sprintf("gsm7: invalid septet 0x%02x", int(e))
 }
 
+// ErrInvalidUTF8 indicates a rune cannot be converted to GSM7.
 type ErrInvalidUTF8 rune
 
 func (e ErrInvalidUTF8) Error() string {

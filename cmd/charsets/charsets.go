@@ -9,118 +9,67 @@ import (
 	"fmt"
 
 	"github.com/warthog618/sms/encoding/gsm7/charset"
-	"github.com/warthog618/sms/encoding/gsm7/charset/basic"
-	"github.com/warthog618/sms/encoding/gsm7/charset/bengali"
-	"github.com/warthog618/sms/encoding/gsm7/charset/gujarati"
-	"github.com/warthog618/sms/encoding/gsm7/charset/hindi"
-	"github.com/warthog618/sms/encoding/gsm7/charset/kannada"
-	"github.com/warthog618/sms/encoding/gsm7/charset/malayalam"
-	"github.com/warthog618/sms/encoding/gsm7/charset/oriya"
-	"github.com/warthog618/sms/encoding/gsm7/charset/portuguese"
-	"github.com/warthog618/sms/encoding/gsm7/charset/punjabi"
-	"github.com/warthog618/sms/encoding/gsm7/charset/spanish"
-	"github.com/warthog618/sms/encoding/gsm7/charset/tamil"
-	"github.com/warthog618/sms/encoding/gsm7/charset/telugu"
-	"github.com/warthog618/sms/encoding/gsm7/charset/turkish"
-	"github.com/warthog618/sms/encoding/gsm7/charset/urdu"
 )
 
+var charsetName = []string{
+	"Basic (default)",
+	"Turkish",
+	"Spanish",
+	"Portuguese",
+	"Bengali",
+	"Gujaranti",
+	"Hindi",
+	"Kannada",
+	"Malayalam",
+	"Oriya",
+	"Punjabi",
+	"Tamil",
+	"Telugu",
+	"Urdu",
+}
+
 func main() {
-	fmt.Println("Basic (default)")
-	charset.Display(basic.NewDecoder())
-	fmt.Println()
-	fmt.Println("Basic (default) Extensions")
-	charset.Display(basic.NewExtDecoder())
-	fmt.Println()
+	for nli := charset.Default; nli <= charset.Urdu; nli++ {
+		fmt.Println(charsetName[nli] + " Locking")
+		Display(charset.NewDecoder(nli))
+		fmt.Println()
+		fmt.Println(charsetName[nli] + " Shift")
+		Display(charset.NewDecoder(nli))
+		fmt.Println()
+	}
+}
 
-	fmt.Println("Turkish")
-	charset.Display(turkish.NewDecoder())
-	fmt.Println()
-	fmt.Println("Turkish Extensions")
-	charset.Display(turkish.NewExtDecoder())
-	fmt.Println()
-
-	fmt.Println("Spanish")
-	charset.Display(basic.NewDecoder())
-	fmt.Println()
-	fmt.Println("Spanish Extensions")
-	charset.Display(spanish.NewExtDecoder())
-	fmt.Println()
-
-	fmt.Println("Portuguese")
-	charset.Display(portuguese.NewDecoder())
-	fmt.Println()
-	fmt.Println("Portuguese Extensions")
-	charset.Display(portuguese.NewExtDecoder())
-	fmt.Println()
-
-	fmt.Println("Bengali")
-	charset.Display(bengali.NewDecoder())
-	fmt.Println()
-	fmt.Println("Bengali Extensions")
-	charset.Display(bengali.NewExtDecoder())
-	fmt.Println()
-
-	fmt.Println("Gujarati")
-	charset.Display(gujarati.NewDecoder())
-	fmt.Println()
-	fmt.Println("Gujarati Extensions")
-	charset.Display(gujarati.NewExtDecoder())
-	fmt.Println()
-
-	fmt.Println("Hindi")
-	charset.Display(hindi.NewDecoder())
-	fmt.Println()
-	fmt.Println("Hindi Extensions")
-	charset.Display(hindi.NewExtDecoder())
-	fmt.Println()
-
-	fmt.Println("Kannada")
-	charset.Display(kannada.NewDecoder())
-	fmt.Println()
-	fmt.Println("Kannada Extensions")
-	charset.Display(kannada.NewExtDecoder())
-	fmt.Println()
-
-	fmt.Println("Malayalam")
-	charset.Display(malayalam.NewDecoder())
-	fmt.Println()
-	fmt.Println("Malayalam Extensions")
-	charset.Display(malayalam.NewExtDecoder())
-	fmt.Println()
-
-	fmt.Println("Oriya")
-	charset.Display(oriya.NewDecoder())
-	fmt.Println()
-	fmt.Println("Oriya Extensions")
-	charset.Display(oriya.NewExtDecoder())
-	fmt.Println()
-
-	fmt.Println("Punjabi")
-	charset.Display(punjabi.NewDecoder())
-	fmt.Println()
-	fmt.Println("Punjabi Extensions")
-	charset.Display(punjabi.NewExtDecoder())
-	fmt.Println()
-
-	fmt.Println("Tamil")
-	charset.Display(tamil.NewDecoder())
-	fmt.Println()
-	fmt.Println("Tamil Extensions")
-	charset.Display(tamil.NewExtDecoder())
-	fmt.Println()
-
-	fmt.Println("Telugu")
-	charset.Display(telugu.NewDecoder())
-	fmt.Println()
-	fmt.Println("telugu Extensions")
-	charset.Display(telugu.NewExtDecoder())
-	fmt.Println()
-
-	fmt.Println("Urdu")
-	charset.Display(urdu.NewDecoder())
-	fmt.Println()
-	fmt.Println("Urdu Extensions")
-	charset.Display(urdu.NewExtDecoder())
-	fmt.Println()
+// Display prints the character set for a given character set decoder.
+func Display(m charset.Decoder) {
+	specials := map[rune]string{
+		'\n':   "LF",
+		'\r':   "CR",
+		'\f':   "FF",
+		' ':    "SP",
+		0x1b:   "ESC",
+		0x20ac: " €",
+	}
+	fmt.Printf("      ")
+	for c := 0; c < 8; c++ {
+		fmt.Printf("0x%d_ ", c)
+	}
+	fmt.Println("")
+	for r := 0; r < 0x10; r++ {
+		fmt.Printf("0x_%x: ", r)
+		for c := 0; c < 8; c++ {
+			k := byte(c*0x10 + r)
+			if v, ok := m[k]; ok {
+				if s, ok := specials[v]; ok {
+					fmt.Printf("%3s  ", s)
+				} else if v >= 0x400 {
+					fmt.Printf("%04x ", v)
+				} else {
+					fmt.Printf("  %c  ", v)
+				}
+			} else {
+				fmt.Printf("     ")
+			}
+		}
+		fmt.Println()
+	}
 }
