@@ -291,6 +291,14 @@ func TestUDDDecode(t *testing.T) {
 		{"message 8bit", []byte("message\x1b"), nil, tpdu.Alpha8Bit, 0, 0, []byte("message\x1b"), nil},
 		{"euro", []byte("\x1be"), nil, tpdu.Alpha7Bit, 0, 0, []byte("€"), nil},
 		{"grin", []byte{0xd8, 0x3d, 0xde, 0x01}, nil, tpdu.AlphaUCS2, 0, 0, []byte("😁"), nil},
+		// repeat the GSM7 Kannada tests without charset to force decoding to fallback to default
+		{"message 7bit locking defaulted", []byte("\x01\x02\x03"),
+			tpdu.UserDataHeader{tpdu.InformationElement{ID: 25, Data: []byte{byte(charset.Kannada)}}},
+			tpdu.Alpha7Bit, 0, 0, []byte("£$¥"), nil},
+		{"message 7bit shift defaulted", []byte("\x1b\x1e\x1b\x1f\x1b\x20"),
+			tpdu.UserDataHeader{tpdu.InformationElement{ID: 24, Data: []byte{byte(charset.Kannada)}}},
+			tpdu.Alpha7Bit, 0, 0, []byte("ßÉ "), nil},
+		// error tests
 		{"dangling surrogate", []byte{0xd8, 0x3d},
 			nil, tpdu.AlphaUCS2, 0, 0, []byte{}, ucs2.ErrDanglingSurrogate(0xD83d)},
 	}
@@ -330,6 +338,11 @@ func TestUDEEncode(t *testing.T) {
 			tpdu.Alpha7Bit, 0, charset.Kannada, []byte("\u0ce8\u0ce9\u0cea"), nil},
 		{"euro", []byte("\x1be"), nil, tpdu.Alpha7Bit, 0, 0, []byte("€"), nil},
 		{"grin", []byte{0xd8, 0x3d, 0xde, 0x01}, nil, tpdu.AlphaUCS2, 0, 0, []byte("😁"), nil},
+		// repeat the GSM7 Kannada tests without charset to force encoding to UCS2
+		{"message ucs2 locking", []byte{0x0c, 0x82, 0x0c, 0x83, 0x0c, 0x85}, nil,
+			tpdu.AlphaUCS2, 0, 0, []byte("\u0c82\u0c83\u0c85"), nil},
+		{"message ucs2 shift", []byte{0x0c, 0xe8, 0x0c, 0xe9, 0x0c, 0xea}, nil,
+			tpdu.AlphaUCS2, 0, 0, []byte("\u0ce8\u0ce9\u0cea"), nil},
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
