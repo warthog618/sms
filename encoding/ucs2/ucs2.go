@@ -11,39 +11,51 @@ import (
 // As the UCS2 characters are packed into a byte array, the length of the
 // byte array provided must be even.
 func Decode(src []byte) ([]rune, error) {
+	if len(src) == 0 {
+		return nil, nil
+	}
 	if len(src)&0x01 == 0x01 {
 		return nil, ErrInvalidLength
 	}
 	l := len(src) / 2
-	dst := make([]rune, l)
-	ri := 0
-	for i := 0; i < l; i++ {
-		dst[i] = rune(binary.BigEndian.Uint16(src[ri:]))
-		ri += 2
+	dst := make([]rune, 0, l)
+	for ri := 0; ri < len(src)-1; ri = ri + 2 {
+		r := rune(binary.BigEndian.Uint16(src[ri:]))
+		if utf16.IsSurrogate(r) {
+			ri += 2
+			if ri >= len(src)-1 {
+				return dst, ErrDanglingSurrogate(r)
+			}
+			r2 := rune(binary.BigEndian.Uint16(src[ri:]))
+			r = utf16.DecodeRune(r, r2)
+		}
+		dst = append(dst, r)
 	}
 	return dst, nil
 }
 
 // Encode converts an array of UCS2 runes into an array of bytes, where pairs of
 // bytes (in Big Endian) represent a UCS2 character.
-func Encode(src []rune) ([]byte, error) {
-	dst := make([]byte, len(src)*2)
+func Encode(src []rune) []byte {
+	if len(src) == 0 {
+		return nil
+	}
+	u := utf16.Encode(src)
+	dst := make([]byte, len(u)*2)
 	wi := 0
-	for _, r := range src {
-		if r1, r2 := utf16.EncodeRune(r); r1 != '\ufffd' || r2 != '\ufffd' {
-			return dst[:wi], ErrInvalidRune(r)
-		}
+	for _, r := range u {
 		binary.BigEndian.PutUint16(dst[wi:], uint16(r))
 		wi += 2
 	}
-	return dst[:wi], nil
+	return dst
 }
 
-// ErrInvalidRune indicates a rune cannot be converted to UCS2.
-type ErrInvalidRune rune
+// ErrDanglingSurrogate indicates only half of a suggorate pair is provided at
+// the end of the byte array being decoded.
+type ErrDanglingSurrogate rune
 
-func (e ErrInvalidRune) Error() string {
-	return fmt.Sprintf("ucs2: invalid rune: %U", rune(e))
+func (e ErrDanglingSurrogate) Error() string {
+	return fmt.Sprintf("ucs2: dangling surrogate: %U", rune(e))
 }
 
 var (
