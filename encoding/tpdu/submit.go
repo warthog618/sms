@@ -23,6 +23,12 @@ func (s *Submit) DA() Address {
 	return s.da
 }
 
+// MaxUDL returns the maximum number of octets that can be encoded into the UD.
+// Note that for 7bit encoding this can result in up to 160 septets.
+func (s *Submit) MaxUDL() int {
+	return 140
+}
+
 // MR returns the Submit mr.
 func (s *Submit) MR() byte {
 	return s.mr

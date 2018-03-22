@@ -11,7 +11,9 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/warthog618/sms/encoding/gsm7/charset"
 	"github.com/warthog618/sms/encoding/tpdu"
+	"github.com/warthog618/sms/encoding/ucs2"
 )
 
 type udhMarshalPattern struct {
@@ -83,9 +85,7 @@ func TestUserDataHeaderUnmarshalBinary(t *testing.T) {
 			if n != p.n {
 				t.Errorf("unmarshal %v read incorrect number of characters, expected %d, read %d", p.in, p.n, n)
 			}
-			if !assert.Equal(t, a, p.out) {
-				t.Errorf("failed to unmarshal %v: expected %v, got %v", p.in, p.out, a)
-			}
+			assert.Equal(t, a, p.out)
 		}
 		t.Run(p.name, f)
 	}
@@ -148,5 +148,211 @@ func TestUserDataHeaderIEs(t *testing.T) {
 	}
 	if !bytes.Equal(i[1].Data, u[1].Data) {
 		t.Errorf("returned wrong IE, expected Data %v, got %v", u[1].Data, i[1].Data)
+	}
+}
+
+type concatTestPattern struct {
+	udh      tpdu.UserDataHeader
+	mref     int
+	segments int
+	seqno    int
+	ok       bool
+}
+
+func TestConcatInfo(t *testing.T) {
+	patterns := []concatTestPattern{
+		{tpdu.UserDataHeader{}, 0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{}}},
+			0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: nil}},
+			0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}}},
+			3, 2, 1, true},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 1, Data: []byte{3, 2, 1}}},
+			0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 8, Data: []byte{4, 3, 2, 1}}},
+			1027, 2, 1, true},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{2, 1}}},
+			0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 8, Data: []byte{3, 2, 1}}},
+			0, 0, 0, false},
+	}
+	for _, p := range patterns {
+		segments, seqno, mref, ok := p.udh.ConcatInfo()
+		if ok != p.ok {
+			t.Errorf("%v expected ok %t, got %t", p.udh, p.ok, ok)
+		}
+		if segments != p.segments {
+			t.Errorf("%v expected segments %d, got %d", p.udh, p.segments, segments)
+		}
+		if seqno != p.seqno {
+			t.Errorf("%v expected seqno %d, got %d", p.udh, p.seqno, seqno)
+		}
+		if mref != p.mref {
+			t.Errorf("%v expected mref %d, got %d", p.udh, p.mref, mref)
+		}
+	}
+}
+
+func TestConcatInfo8(t *testing.T) {
+	patterns := []concatTestPattern{
+		{tpdu.UserDataHeader{}, 0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{}}},
+			0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: nil}},
+			0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}}},
+			3, 2, 1, true},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 1, Data: []byte{3, 2, 1}}},
+			0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 8, Data: []byte{4, 3, 2, 1}}},
+			0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{2, 1}}},
+			0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 8, Data: []byte{3, 2, 1}}},
+			0, 0, 0, false},
+	}
+	for _, p := range patterns {
+		segments, seqno, mref, ok := p.udh.ConcatInfo8()
+		if ok != p.ok {
+			t.Errorf("%v expected ok %t, got %t", p.udh, p.ok, ok)
+		}
+		if segments != p.segments {
+			t.Errorf("%v expected segments %d, got %d", p.udh, p.segments, segments)
+		}
+		if seqno != p.seqno {
+			t.Errorf("%v expected seqno %d, got %d", p.udh, p.seqno, seqno)
+		}
+		if mref != p.mref {
+			t.Errorf("%v expected mref %d, got %d", p.udh, p.mref, mref)
+		}
+	}
+}
+
+func TestConcatInfo16(t *testing.T) {
+	patterns := []concatTestPattern{
+		{tpdu.UserDataHeader{}, 0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{}}},
+			0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: nil}},
+			0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}}},
+			0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 1, Data: []byte{3, 2, 1}}},
+			0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 8, Data: []byte{4, 3, 2, 1}}},
+			1027, 2, 1, true},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{2, 1}}},
+			0, 0, 0, false},
+		{tpdu.UserDataHeader{tpdu.InformationElement{ID: 8, Data: []byte{3, 2, 1}}},
+			0, 0, 0, false},
+	}
+	for _, p := range patterns {
+		segments, seqno, mref, ok := p.udh.ConcatInfo16()
+		if ok != p.ok {
+			t.Errorf("%v expected ok %t, got %t", p.udh, p.ok, ok)
+		}
+		if segments != p.segments {
+			t.Errorf("%v expected segments %d, got %d", p.udh, p.segments, segments)
+		}
+		if seqno != p.seqno {
+			t.Errorf("%v expected seqno %d, got %d", p.udh, p.seqno, seqno)
+		}
+		if mref != p.mref {
+			t.Errorf("%v expected mref %d, got %d", p.udh, p.mref, mref)
+		}
+	}
+}
+
+type udDecodeTestPattern struct {
+	name    string
+	ud      tpdu.UserData
+	udh     tpdu.UserDataHeader
+	alpha   tpdu.Alphabet
+	locking charset.NationalLanguageIdentifier
+	shift   charset.NationalLanguageIdentifier
+	msg     []byte
+	err     error
+}
+
+func TestUDDDecode(t *testing.T) {
+	// Also tests NewUDDecoder, AddLockingCharset and AddShiftCharset
+	patterns := []udDecodeTestPattern{
+		{"empty", nil, nil, 0, 0, 0, nil, nil},
+		{"message 7bit", []byte("message\x10"), nil, tpdu.Alpha7Bit, 0, 0, []byte("messageΔ"), nil},
+		{"message reserved", []byte("message\x10"), nil, tpdu.AlphaReserved, 0, 0, []byte("messageΔ"), nil},
+		{"message 7bit esc", []byte("message\x1b"), nil, tpdu.Alpha7Bit, 0, 0, []byte("message "), nil},
+		{"message 7bit locking", []byte("\x01\x02\x03"),
+			tpdu.UserDataHeader{tpdu.InformationElement{ID: 25, Data: []byte{byte(charset.Kannada)}}},
+			tpdu.Alpha7Bit, charset.Kannada, 0, []byte("\u0c82\u0c83\u0c85"), nil},
+		{"message 7bit shift", []byte("\x1b\x1e\x1b\x1f\x1b\x20"),
+			tpdu.UserDataHeader{tpdu.InformationElement{ID: 24, Data: []byte{byte(charset.Kannada)}}},
+			tpdu.Alpha7Bit, 0, charset.Kannada, []byte("\u0ce8\u0ce9\u0cea"), nil},
+		{"message 8bit", []byte("message\x1b"), nil, tpdu.Alpha8Bit, 0, 0, []byte("message\x1b"), nil},
+		{"euro", []byte("\x1be"), nil, tpdu.Alpha7Bit, 0, 0, []byte("€"), nil},
+		{"grin", []byte{0xd8, 0x3d, 0xde, 0x01}, nil, tpdu.AlphaUCS2, 0, 0, []byte("😁"), nil},
+		{"dangling surrogate", []byte{0xd8, 0x3d},
+			nil, tpdu.AlphaUCS2, 0, 0, []byte{}, ucs2.ErrDanglingSurrogate(0xD83d)},
+	}
+	for _, p := range patterns {
+		f := func(t *testing.T) {
+			d, err := tpdu.NewUDDecoder()
+			if d == nil || err != nil {
+				t.Fatal("failed to create decoder")
+			}
+			if p.locking != charset.Default {
+				d.AddLockingCharset(p.locking)
+			}
+			if p.shift != charset.Default {
+				d.AddShiftCharset(p.shift)
+			}
+			msg, err := d.Decode(p.ud, p.udh, p.alpha)
+			if err != p.err {
+				t.Fatalf("error decoding %v: %v", p.ud, err)
+			}
+			assert.Equal(t, p.msg, msg)
+		}
+		t.Run(p.name, f)
+	}
+}
+
+func TestUDEEncode(t *testing.T) {
+	// Also tests NewUDEncoder, AddLockingCharset and AddShiftCharset
+	patterns := []udDecodeTestPattern{
+		{"empty", nil, nil, 0, 0, 0, nil, nil},
+		{"message 7bit", []byte("message\x10"),
+			nil, tpdu.Alpha7Bit, 0, 0, []byte("messageΔ"), nil},
+		{"message 7bit locking", []byte("\x01\x02\x03"),
+			tpdu.UserDataHeader{tpdu.InformationElement{ID: 25, Data: []byte{byte(charset.Kannada)}}},
+			tpdu.Alpha7Bit, charset.Kannada, 0, []byte("\u0c82\u0c83\u0c85"), nil},
+		{"message 7bit shift", []byte("\x1b\x1e\x1b\x1f\x1b\x20"),
+			tpdu.UserDataHeader{tpdu.InformationElement{ID: 24, Data: []byte{byte(charset.Kannada)}}},
+			tpdu.Alpha7Bit, 0, charset.Kannada, []byte("\u0ce8\u0ce9\u0cea"), nil},
+		{"euro", []byte("\x1be"), nil, tpdu.Alpha7Bit, 0, 0, []byte("€"), nil},
+		{"grin", []byte{0xd8, 0x3d, 0xde, 0x01}, nil, tpdu.AlphaUCS2, 0, 0, []byte("😁"), nil},
+	}
+	for _, p := range patterns {
+		f := func(t *testing.T) {
+			e, err := tpdu.NewUDEncoder()
+			if e == nil || err != nil {
+				t.Fatal("failed to create encoder")
+			}
+			if p.locking != charset.Default {
+				e.AddLockingCharset(p.locking)
+			}
+			if p.shift != charset.Default {
+				e.AddShiftCharset(p.shift)
+			}
+			ud, udh, alpha, err := e.Encode(string(p.msg))
+			if err != p.err {
+				t.Fatalf("error encoding %v: %v", p.ud, err)
+			}
+			assert.Equal(t, p.ud, ud)
+			assert.Equal(t, p.udh, udh)
+			if p.alpha != alpha {
+				t.Errorf("failed to encode %s: expected alphabet %v, got %v", p.msg, p.alpha, alpha)
+			}
+		}
+		t.Run(p.name, f)
 	}
 }

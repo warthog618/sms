@@ -101,6 +101,19 @@ func TestAddressUnmarshalBinary(t *testing.T) {
 	}
 }
 
+func TestAddressNumber(t *testing.T) {
+	a := tpdu.Address{Addr: "61409865629", TOA: 0}
+	n := a.Number()
+	if n != "61409865629" {
+		t.Errorf("returned unexpected number, expected '61409865629', got '%s'", n)
+	}
+	a.SetTypeOfNumber(tpdu.TonInternational)
+	n = a.Number()
+	if n != "+61409865629" {
+		t.Errorf("failed to add '+' to international number")
+	}
+}
+
 func TestAddressNumberingPlan(t *testing.T) {
 	patterns := []tpdu.NumberingPlan{0, 2, 0xf, 0x12}
 	for _, p := range patterns {

@@ -25,6 +25,12 @@ func (d *Deliver) OA() Address {
 	return d.oa
 }
 
+// MaxUDL returns the maximum number of octets that can be encoded into the UD.
+// Note that for 7bit encoding this can result in up to 160 septets.
+func (d *Deliver) MaxUDL() int {
+	return 140
+}
+
 // SCTS returns the Deliver scts.
 func (d *Deliver) SCTS() Timestamp {
 	return d.scts

@@ -6,10 +6,10 @@
 package gsm7_test
 
 import (
-	"bytes"
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/warthog618/sms/encoding/gsm7"
 )
 
@@ -34,9 +34,10 @@ func testDecoder(t *testing.T, d gsm7.Decoder, patterns []decoderPattern) {
 			if err != p.err {
 				t.Errorf("error decoding %v: %v", p.in, err)
 			}
-			if !bytes.Equal(out, p.out) {
-				t.Errorf("failed to decode: %v, expected %v, got %v", p.in, p.out, out)
+			if p.out == nil && out != nil {
+				t.Errorf("failed to decode: %v expected nil, got %v", p.in, out)
 			}
+			assert.Equal(t, out, p.out)
 		}
 		t.Run(p.name, f)
 	}
@@ -47,11 +48,9 @@ func testEncoder(t *testing.T, e gsm7.Encoder, patterns []encoderPattern) {
 		f := func(t *testing.T) {
 			out, err := e.Encode(p.in)
 			if err != p.err {
-				t.Errorf("error decoding %v: %v", p.in, err)
+				t.Errorf("error encoding %v: %v", p.in, err)
 			}
-			if !bytes.Equal(out, p.out) {
-				t.Errorf("failed to decode: %v expected %v, got %v", p.in, p.out, out)
-			}
+			assert.Equal(t, out, p.out)
 		}
 		t.Run(p.name, f)
 	}
@@ -60,6 +59,7 @@ func testEncoder(t *testing.T, e gsm7.Encoder, patterns []encoderPattern) {
 func TestDecode(t *testing.T) {
 	d := gsm7.NewDecoder()
 	p := []decoderPattern{
+		{"empty", nil, nil, nil},
 		{"base", []byte("message"), []byte("message"), nil},
 		{"ext", []byte("\x1b\x28\x1b\x29"), []byte("{}"), nil},
 		{"escaped", []byte("mes\x1b\x40sage"), []byte("mes|sage"), nil},
@@ -109,6 +109,7 @@ func TestDecoderStrict(t *testing.T) {
 func TestEncode(t *testing.T) {
 	e := gsm7.NewEncoder()
 	p := []encoderPattern{
+		{"empty", nil, nil, nil},
 		{"base", []byte("message"), []byte("message"), nil},
 		{"ext", []byte("{}"), []byte("\x1b\x28\x1b\x29"), nil},
 		{"escaped", []byte("mes|sage"), []byte("mes\x1b\x40sage"), nil},

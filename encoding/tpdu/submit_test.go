@@ -27,6 +27,13 @@ func TestNewSubmit(t *testing.T) {
 	}
 }
 
+func TestSubmitMaxUDL(t *testing.T) {
+	s := tpdu.NewSubmit()
+	if s.MaxUDL() != 140 {
+		t.Errorf("bad maxUDL expected %d, got %d", 140, s.MaxUDL())
+	}
+}
+
 func TestDeliverSetDA(t *testing.T) {
 	// also tests Deliver.DA
 	s := tpdu.Submit{}

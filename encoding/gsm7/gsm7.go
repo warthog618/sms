@@ -41,6 +41,9 @@ func NewEncoder() Encoder {
 
 // Decode converts the src from unpacked GSM7 to UTF-8.
 func (d *Decoder) Decode(src []byte) ([]byte, error) {
+	if len(src) == 0 {
+		return nil, nil
+	}
 	dst := make([]byte, 0, len(src))
 	escaped := false
 	for _, g := range src {
@@ -100,6 +103,9 @@ func (d Decoder) Strict() Decoder {
 // The return value includes the encoded GSM7 bytes, and any error that
 // occured during encoding.
 func (e *Encoder) Encode(src []byte) ([]byte, error) {
+	if len(src) == 0 {
+		return nil, nil
+	}
 	dst := make([]byte, 0, len(src))
 	for _, u := range string(src) {
 		g, ok := e.set[u]

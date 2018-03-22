@@ -206,9 +206,7 @@ func TestBaseTPDUSetUD(t *testing.T) {
 	} {
 		b.SetUD(p)
 		ud = b.UD()
-		if !assert.Equal(t, ud, p) {
-			t.Errorf("expected ud %v, got %v", p, ud)
-		}
+		assert.Equal(t, ud, p)
 	}
 }
 
@@ -229,9 +227,7 @@ func TestBaseTPDUSetUDH(t *testing.T) {
 	} {
 		b.SetUDH(p)
 		udh = b.UDH()
-		if !assert.Equal(t, udh, p) {
-			t.Errorf("expected udh %v, got %v", p, udh)
-		}
+		assert.Equal(t, udh, p)
 	}
 }
 

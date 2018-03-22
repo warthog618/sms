@@ -26,6 +26,13 @@ func TestNewDeliver(t *testing.T) {
 	}
 }
 
+func TestDeliverMaxUDL(t *testing.T) {
+	d := tpdu.NewDeliver()
+	if d.MaxUDL() != 140 {
+		t.Errorf("bad maxUDL expected %d, got %d", 140, d.MaxUDL())
+	}
+}
+
 func TestDeliverSetOA(t *testing.T) {
 	// also tests Deliver.OA
 	d := tpdu.Deliver{}

@@ -39,9 +39,6 @@ type TPDU interface {
 	MTI() MessageType
 	// Alphabet defines how the UD field is encoded.
 	Alphabet() (Alphabet, error)
-
-	SetUD(UserData)
-	SetUDH(UserDataHeader)
 	// UD provides the UserData, the format of which depends on the Alphabet.
 	UD() UserData
 	// UDH provides the UserDataHeader, which is optional and so may be empty.
