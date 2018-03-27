@@ -101,7 +101,7 @@ func (d Decoder) Strict() Decoder {
 
 // Encode converts the src from UTF-8 to GSM7 and writes the result to dst.
 // The return value includes the encoded GSM7 bytes, and any error that
-// occured during encoding.
+// occurred during encoding.
 func (e *Encoder) Encode(src []byte) ([]byte, error) {
 	if len(src) == 0 {
 		return nil, nil

@@ -106,11 +106,11 @@ func TestDCSCompressed(t *testing.T) {
 
 func TestBaseTPDUAlphabet(t *testing.T) {
 	patterns := []dcsAlphabetPattern{
-		dcsAlphabetPattern{0x00, tpdu.Alpha7Bit, nil},
-		dcsAlphabetPattern{0x04, tpdu.Alpha8Bit, nil},
-		dcsAlphabetPattern{0x08, tpdu.AlphaUCS2, nil},
-		dcsAlphabetPattern{0x0c, tpdu.Alpha7Bit, nil},
-		dcsAlphabetPattern{0x80, tpdu.Alpha7Bit, tpdu.ErrInvalid},
+		{0x00, tpdu.Alpha7Bit, nil},
+		{0x04, tpdu.Alpha8Bit, nil},
+		{0x08, tpdu.AlphaUCS2, nil},
+		{0x0c, tpdu.Alpha7Bit, nil},
+		{0x80, tpdu.Alpha7Bit, tpdu.ErrInvalid},
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
@@ -201,7 +201,7 @@ func TestBaseTPDUSetUD(t *testing.T) {
 	}
 	for _, p := range []tpdu.UserData{
 		nil,
-		tpdu.UserData{5, 6, 7},
+		{5, 6, 7},
 		nil,
 	} {
 		b.SetUD(p)

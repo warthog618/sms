@@ -53,14 +53,14 @@ type collectTestPattern struct {
 func TestCollectorCollect(t *testing.T) {
 	patterns := []collectTestPattern{
 		// the patterns are Collected sequentially, so the return value depends on
-		// the preceeding set of PDUs, not just the individual in.
+		// the preceding set of PDUs, not just the individual in.
 		// The resulting tests must be run as a complete set, not individually, or some will fail.
 		{"single segment", tpdu.Address{Addr: "1234", TOA: 0x91}, nil,
 			[]*tpdu.UserDataHeader{nil}, nil},
 		// 1 segment (shouldn't be seen in practice, but test in case)
 		{"one segment", tpdu.Address{Addr: "1234", TOA: 0x91},
 			tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 1, 1}}},
-			[]*tpdu.UserDataHeader{&tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 1, 1}}}},
+			[]*tpdu.UserDataHeader{{tpdu.InformationElement{ID: 0, Data: []byte{1, 1, 1}}}},
 			nil},
 		{"two a", tpdu.Address{Addr: "1234", TOA: 0x91},
 			tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 1}}},
@@ -69,8 +69,8 @@ func TestCollectorCollect(t *testing.T) {
 		{"two b", tpdu.Address{Addr: "1234", TOA: 0x91},
 			tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 2}}},
 			[]*tpdu.UserDataHeader{
-				&tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 1}}},
-				&tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 2}}},
+				{tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 1}}},
+				{tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 2}}},
 			},
 			nil},
 		{"three a", tpdu.Address{Addr: "1234", TOA: 0x91},
@@ -84,9 +84,9 @@ func TestCollectorCollect(t *testing.T) {
 		{"three c", tpdu.Address{Addr: "1234", TOA: 0x91},
 			tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 3}}},
 			[]*tpdu.UserDataHeader{
-				&tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 1}}},
-				&tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 2}}},
-				&tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 3}}},
+				{tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 1}}},
+				{tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 2}}},
+				{tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 3}}},
 			},
 			nil},
 		{"jumbled a", tpdu.Address{Addr: "1234", TOA: 0x91},
@@ -104,9 +104,9 @@ func TestCollectorCollect(t *testing.T) {
 		{"jumbled b", tpdu.Address{Addr: "1234", TOA: 0x91},
 			tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 2}}},
 			[]*tpdu.UserDataHeader{
-				&tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 1}}},
-				&tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 2}}},
-				&tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 3}}},
+				{tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 1}}},
+				{tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 2}}},
+				{tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 3}}},
 			},
 			nil},
 		{"concurrent one a", tpdu.Address{Addr: "1234", TOA: 0x91},
@@ -120,15 +120,15 @@ func TestCollectorCollect(t *testing.T) {
 		{"concurrent one b", tpdu.Address{Addr: "1234", TOA: 0x91},
 			tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 2}}},
 			[]*tpdu.UserDataHeader{
-				&tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 1}}},
-				&tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 2}}},
+				{tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 1}}},
+				{tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 2}}},
 			},
 			nil},
 		{"concurrent two b", tpdu.Address{Addr: "1234", TOA: 0x91},
 			tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{2, 2, 2}}},
 			[]*tpdu.UserDataHeader{
-				&tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{2, 2, 1}}},
-				&tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{2, 2, 2}}},
+				{tpdu.InformationElement{ID: 0, Data: []byte{2, 2, 1}}},
+				{tpdu.InformationElement{ID: 0, Data: []byte{2, 2, 2}}},
 			},
 			nil},
 		{"zero seqno", tpdu.Address{Addr: "1234", TOA: 0x91},
@@ -190,7 +190,7 @@ func TestCollectorCollectExpiry(t *testing.T) {
 	expiredPatterns := []collectTestPattern{
 		{"two a", tpdu.Address{Addr: "1234", TOA: 0x91},
 			tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 1}}},
-			[]*tpdu.UserDataHeader{&tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 1}}}, nil},
+			[]*tpdu.UserDataHeader{{tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 1}}}, nil},
 			nil,
 		},
 	}

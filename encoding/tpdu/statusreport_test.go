@@ -189,7 +189,7 @@ func TestStatusReportSetUDH(t *testing.T) {
 	if pi != 0 {
 		t.Errorf("initial pi should be 0")
 	}
-	for _, p := range []tpdu.UserDataHeader{tpdu.UserDataHeader{
+	for _, p := range []tpdu.UserDataHeader{{
 		tpdu.InformationElement{ID: 1, Data: []byte{1, 2, 3}}}} {
 		b.SetUDH(p)
 		d := b.UDH()

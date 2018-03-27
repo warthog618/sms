@@ -170,7 +170,7 @@ func NewEncoder(nli NationalLanguageIdentifier) Encoder {
 	}
 }
 
-// DefaultExtEncoder returns the default extention mapping table from UTF8 to GSM7.
+// DefaultExtEncoder returns the default extension mapping table from UTF8 to GSM7.
 func DefaultExtEncoder() Encoder {
 	if defaultExtEncoder == nil {
 		defaultExtEncoder = generateDefaultExtEncoder()
@@ -178,7 +178,7 @@ func DefaultExtEncoder() Encoder {
 	return defaultExtEncoder
 }
 
-// NewExtEncoder returns the extention mapping table from UTF8 to GSM7 for the given language.
+// NewExtEncoder returns the extension mapping table from UTF8 to GSM7 for the given language.
 func NewExtEncoder(nli NationalLanguageIdentifier) Encoder {
 	switch nli {
 	case Turkish:
