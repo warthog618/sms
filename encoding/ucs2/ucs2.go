@@ -24,7 +24,7 @@ func Decode(src []byte) ([]rune, error) {
 		if utf16.IsSurrogate(r) {
 			ri += 2
 			if ri >= len(src)-1 {
-				return dst, ErrDanglingSurrogate(r)
+				return dst, ErrDanglingSurrogate(uint16(r))
 			}
 			r2 := rune(binary.BigEndian.Uint16(src[ri:]))
 			r = utf16.DecodeRune(r, r2)
@@ -52,10 +52,15 @@ func Encode(src []rune) []byte {
 
 // ErrDanglingSurrogate indicates only half of a suggorate pair is provided at
 // the end of the byte array being decoded.
-type ErrDanglingSurrogate rune
+type ErrDanglingSurrogate uint16
 
 func (e ErrDanglingSurrogate) Error() string {
-	return fmt.Sprintf("ucs2: dangling surrogate: %U", rune(e))
+	return fmt.Sprintf("ucs2: dangling surrogate: 0x%04x", uint16(e))
+}
+
+// Surrogate returns the dangling surrogate.
+func (e ErrDanglingSurrogate) Surrogate() uint16 {
+	return uint16(e)
 }
 
 var (

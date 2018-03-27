@@ -73,10 +73,13 @@ func TestErrDanglingSurrogate(t *testing.T) {
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			err := ucs2.ErrDanglingSurrogate(p)
-			expected := fmt.Sprintf("ucs2: dangling surrogate: %U", p)
+			expected := fmt.Sprintf("ucs2: dangling surrogate: 0x%04x", p)
 			s := err.Error()
 			if s != expected {
 				t.Errorf("failed to stringify %x, expected '%s', got '%s'", p, expected, s)
+			}
+			if err.Surrogate() != uint16(p) {
+				t.Errorf("returned incorrect surrogate, expected 0x%04x, got 0x%04x", p, err.Surrogate())
 			}
 		}
 		t.Run(fmt.Sprintf("%x", p), f)

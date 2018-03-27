@@ -299,8 +299,8 @@ func TestUDDDecode(t *testing.T) {
 			tpdu.UserDataHeader{tpdu.InformationElement{ID: 24, Data: []byte{byte(charset.Kannada)}}},
 			tpdu.Alpha7Bit, 0, 0, []byte("ßÉ "), nil},
 		// error tests
-		{"dangling surrogate", []byte{0xd8, 0x3d},
-			nil, tpdu.AlphaUCS2, 0, 0, []byte{}, ucs2.ErrDanglingSurrogate(0xD83d)},
+		{"dangling surrogate", []byte{0xd8, 0x3d, 0xde, 0x01, 0xd8, 0x3d},
+			nil, tpdu.AlphaUCS2, 0, 0, []byte("😁"), ucs2.ErrDanglingSurrogate(0xd83d)},
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
