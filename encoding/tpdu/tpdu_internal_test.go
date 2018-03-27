@@ -57,7 +57,7 @@ var decodeUDTestPatterns = []decodeUDTestPattern{
 	{"bad dcs", BaseTPDU{udhiMask: 0x20, firstOctet: 0x20, dcs: 0xaa},
 		[]byte{6, 4, 1, 3, 1, 2}, nil, nil, DecodeError("alphabet", 1, ErrInvalid)},
 	{"overlength", BaseTPDU{udhiMask: 0x20, firstOctet: 0x20},
-		[]byte{6, 5, 1, 3, 1, 2, 3, 4}, nil, nil, DecodeError("udh", 1, ErrOverlength)},
+		[]byte{6, 5, 1, 3, 1, 2, 3, 4}, nil, nil, DecodeError("ud", 1, ErrOverlength)},
 	{"short udh", BaseTPDU{udhiMask: 0x20, firstOctet: 0x20},
 		[]byte{5, 5, 1, 3, 1, 2}, nil, nil, DecodeError("udh.ie", 2, ErrUnderflow)},
 	{"bad udh", BaseTPDU{udhiMask: 0x20, firstOctet: 0x20},

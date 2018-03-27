@@ -101,44 +101,11 @@ func (v *ValidityPeriod) UnmarshalBinary(src []byte, vpf ValidityPeriodFormat) (
 		}
 		return 7, err
 	case VpfEnhanced:
-		if len(src) < 7 {
-			return 0, ErrUnderflow
+		used, err := v.unmarshalVPEnhanced(src)
+		if err == nil {
+			v.Format = vpf
 		}
-		efi := src[0]
-		evpf := EnhancedValidityPeriodFormat(efi & 0x7)
-		used := 0
-		d := time.Duration(0)
-		switch evpf {
-		case EvpfNotPresent:
-		case EvpfRelative:
-			d = relativeToDuration(src[1])
-			used = 1
-		case EvpfRelativeSeconds:
-			d = time.Second * time.Duration(src[1])
-			used = 1
-		case EvpfRelativeHHMMSS:
-			i := make([]int, 3)
-			var err error
-			for idx := 0; idx < 3; idx++ {
-				i[idx], err = bcd.Decode(src[idx+1])
-				if err != nil {
-					return 4, DecodeError("enhanced", 1, err)
-				}
-			}
-			d = time.Duration(i[0])*time.Hour + time.Duration(i[1])*time.Minute + time.Duration(i[2])*time.Second
-			used = 3
-		default:
-			return 7, DecodeError("enhanced", 0, ErrInvalid)
-		}
-		for i := used + 1; i < 7; i++ {
-			if src[i] != 0 {
-				return used + 1, DecodeError("enhanced", i, ErrNonZero)
-			}
-		}
-		v.Efi = efi
-		v.Duration = d
-		v.Format = vpf
-		return 7, nil
+		return used, err
 	case VpfRelative:
 		if len(src) < 1 {
 			return 0, ErrUnderflow
@@ -150,6 +117,46 @@ func (v *ValidityPeriod) UnmarshalBinary(src []byte, vpf ValidityPeriodFormat) (
 		return 0, nil
 	}
 	return 0, DecodeError("vpf", 0, ErrInvalid)
+}
+
+func (v *ValidityPeriod) unmarshalVPEnhanced(src []byte) (int, error) {
+	if len(src) < 7 {
+		return 0, ErrUnderflow
+	}
+	efi := src[0]
+	evpf := EnhancedValidityPeriodFormat(efi & 0x7)
+	used := 0
+	d := time.Duration(0)
+	switch evpf {
+	case EvpfNotPresent:
+	case EvpfRelative:
+		d = relativeToDuration(src[1])
+		used = 1
+	case EvpfRelativeSeconds:
+		d = time.Second * time.Duration(src[1])
+		used = 1
+	case EvpfRelativeHHMMSS:
+		i := make([]int, 3)
+		var err error
+		for idx := 0; idx < 3; idx++ {
+			i[idx], err = bcd.Decode(src[idx+1])
+			if err != nil {
+				return 4, DecodeError("enhanced", 1, err)
+			}
+		}
+		d = time.Duration(i[0])*time.Hour + time.Duration(i[1])*time.Minute + time.Duration(i[2])*time.Second
+		used = 3
+	default:
+		return 7, DecodeError("enhanced", 0, ErrInvalid)
+	}
+	for i := used + 1; i < 7; i++ {
+		if src[i] != 0 {
+			return used + 1, DecodeError("enhanced", i, ErrNonZero)
+		}
+	}
+	v.Efi = efi
+	v.Duration = d
+	return 7, nil
 }
 
 // ValidityPeriodFormat identifies the format of the ValidityPeriod when encoded to binary.

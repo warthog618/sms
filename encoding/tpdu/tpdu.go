@@ -167,7 +167,7 @@ func (p *BaseTPDU) decodeUserData(src []byte) error {
 		return DecodeError("sm", ri, ErrUnderflow)
 	}
 	if len(src) > ri+udl {
-		return DecodeError("udh", ri, ErrOverlength)
+		return DecodeError("ud", ri, ErrOverlength)
 	}
 	var udhl int // Note that in this context udhl includes itself.
 	udhi := p.UDHI()

@@ -15,42 +15,13 @@ func DefaultDecoder() Decoder {
 
 // NewDecoder returns the mapping table from GSM7 to UTF8 for the given language.
 func NewDecoder(nli NationalLanguageIdentifier) Decoder {
-	switch nli {
-	case Turkish:
-		if turkishDecoder == nil {
-			turkishDecoder = generateTurkishDecoder()
+	if di, ok := decoder[nli]; ok {
+		if *di.e == nil {
+			*di.e = di.g()
 		}
-		return turkishDecoder
-	case Portuguese:
-		if portugueseDecoder == nil {
-			portugueseDecoder = generatePortugueseDecoder()
-		}
-		return portugueseDecoder
-	case Bengali:
-		return bengaliDecoder
-	case Gujaranti:
-		return gujaratiDecoder
-	case Hindi:
-		return hindiDecoder
-	case Kannada:
-		return kannadaDecoder
-	case Malayalam:
-		return malayalamDecoder
-	case Oriya:
-		return oriyaDecoder
-	case Punjabi:
-		return punjabiDecoder
-	case Tamil:
-		return tamilDecoder
-	case Telugu:
-		return teluguDecoder
-	case Urdu:
-		return urduDecoder
-	case Spanish:
-		fallthrough
-	default:
-		return DefaultDecoder()
+		return *di.e
 	}
+	return DefaultDecoder()
 }
 
 // DefaultExtDecoder returns the default extension mapping table from GSM7 to UTF8.
@@ -60,36 +31,10 @@ func DefaultExtDecoder() Decoder {
 
 // NewExtDecoder returns the extension mapping table from GSM7 to UTF8 for the given language.
 func NewExtDecoder(nli NationalLanguageIdentifier) Decoder {
-	switch nli {
-	case Turkish:
-		return turkishExtDecoder
-	case Spanish:
-		return spanishExtDecoder
-	case Portuguese:
-		return portugueseExtDecoder
-	case Bengali:
-		return bengaliExtDecoder
-	case Gujaranti:
-		return gujaratiExtDecoder
-	case Hindi:
-		return hindiExtDecoder
-	case Kannada:
-		return kannadaExtDecoder
-	case Malayalam:
-		return malayalamExtDecoder
-	case Oriya:
-		return oriyaExtDecoder
-	case Punjabi:
-		return punjabiExtDecoder
-	case Tamil:
-		return tamilExtDecoder
-	case Telugu:
-		return teluguExtDecoder
-	case Urdu:
-		return urduExtDecoder
-	default:
-		return defaultExtDecoder
+	if di, ok := extDecoder[nli]; ok {
+		return *di.e
 	}
+	return DefaultExtDecoder()
 }
 
 // DefaultEncoder returns the default mapping table from UTF8 to GSM7.
@@ -102,72 +47,13 @@ func DefaultEncoder() Encoder {
 
 // NewEncoder returns the mapping table from UTF8 to GSM7 for the given language.
 func NewEncoder(nli NationalLanguageIdentifier) Encoder {
-	switch nli {
-	case Turkish:
-		if turkishEncoder == nil {
-			turkishEncoder = generateTurkishEncoder()
+	if ei, ok := encoder[nli]; ok {
+		if *ei.e == nil {
+			*ei.e = ei.g()
 		}
-		return turkishEncoder
-	case Portuguese:
-		if portugueseEncoder == nil {
-			portugueseEncoder = generatePortugueseEncoder()
-		}
-		return portugueseEncoder
-	case Bengali:
-		if bengaliEncoder == nil {
-			bengaliEncoder = generateBengaliEncoder()
-		}
-		return bengaliEncoder
-	case Gujaranti:
-		if gujaratiEncoder == nil {
-			gujaratiEncoder = generateGujaratiEncoder()
-		}
-		return gujaratiEncoder
-	case Hindi:
-		if hindiEncoder == nil {
-			hindiEncoder = generateHindiEncoder()
-		}
-		return hindiEncoder
-	case Kannada:
-		if kannadaEncoder == nil {
-			kannadaEncoder = generateKannadaEncoder()
-		}
-		return kannadaEncoder
-	case Malayalam:
-		if malayalamEncoder == nil {
-			malayalamEncoder = generateMalayalamEncoder()
-		}
-		return malayalamEncoder
-	case Oriya:
-		if oriyaEncoder == nil {
-			oriyaEncoder = generateOriyaEncoder()
-		}
-		return oriyaEncoder
-	case Punjabi:
-		if punjabiEncoder == nil {
-			punjabiEncoder = generatePunjabiEncoder()
-		}
-		return punjabiEncoder
-	case Tamil:
-		if tamilEncoder == nil {
-			tamilEncoder = generateTamilEncoder()
-		}
-		return tamilEncoder
-	case Telugu:
-		if teluguEncoder == nil {
-			teluguEncoder = generateTeluguEncoder()
-		}
-		return teluguEncoder
-	case Urdu:
-		if urduEncoder == nil {
-			urduEncoder = generateUrduEncoder()
-		}
-		return urduEncoder
-	case Spanish:
-		fallthrough
-	default:
-		return DefaultEncoder()
+		return *ei.e
 	}
+	return DefaultEncoder()
 }
 
 // DefaultExtEncoder returns the default extension mapping table from UTF8 to GSM7.
@@ -180,75 +66,13 @@ func DefaultExtEncoder() Encoder {
 
 // NewExtEncoder returns the extension mapping table from UTF8 to GSM7 for the given language.
 func NewExtEncoder(nli NationalLanguageIdentifier) Encoder {
-	switch nli {
-	case Turkish:
-		if turkishExtEncoder == nil {
-			turkishExtEncoder = generateTurkishExtEncoder()
+	if ei, ok := extEncoder[nli]; ok {
+		if *ei.e == nil {
+			*ei.e = ei.g()
 		}
-		return turkishExtEncoder
-	case Spanish:
-		if spanishExtEncoder == nil {
-			spanishExtEncoder = generateSpanishExtEncoder()
-		}
-		return spanishExtEncoder
-	case Portuguese:
-		if portugueseExtEncoder == nil {
-			portugueseExtEncoder = generatePortugueseExtEncoder()
-		}
-		return portugueseExtEncoder
-	case Bengali:
-		if bengaliExtEncoder == nil {
-			bengaliExtEncoder = generateBengaliExtEncoder()
-		}
-		return bengaliExtEncoder
-	case Gujaranti:
-		if gujaratiExtEncoder == nil {
-			gujaratiExtEncoder = generateGujaratiExtEncoder()
-		}
-		return gujaratiExtEncoder
-	case Hindi:
-		if hindiExtEncoder == nil {
-			hindiExtEncoder = generateHindiExtEncoder()
-		}
-		return hindiExtEncoder
-	case Kannada:
-		if kannadaExtEncoder == nil {
-			kannadaExtEncoder = generateKannadaExtEncoder()
-		}
-		return kannadaExtEncoder
-	case Malayalam:
-		if malayalamExtEncoder == nil {
-			malayalamExtEncoder = generateMalayalamExtEncoder()
-		}
-		return malayalamExtEncoder
-	case Oriya:
-		if oriyaExtEncoder == nil {
-			oriyaExtEncoder = generateOriyaExtEncoder()
-		}
-		return oriyaExtEncoder
-	case Punjabi:
-		if punjabiExtEncoder == nil {
-			punjabiExtEncoder = generatePunjabiExtEncoder()
-		}
-		return punjabiExtEncoder
-	case Tamil:
-		if tamilExtEncoder == nil {
-			tamilExtEncoder = generateTamilExtEncoder()
-		}
-		return tamilExtEncoder
-	case Telugu:
-		if teluguExtEncoder == nil {
-			teluguExtEncoder = generateTeluguExtEncoder()
-		}
-		return teluguExtEncoder
-	case Urdu:
-		if urduExtEncoder == nil {
-			urduExtEncoder = generateUrduExtEncoder()
-		}
-		return urduExtEncoder
-	default:
-		return DefaultExtEncoder()
+		return *ei.e
 	}
+	return DefaultExtEncoder()
 }
 
 // Decoder provides a mapping from GSM7 byte to UTF8 rune.
@@ -317,3 +141,80 @@ func generateDecoderFromRunes(runes []rune) Decoder {
 	}
 	return dset
 }
+
+type decoderGenerator func() Decoder
+
+type decoderNGen struct {
+	e *Decoder
+	g decoderGenerator
+}
+
+type encoderGenerator func() Encoder
+
+type encoderNGen struct {
+	e *Encoder
+	g encoderGenerator
+}
+
+var (
+	decoder = map[NationalLanguageIdentifier]decoderNGen{
+		Turkish: {&turkishDecoder, generateTurkishDecoder},
+		// Spanish uses default
+		Portuguese: {&portugueseDecoder, generatePortugueseDecoder},
+		Bengali:    {&bengaliDecoder, nil},
+		Gujaranti:  {&gujaratiDecoder, nil},
+		Hindi:      {&hindiDecoder, nil},
+		Kannada:    {&kannadaDecoder, nil},
+		Malayalam:  {&malayalamDecoder, nil},
+		Oriya:      {&oriyaDecoder, nil},
+		Punjabi:    {&punjabiDecoder, nil},
+		Tamil:      {&tamilDecoder, nil},
+		Telugu:     {&teluguDecoder, nil},
+		Urdu:       {&urduDecoder, nil},
+	}
+	extDecoder = map[NationalLanguageIdentifier]decoderNGen{
+		Turkish:    {&turkishExtDecoder, nil},
+		Spanish:    {&spanishExtDecoder, nil},
+		Portuguese: {&portugueseExtDecoder, nil},
+		Bengali:    {&bengaliExtDecoder, nil},
+		Gujaranti:  {&gujaratiExtDecoder, nil},
+		Hindi:      {&hindiExtDecoder, nil},
+		Kannada:    {&kannadaExtDecoder, nil},
+		Malayalam:  {&malayalamExtDecoder, nil},
+		Oriya:      {&oriyaExtDecoder, nil},
+		Punjabi:    {&punjabiExtDecoder, nil},
+		Tamil:      {&tamilExtDecoder, nil},
+		Telugu:     {&teluguExtDecoder, nil},
+		Urdu:       {&urduExtDecoder, nil},
+	}
+	encoder = map[NationalLanguageIdentifier]encoderNGen{
+		Turkish: {&turkishEncoder, generateTurkishEncoder},
+		// Spanish uses default
+		Portuguese: {&portugueseEncoder, generatePortugueseEncoder},
+		Bengali:    {&bengaliEncoder, generateBengaliEncoder},
+		Gujaranti:  {&gujaratiEncoder, generateGujaratiEncoder},
+		Hindi:      {&hindiEncoder, generateHindiEncoder},
+		Kannada:    {&kannadaEncoder, generateKannadaEncoder},
+		Malayalam:  {&malayalamEncoder, generateMalayalamEncoder},
+		Oriya:      {&oriyaEncoder, generateOriyaEncoder},
+		Punjabi:    {&punjabiEncoder, generatePunjabiEncoder},
+		Tamil:      {&tamilEncoder, generateTamilEncoder},
+		Telugu:     {&teluguEncoder, generateTeluguEncoder},
+		Urdu:       {&urduEncoder, generateUrduEncoder},
+	}
+	extEncoder = map[NationalLanguageIdentifier]encoderNGen{
+		Turkish:    {&turkishExtEncoder, generateTurkishExtEncoder},
+		Spanish:    {&spanishExtEncoder, generateSpanishExtEncoder},
+		Portuguese: {&portugueseExtEncoder, generatePortugueseExtEncoder},
+		Bengali:    {&bengaliExtEncoder, generateBengaliExtEncoder},
+		Gujaranti:  {&gujaratiExtEncoder, generateGujaratiExtEncoder},
+		Hindi:      {&hindiExtEncoder, generateHindiExtEncoder},
+		Kannada:    {&kannadaExtEncoder, generateKannadaExtEncoder},
+		Malayalam:  {&malayalamExtEncoder, generateMalayalamExtEncoder},
+		Oriya:      {&oriyaExtEncoder, generateOriyaExtEncoder},
+		Punjabi:    {&punjabiExtEncoder, generatePunjabiExtEncoder},
+		Tamil:      {&tamilExtEncoder, generateTamilExtEncoder},
+		Telugu:     {&teluguExtEncoder, generateTeluguExtEncoder},
+		Urdu:       {&urduExtEncoder, generateUrduExtEncoder},
+	}
+)
