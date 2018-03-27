@@ -132,14 +132,22 @@ func (a *Address) TypeOfNumber() TypeOfNumber {
 type TypeOfNumber int
 
 const (
+	// TonUnknown indicates the type of the number is unknown.
 	TonUnknown TypeOfNumber = iota
+	// TonInternational indicates the number is international.
 	TonInternational
+	// TonNational indicates the number is national.
 	TonNational
+	// TonNetworkSpecific indicates the number is specific to the carrier network.
 	TonNetworkSpecific
+	// TonSubscriberNumber indicates the number is a subscriber number.
 	TonSubscriberNumber
+	// TonAlphanumeric indicates the number is in alphanumeric format.
 	TonAlphanumeric
+	// TonAbbreviated indicates the number is in abbreviated format.
 	TonAbbreviated
-	TonReserved
+	// TonExtension is reserved for future extension.
+	TonExtension
 )
 
 // NumberingPlan corresponds to bits 4,3,2,1 of the Address TOA field.
@@ -148,17 +156,27 @@ const (
 type NumberingPlan int
 
 const (
+	// NpUnknown indicates the numbering plan is unknown.
 	NpUnknown NumberingPlan = iota
+	// NpISDN indicates the number is in ISDN/E.164 format.
 	NpISDN
 	_
+	// NpData indicates a data numbering plan (X.121).
 	NpData
+	// NpTelex indicates a telex numbering plan.
 	NpTelex
+	// NpScSpecificA indicates a service center specific numbering plan.
 	NpScSpecificA
+	// NpScSpecificB indicates a service center specific numbering plan.
 	NpScSpecificB
 	_
+	// NpNational indicates a national numbering plan.
 	NpNational
+	// NpPrivate indicates a private numbering plan.
 	NpPrivate
+	// NpErmes indicates the ERMES (ETSI DE/PS 3 01-3) numbering plan.
 	NpErmes
+	// NpExtension is reserved for future extensions.
 	NpExtension = 0x0f
 	// all other values reserved.
 )
