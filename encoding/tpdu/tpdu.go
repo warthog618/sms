@@ -186,24 +186,9 @@ func (p *BaseTPDU) decodeUserData(src []byte) error {
 	}
 	switch alphabet {
 	case Alpha7Bit:
-		var fillBits int
-		if udhi {
-			if dangling := udhl % 7; dangling != 0 {
-				fillBits = 7 - dangling
-			}
-			sml7 = sml7 - (udhl*8+fillBits)/7
-		}
-		sm := gsm7.Unpack7Bit(src[ri:], fillBits)
-		// this is a double check on the math and should never trip...
-		if len(sm) < sml7 {
-			return DecodeError("sm", ri, ErrUnderflow)
-		}
-		if len(sm) > sml7 {
-			if len(sm) > sml7+1 || sm[sml7] != 0 {
-				return DecodeError("sm", ri, ErrOverlength)
-			}
-			// drop trailing 0 septet
-			sm = sm[:sml7]
+		sm, err := decode7Bit(sml7, udhl, src[ri:])
+		if err != nil {
+			return DecodeError("sm", ri, err)
 		}
 		p.ud = sm
 	case AlphaUCS2:
@@ -216,6 +201,32 @@ func (p *BaseTPDU) decodeUserData(src []byte) error {
 	}
 	p.udh = udh
 	return nil
+}
+
+// decode7Bit decodes the GSM7 encoded binary src into a byte array.
+// sml is the number of septets expected, and udhl is the number of octets
+// in the UDH, including the UDHL field.
+func decode7Bit(sml, udhl int, src []byte) ([]byte, error) {
+	var fillBits int
+	if udhl > 0 {
+		if dangling := udhl % 7; dangling != 0 {
+			fillBits = 7 - dangling
+		}
+		sml = sml - (udhl*8+fillBits)/7
+	}
+	sm := gsm7.Unpack7Bit(src, fillBits)
+	// this is a double check on the math and should never trip...
+	if len(sm) < sml {
+		return nil, ErrUnderflow
+	}
+	if len(sm) > sml {
+		if len(sm) > sml+1 || sm[sml] != 0 {
+			return nil, ErrOverlength
+		}
+		// drop trailing 0 septet
+		sm = sm[:sml]
+	}
+	return sm, nil
 }
 
 // encodeUserData marshals the User Data into binary.
