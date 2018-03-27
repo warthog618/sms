@@ -182,9 +182,14 @@ func (s *StatusReport) UnmarshalBinary(src []byte) error {
 	}
 	s.st = src[ri]
 	ri++
-	if len(src) == ri {
-		return nil
+	if len(src) > ri {
+		return s.unmarshalOptionals(ri, src)
 	}
+	return nil
+}
+
+// unmarshal the optional fields at the end if the StatusReport TPDU.
+func (s *StatusReport) unmarshalOptionals(ri int, src []byte) error {
 	s.pi = src[ri]
 	ri++
 	if s.pi&0x01 == 0x01 {
