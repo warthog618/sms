@@ -130,3 +130,67 @@ func TestSegment(t *testing.T) {
 		t.Run(p.name, f)
 	}
 }
+
+func TestSegmentWide(t *testing.T) {
+	patterns := []struct {
+		name string
+		in   segmentInPattern
+		out  []segmentOutPattern
+	}{
+		{"empty",
+			segmentInPattern{nil, 0, nil},
+			nil},
+		{"single segment",
+			segmentInPattern{[]byte("hello"), 0, nil},
+			[]segmentOutPattern{{0, nil, []byte("hello")}}},
+		{"two segment 7bit",
+			segmentInPattern{[]byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you might think"), 0, nil},
+			[]segmentOutPattern{
+				{0, tpdu.UserDataHeader{tpdu.InformationElement{ID: 8, Data: []byte{0, 1, 2, 1}}},
+					[]byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you mi")},
+				{0, tpdu.UserDataHeader{tpdu.InformationElement{ID: 8, Data: []byte{0, 1, 2, 2}}},
+					[]byte("ght think")}},
+		},
+		{"three segment 7bit",
+			segmentInPattern{[]byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you might think, but wait, then we also need a really really long message to trigger a three segment concatenation which requires even more characters than I care to count"), 0, nil},
+			[]segmentOutPattern{
+				{0, tpdu.UserDataHeader{tpdu.InformationElement{ID: 8, Data: []byte{0, 2, 3, 1}}},
+					[]byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you mi")},
+				{0, tpdu.UserDataHeader{tpdu.InformationElement{ID: 8, Data: []byte{0, 2, 3, 2}}},
+					[]byte("ght think, but wait, then we also need a really really long message to trigger a three segment concatenation which requires even more characters than I c")},
+				{0, tpdu.UserDataHeader{tpdu.InformationElement{ID: 8, Data: []byte{0, 2, 3, 3}}},
+					[]byte("are to count")},
+			},
+		},
+		{"two segment 7bit udh",
+			segmentInPattern{[]byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you might think"),
+				0, tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}}},
+			[]segmentOutPattern{
+				{0, tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}, tpdu.InformationElement{ID: 8, Data: []byte{0, 3, 2, 1}}},
+					[]byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than ")},
+				{0, tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}, tpdu.InformationElement{ID: 8, Data: []byte{0, 3, 2, 2}}},
+					[]byte("you might think")}},
+		},
+	}
+	s := sar.NewSegmenter()
+	s.SetWide(true)
+	for _, p := range patterns {
+		f := func(t *testing.T) {
+			tmpl := tpdu.Submit{}
+			tmpl.SetDCS(tpdu.DCS(p.in.dcs))
+			tmpl.SetUDH(p.in.udh)
+			out := s.Segment(p.in.msg, &tmpl)
+			expected := make([]tpdu.Submit, len(p.out))
+			if len(p.out) == 0 {
+				expected = nil
+			}
+			for i, o := range p.out {
+				expected[i].SetDCS(tpdu.DCS(o.dcs))
+				expected[i].SetUDH(o.udh)
+				expected[i].SetUD(o.ud)
+			}
+			assert.Equal(t, expected, out)
+		}
+		t.Run(p.name, f)
+	}
+}

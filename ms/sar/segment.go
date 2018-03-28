@@ -7,6 +7,7 @@ package sar
 
 import (
 	"encoding/binary"
+	"sync"
 
 	"github.com/warthog618/sms/encoding/tpdu"
 )
@@ -14,12 +15,22 @@ import (
 // Segmenter segments a large outgoing message into the set of Submit TPDUs
 // required to contain it.
 type Segmenter struct {
+	mutex    sync.Mutex // covers msgCount and wide
 	msgCount int
+	wide     bool
 }
 
 // NewSegmenter creates a Segmenter.
 func NewSegmenter() *Segmenter {
 	return new(Segmenter)
+}
+
+// SetWide sets the Segmenter wide flag.
+// If true then the segmenter will use 16bit message references instead of 8bit.
+func (s *Segmenter) SetWide(w bool) {
+	s.mutex.Lock()
+	s.wide = w
+	s.mutex.Unlock()
 }
 
 // Segment returns the set of SMS-Submit TPDUs required to transmit the message
@@ -46,7 +57,6 @@ func (s *Segmenter) Segment(msg []byte, t *tpdu.Submit) []tpdu.Submit {
 	// allow for concat entry in UDH
 	bs = maxSML(t.MaxUDL(), udhl+5, alpha)
 	// any point checking for bs==0?
-	s.msgCount++
 	var chunks [][]byte
 	switch alpha {
 	default: // default to 7Bit
@@ -58,12 +68,24 @@ func (s *Segmenter) Segment(msg []byte, t *tpdu.Submit) []tpdu.Submit {
 	}
 	count := len(chunks)
 	pdus := make([]tpdu.Submit, count)
+	s.mutex.Lock()
+	s.msgCount++
+	msgCount := s.msgCount
+	wide := s.wide
+	s.mutex.Unlock()
 	for i := 0; i < count; i++ {
 		sg := &pdus[i]
 		*sg = *t
-		sg.SetUDH(append(t.UDH(), tpdu.InformationElement{
-			ID:   0,
-			Data: []byte{byte(s.msgCount), byte(count), byte(i + 1)}}))
+		ie := tpdu.InformationElement{}
+		if wide {
+			ie.ID = 8
+			ie.Data = []byte{0, 0, byte(count), byte(i + 1)}
+			binary.BigEndian.PutUint16(ie.Data, uint16(msgCount))
+		} else {
+			ie.ID = 0
+			ie.Data = []byte{byte(msgCount), byte(count), byte(i + 1)}
+		}
+		sg.SetUDH(append(t.UDH(), ie))
 		sg.SetUD(chunks[i])
 	}
 	return pdus
