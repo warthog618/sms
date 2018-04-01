@@ -25,7 +25,7 @@ type Message struct {
 // them using the DataDecoder (typically a tpdu.UDDecoder).
 type Reassembler struct {
 	c Collector
-	d DataDecoder
+	g Concatenator
 }
 
 // DataDecoder provides a Decode method to convert the user data from a TPDU
@@ -43,7 +43,7 @@ type Collector interface {
 
 // NewReassembler creates a Reassembler.
 func NewReassembler(d DataDecoder, c Collector) *Reassembler {
-	r := Reassembler{d: d, c: c}
+	r := Reassembler{c: c, g: Concatenator{d}}
 	return &r
 }
 
@@ -65,14 +65,19 @@ func (r *Reassembler) Reassemble(b []byte) (*Message, error) {
 		return nil, err
 	}
 	if segments != nil {
-		return r.concatenate(segments)
+		return r.g.Concatenate(segments)
 	}
 	return nil, nil
 }
 
-// concatenate converts the completed set of concatenated TPDUs into a Message.
-// The User Data in each TPDU is converted to UTF-8 using the DataEncoder.
-func (r *Reassembler) concatenate(segments []*tpdu.Deliver) (*Message, error) {
+// Concatenator converts a completed set of concatenated TPDUs into a Message.
+type Concatenator struct {
+	d DataDecoder
+}
+
+// Concatenate converts the completed set of concatenated TPDUs into a Message.
+// The User Data in each TPDU is converted to UTF-8 using the DataDecoder.
+func (c *Concatenator) Concatenate(segments []*tpdu.Deliver) (*Message, error) {
 	bl := 0
 	ts := make([][]byte, len(segments))
 	var danglingSurrogate tpdu.UserData
@@ -83,7 +88,7 @@ func (r *Reassembler) concatenate(segments []*tpdu.Deliver) (*Message, error) {
 			ud = append(danglingSurrogate, ud...)
 			danglingSurrogate = nil
 		}
-		d, err := r.d.Decode(ud, s.UDH(), a)
+		d, err := c.d.Decode(ud, s.UDH(), a)
 		if err != nil {
 			switch e := err.(type) {
 			case ucs2.ErrDanglingSurrogate:
