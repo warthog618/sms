@@ -6,10 +6,10 @@
 package tpdu_test
 
 import (
-	"bytes"
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/warthog618/sms/encoding/gsm7"
 	"github.com/warthog618/sms/encoding/semioctet"
 	"github.com/warthog618/sms/encoding/tpdu"
@@ -45,12 +45,8 @@ func TestAddressMarshalBinary(t *testing.T) {
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			b, err := p.in.MarshalBinary()
-			if err != p.err {
-				t.Fatalf("error marshalling %v: %v", p.in, err)
-			}
-			if !bytes.Equal(b, p.out) {
-				t.Errorf("failed to marshal %v: expected %v, got %v", p.in, p.out, b)
-			}
+			assert.Equal(t, p.err, err)
+			assert.Equal(t, p.out, b)
 		}
 		t.Run(p.name, f)
 	}
@@ -87,15 +83,11 @@ func TestAddressUnmarshalBinary(t *testing.T) {
 		f := func(t *testing.T) {
 			a := tpdu.Address{}
 			n, err := a.UnmarshalBinary(p.in)
-			if err != p.err {
-				t.Fatalf("error unmarshalling %v: %v", p.in, err)
-			}
+			assert.Equal(t, p.err, err)
 			if n != p.n {
 				t.Errorf("unmarshal %v read incorrect number of characters, expected %d, read %d", p.in, p.n, n)
 			}
-			if a != p.out {
-				t.Errorf("failed to unmarshal %v: expected %v, got %v", p.in, p.out, a)
-			}
+			assert.Equal(t, p.out, a)
 		}
 		t.Run(p.name, f)
 	}
