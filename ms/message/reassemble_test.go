@@ -90,11 +90,8 @@ func TestReassemble(t *testing.T) {
 }
 
 // TestConcatenate tests the dangling surrogate section of concatenate.
-// All othe functionality is covered in TestReassemble.
+// Other functionality is covered implicitly by TestReassemble.
 func TestConcatenate(t *testing.T) {
-	// anything that unmarshals so Reassemble will call Collect and then concatenate.
-	pdu := []byte{0x04, 0x04, 0x91, 0x36, 0x19, 0x00, 0x00, 0x51, 0x50, 0x71, 0x32, 0x20,
-		0x05, 0x23, 0x08, 0xC8, 0x30, 0x3A, 0x8C, 0x0E, 0xA3, 0xC3}
 	// Two UCS-2 TPDUs to be concatenated.  The first ends with the first surrogate
 	// of a surrogate pair.  In total there are three surrogate pairs - each one
 	// an emoticon - 😁.
@@ -108,16 +105,9 @@ func TestConcatenate(t *testing.T) {
 	u2.SetDCS(dcs)
 	u2.SetOA(oa)
 	u2.SetUD([]byte{0xde, 0x01, 0xd8, 0x3d, 0xde, 0x01})
-	// collector returns the two UCS2 TPDUs.
-	c := MockCollector{CollectFunc: func(pdu *tpdu.Deliver) (d []*tpdu.Deliver, err error) {
-		return []*tpdu.Deliver{u1, u2}, nil
-	}}
 	d, _ := tpdu.NewUDDecoder()
-	r := message.NewReassembler(d, &c)
-	if r == nil {
-		t.Fatalf("failed to create Reassembler")
-	}
-	m, err := r.Reassemble(pdu)
+	c := message.NewConcatenator(d)
+	m, err := c.Concatenate([]*tpdu.Deliver{u1, u2})
 	assert.Equal(t, nil, err)
 	expected := &message.Message{Msg: "😁😁😁", Number: "+1234", TPDUs: []*tpdu.Deliver{u1, u2}}
 	assert.Equal(t, expected, m)

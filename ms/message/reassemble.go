@@ -70,12 +70,17 @@ func (r *Reassembler) Reassemble(b []byte) (*Message, error) {
 	return nil, nil
 }
 
-// Concatenator converts a completed set of concatenated TPDUs into a Message.
+// Concatenator converts a set of concatenated TPDUs into a Message.
 type Concatenator struct {
 	d DataDecoder
 }
 
-// Concatenate converts the completed set of concatenated TPDUs into a Message.
+// NewConcatenator creates a new Concatenator.
+func NewConcatenator(d DataDecoder) *Concatenator {
+	return &Concatenator{d}
+}
+
+// Concatenate converts a set of concatenated TPDUs into a Message.
 // The User Data in each TPDU is converted to UTF-8 using the DataDecoder.
 func (c *Concatenator) Concatenate(segments []*tpdu.Deliver) (*Message, error) {
 	bl := 0
