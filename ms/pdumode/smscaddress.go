@@ -24,6 +24,9 @@ func (a *SMSCAddress) MarshalBinary() (dst []byte, err error) {
 	if err != nil {
 		return nil, tpdu.EncodeError("addr", err)
 	}
+	if len(addr) == 0 {
+		return []byte{0}, nil
+	}
 	l := len(addr) + 1 // in octets and includes the toa
 	dst = make([]byte, 2, l+1)
 	dst[0] = byte(l)
@@ -40,8 +43,8 @@ func (a *SMSCAddress) UnmarshalBinary(src []byte) (int, error) {
 		return 0, tpdu.DecodeError("length", 0, tpdu.ErrUnderflow)
 	}
 	l := int(src[0]) // len is octets including toa
-	if l < 1 {
-		return 1, tpdu.DecodeError("length", 0, tpdu.ErrUnderflow)
+	if l == 0 {
+		return 1, nil
 	}
 	if len(src) < 2 {
 		return 1, tpdu.DecodeError("toa", 1, tpdu.ErrUnderflow)

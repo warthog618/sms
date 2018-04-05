@@ -70,7 +70,7 @@ func TestDecodeString(t *testing.T) {
 
 func TestEncode(t *testing.T) {
 	patterns := []testPattern{
-		{"empty", "0100", &pdumode.SMSCAddress{}, nil, nil},
+		{"empty", "00", &pdumode.SMSCAddress{}, nil, nil},
 		{"valid", "0791361907002039010203040506070809",
 			&pdumode.SMSCAddress{Addr: "639170000293", TOA: 0x91},
 			[]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09},
@@ -92,7 +92,7 @@ func TestEncode(t *testing.T) {
 
 func TestEncodeToString(t *testing.T) {
 	patterns := []testPattern{
-		{"empty", "0100", &pdumode.SMSCAddress{}, nil, nil},
+		{"empty", "00", &pdumode.SMSCAddress{}, nil, nil},
 		{"valid", "0791361907002039010203040506070809",
 			&pdumode.SMSCAddress{Addr: "639170000293", TOA: 0x91},
 			[]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09},
