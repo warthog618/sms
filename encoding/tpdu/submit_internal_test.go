@@ -24,7 +24,7 @@ type marshalSubmitTestPattern struct {
 var marshalSubmitTestPatterns = []marshalSubmitTestPattern{
 	{"haha",
 		Submit{
-			BaseTPDU: BaseTPDU{firstOctet: 1, udhiMask: 0x40, ud: []byte("Hahahaha")},
+			BaseTPDU: BaseTPDU{firstOctet: 1, ud: []byte("Hahahaha")},
 			da:       Address{Addr: "6391", TOA: 0x91},
 		},
 		[]byte{0x01, 0x00, 0x04, 0x91, 0x36, 0x19, 0x00, 0x00, 0x08, 0xC8, 0x30,
@@ -32,7 +32,7 @@ var marshalSubmitTestPatterns = []marshalSubmitTestPattern{
 		nil},
 	{"vp",
 		Submit{
-			BaseTPDU: BaseTPDU{firstOctet: 1, udhiMask: 0x40, ud: []byte("Hahahaha")},
+			BaseTPDU: BaseTPDU{firstOctet: 1, ud: []byte("Hahahaha")},
 			da:       Address{Addr: "6391", TOA: 0x91},
 			vp:       ValidityPeriod{VpfRelative, Timestamp{}, time.Duration(6000000000000), 0},
 		},
@@ -41,14 +41,14 @@ var marshalSubmitTestPatterns = []marshalSubmitTestPattern{
 		nil},
 	{"bad da",
 		Submit{
-			BaseTPDU: BaseTPDU{firstOctet: 4, udhiMask: 0x40, ud: []byte("Hahahaha")},
+			BaseTPDU: BaseTPDU{firstOctet: 4, ud: []byte("Hahahaha")},
 			da:       Address{Addr: "d391", TOA: 0x91},
 		},
 		nil,
 		EncodeError("da.addr", semioctet.ErrInvalidDigit('d'))},
 	{"bad vp",
 		Submit{
-			BaseTPDU: BaseTPDU{firstOctet: 1, udhiMask: 0x40, ud: []byte("Hahahaha")},
+			BaseTPDU: BaseTPDU{firstOctet: 1, ud: []byte("Hahahaha")},
 			da:       Address{Addr: "6391", TOA: 0x91},
 			vp:       ValidityPeriod{6, Timestamp{}, 0, 0},
 		},
@@ -56,7 +56,7 @@ var marshalSubmitTestPatterns = []marshalSubmitTestPattern{
 		EncodeError("vp.vpf", ErrInvalid)},
 	{"bad ud",
 		Submit{
-			BaseTPDU: BaseTPDU{firstOctet: 4, udhiMask: 0x40, dcs: 0x80, ud: []byte("Hahahaha")},
+			BaseTPDU: BaseTPDU{firstOctet: 4, dcs: 0x80, ud: []byte("Hahahaha")},
 			da:       Address{Addr: "6391", TOA: 0x91},
 		},
 		nil,
@@ -87,7 +87,7 @@ var unmarshalSubmitTestPatterns = []unmarshalSubmitTestPattern{
 	{"haha", []byte{0x01, 0x23, 0x04, 0x91, 0x36, 0x19, 0x34, 0x00, 0x08, 0xC8,
 		0x30, 0x3A, 0x8C, 0x0E, 0xA3, 0xC3},
 		Submit{
-			BaseTPDU: BaseTPDU{firstOctet: 1, udhiMask: 0x40, pid: 0x34, ud: []byte("Hahahaha")},
+			BaseTPDU: BaseTPDU{firstOctet: 1, pid: 0x34, ud: []byte("Hahahaha")},
 			mr:       0x23,
 			da:       Address{Addr: "6391", TOA: 0x91},
 		},
@@ -95,7 +95,7 @@ var unmarshalSubmitTestPatterns = []unmarshalSubmitTestPattern{
 	{"vp", []byte{0x11, 0x23, 0x04, 0x91, 0x36, 0x19, 0x34, 0x00, 0x45, 0x08, 0xC8,
 		0x30, 0x3A, 0x8C, 0x0E, 0xA3, 0xC3},
 		Submit{
-			BaseTPDU: BaseTPDU{firstOctet: 17, udhiMask: 0x40, pid: 0x34, ud: []byte("Hahahaha")},
+			BaseTPDU: BaseTPDU{firstOctet: 17, pid: 0x34, ud: []byte("Hahahaha")},
 			mr:       0x23,
 			da:       Address{Addr: "6391", TOA: 0x91},
 			vp:       ValidityPeriod{Format: VpfRelative, Duration: time.Duration(60 * 350 * 1000000000)},

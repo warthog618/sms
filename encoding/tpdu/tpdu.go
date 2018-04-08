@@ -9,6 +9,10 @@ import (
 	"github.com/warthog618/sms/encoding/gsm7"
 )
 
+const (
+	udhiMask byte = 0x40
+)
+
 // BaseTPDU is the base type for SMS TPDUs.
 type BaseTPDU struct {
 	firstOctet byte
@@ -25,8 +29,7 @@ type BaseTPDU struct {
 	//  These have NOT been converted to the corresponding UTF8.
 	//  Use the usc2 package to convert to UTF8.
 	// For Alpha8Bit, ud contains the raw octets.
-	ud       UserData
-	udhiMask byte
+	ud UserData
 }
 
 // Alphabet returns the alphabet field from the DCS of the SMS TPDU.
@@ -78,16 +81,11 @@ func (p *BaseTPDU) SetUD(ud UserData) {
 func (p *BaseTPDU) SetUDH(udh UserDataHeader) {
 	if udh == nil {
 		p.udh = nil
-		p.firstOctet = (p.firstOctet &^ p.udhiMask)
+		p.firstOctet = (p.firstOctet &^ udhiMask)
 	} else {
 		p.udh = udh
-		p.firstOctet = (p.firstOctet | p.udhiMask)
+		p.firstOctet = (p.firstOctet | udhiMask)
 	}
-}
-
-// SetUDHIMask sets the udhiMask field of the TPDU.
-func (p *BaseTPDU) SetUDHIMask(udhiMask byte) {
-	p.udhiMask = udhiMask
 }
 
 // UD returns the User Data.
@@ -104,7 +102,7 @@ func (p *BaseTPDU) UDH() UserDataHeader {
 // This is generally the same as testing the length of the udh - unless the dcs
 // has been intentionally overwritten to create an inconsistency.
 func (p *BaseTPDU) UDHI() bool {
-	return p.firstOctet&p.udhiMask != 0
+	return p.firstOctet&udhiMask != 0
 }
 
 // decodeUserData unmarshals the User Data field from the binary src.

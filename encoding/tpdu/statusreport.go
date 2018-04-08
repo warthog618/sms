@@ -18,7 +18,7 @@ type StatusReport struct {
 
 // NewStatusReport creates a StatusReport TPDU and initialises non-zero fields.
 func NewStatusReport() *StatusReport {
-	return &StatusReport{BaseTPDU: BaseTPDU{firstOctet: byte(MtCommand), udhiMask: 0x04}}
+	return &StatusReport{BaseTPDU: BaseTPDU{firstOctet: byte(MtCommand)}}
 }
 
 // RA returns the StatusReport ra.
@@ -207,7 +207,6 @@ func (s *StatusReport) unmarshalOptionals(ri int, src []byte) error {
 		ri++
 	}
 	if s.pi&0x04 == 0x04 {
-		s.udhiMask = 0x04
 		err := s.decodeUserData(src[ri:])
 		if err != nil {
 			return DecodeError("ud", ri, err)

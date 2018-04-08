@@ -20,10 +20,6 @@ func TestNewDeliver(t *testing.T) {
 	if d.UDHI() {
 		t.Errorf("UDHI initially set to true")
 	}
-	d.SetFirstOctet(0x20)
-	if !d.UDHI() {
-		t.Errorf("UDHI can't be set - wrong udhiMask?")
-	}
 }
 
 func TestDeliverMaxUDL(t *testing.T) {

@@ -143,7 +143,6 @@ func TestBaseTPDUSetUDH(t *testing.T) {
 func TestBaseTPDUUDHI(t *testing.T) {
 	// also tests BaseTPDU.SetUDH
 	b := tpdu.BaseTPDU{}
-	b.SetUDHIMask(0x20)
 	udhi := b.UDHI()
 	if udhi {
 		t.Errorf("initial udhi should be false")

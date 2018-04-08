@@ -24,7 +24,7 @@ type marshalStatusReportTestPattern struct {
 var marshalStatusReportTestPatterns = []marshalStatusReportTestPattern{
 	{"minimal",
 		StatusReport{
-			BaseTPDU: BaseTPDU{firstOctet: 3, udhiMask: 0x04},
+			BaseTPDU: BaseTPDU{firstOctet: 3},
 			mr:       0x42,
 			ra:       Address{Addr: "6391", TOA: 0x91},
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
@@ -38,7 +38,7 @@ var marshalStatusReportTestPatterns = []marshalStatusReportTestPattern{
 		nil},
 	{"full",
 		StatusReport{
-			BaseTPDU: BaseTPDU{firstOctet: 7, pid: 0x89, dcs: 0x04, udhiMask: 0x04, ud: []byte("report")},
+			BaseTPDU: BaseTPDU{firstOctet: 7, pid: 0x89, dcs: 0x04, ud: []byte("report")},
 			mr:       0x42, pi: 0x07,
 			ra: Address{Addr: "6391", TOA: 0x91},
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
@@ -61,7 +61,7 @@ var marshalStatusReportTestPatterns = []marshalStatusReportTestPattern{
 		EncodeError("ra.addr", semioctet.ErrInvalidDigit('d'))},
 	{"bad scts",
 		StatusReport{
-			BaseTPDU: BaseTPDU{firstOctet: 3, udhiMask: 0x04},
+			BaseTPDU: BaseTPDU{firstOctet: 3},
 			mr:       0x42,
 			ra:       Address{Addr: "6391", TOA: 0x91},
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
@@ -73,7 +73,7 @@ var marshalStatusReportTestPatterns = []marshalStatusReportTestPattern{
 		EncodeError("scts", bcd.ErrInvalidInteger(96))},
 	{"bad dt",
 		StatusReport{
-			BaseTPDU: BaseTPDU{firstOctet: 3, udhiMask: 0x04},
+			BaseTPDU: BaseTPDU{firstOctet: 3},
 			mr:       0x42,
 			ra:       Address{Addr: "6391", TOA: 0x91},
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
@@ -85,7 +85,7 @@ var marshalStatusReportTestPatterns = []marshalStatusReportTestPattern{
 		EncodeError("dt", bcd.ErrInvalidInteger(96))},
 	{"bad ud",
 		StatusReport{
-			BaseTPDU: BaseTPDU{firstOctet: 1, udhiMask: 0x02, dcs: 0x80, ud: []byte("report")},
+			BaseTPDU: BaseTPDU{firstOctet: 1, dcs: 0x80, ud: []byte("report")},
 			pi:       0x06},
 		nil,
 		EncodeError("ud.alphabet", ErrInvalid)},
@@ -159,7 +159,7 @@ var unmarshalStatusReportTestPatterns = []unmarshalStatusReportTestPattern{
 			0x23, 0x51, 0x40, 0x81, 0x32, 0x20, 0x05, 0x42, 0xab, 0x06, 0x04, 0x06,
 			0x72, 0x65, 0x70, 0x6f, 0x72, 0x74},
 		StatusReport{
-			BaseTPDU: BaseTPDU{firstOctet: 3, udhiMask: 0x04, dcs: 0x04, ud: []byte("report")},
+			BaseTPDU: BaseTPDU{firstOctet: 3, dcs: 0x04, ud: []byte("report")},
 			mr:       0x42, pi: 0x06,
 			ra: Address{Addr: "6391", TOA: 0x91},
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
@@ -255,7 +255,7 @@ var unmarshalStatusReportTestPatterns = []unmarshalStatusReportTestPattern{
 		[]byte{0x3, 0x42, 0x04, 0x91, 0x36, 0x19, 0x51, 0x50, 0x71, 0x32, 0x20, 0x05,
 			0x23, 0x51, 0x40, 0x81, 0x32, 0x20, 0x05, 0x42, 0xab, 0x04},
 		StatusReport{
-			BaseTPDU: BaseTPDU{firstOctet: 3, udhiMask: 0x04},
+			BaseTPDU: BaseTPDU{firstOctet: 3},
 			mr:       0x42, pi: 0x04,
 			ra: Address{Addr: "6391", TOA: 0x91},
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,

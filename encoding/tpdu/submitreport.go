@@ -15,7 +15,7 @@ type SubmitReport struct {
 
 // NewSubmitReport creates a SubmitReport TPDU and initialises non-zero fields.
 func NewSubmitReport() *SubmitReport {
-	return &SubmitReport{BaseTPDU: BaseTPDU{firstOctet: byte(MtSubmit), udhiMask: 0x04}}
+	return &SubmitReport{BaseTPDU: BaseTPDU{firstOctet: byte(MtSubmit)}}
 }
 
 // FCS returns the SubmitReport fcs.
@@ -135,7 +135,6 @@ func (s *SubmitReport) UnmarshalBinary(src []byte) error {
 		s.dcs = src[ri]
 		ri++
 	}
-	s.udhiMask = 0x04
 	if s.pi&0x04 == 0x04 {
 		err := s.decodeUserData(src[ri:])
 		if err != nil {

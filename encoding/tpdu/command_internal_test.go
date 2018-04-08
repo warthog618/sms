@@ -22,7 +22,7 @@ type marshalCommandTestPattern struct {
 var marshalCommandTestPatterns = []marshalCommandTestPattern{
 	{"command",
 		Command{
-			BaseTPDU: BaseTPDU{firstOctet: 2, udhiMask: 0x04,
+			BaseTPDU: BaseTPDU{firstOctet: 2,
 				pid: 0xab, ud: []byte("a command")},
 			mr: 0x42, ct: 0x89, mn: 0x34,
 			da: Address{Addr: "6391", TOA: 0x91},
@@ -32,7 +32,7 @@ var marshalCommandTestPatterns = []marshalCommandTestPattern{
 		nil},
 	{"bad da",
 		Command{
-			BaseTPDU: BaseTPDU{firstOctet: 2, udhiMask: 0x04,
+			BaseTPDU: BaseTPDU{firstOctet: 2,
 				pid: 0xab, ud: []byte("a command")},
 			mr: 0x42, ct: 0x89, mn: 0x34,
 			da: Address{Addr: "d391", TOA: 0x91},
@@ -65,7 +65,7 @@ var unmarshalCommandTestPatterns = []unmarshalCommandTestPattern{
 	{"command", []byte{0x02, 0x42, 0xab, 0x89, 0x34, 0x04, 0x91, 0x36, 0x19, 0x09, 0x61,
 		0x20, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64},
 		Command{
-			BaseTPDU: BaseTPDU{firstOctet: 2, udhiMask: 0x04, dcs: 0x04,
+			BaseTPDU: BaseTPDU{firstOctet: 2, dcs: 0x04,
 				pid: 0xab, ud: []byte("a command")},
 			mr: 0x42, ct: 0x89, mn: 0x34,
 			da: Address{Addr: "6391", TOA: 0x91},
@@ -97,7 +97,7 @@ var unmarshalCommandTestPatterns = []unmarshalCommandTestPattern{
 		DecodeError("da.addr", 7, ErrUnderflow)},
 	{"underflow ud", []byte{0x02, 0x42, 0xab, 0x89, 0x34, 0x04, 0x91, 0x36, 0x19},
 		Command{
-			BaseTPDU: BaseTPDU{firstOctet: 2, pid: 0xab, dcs: 0x04, udhiMask: 0x04},
+			BaseTPDU: BaseTPDU{firstOctet: 2, pid: 0xab, dcs: 0x04},
 			mr:       0x42, ct: 0x89, mn: 0x34,
 			da: Address{Addr: "6391", TOA: 0x91},
 		},

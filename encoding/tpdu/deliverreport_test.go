@@ -21,10 +21,6 @@ func TestNewDeliverReport(t *testing.T) {
 	if d.UDHI() {
 		t.Errorf("UDHI initially set to true")
 	}
-	d.SetFirstOctet(0x04)
-	if !d.UDHI() {
-		t.Errorf("UDHI can't be set - wrong udhiMask?")
-	}
 }
 
 func TestDeliverReportSetFCS(t *testing.T) {

@@ -15,7 +15,7 @@ type Submit struct {
 
 // NewSubmit creates a Submit TPDU and initialises non-zero fields.
 func NewSubmit() *Submit {
-	return &Submit{BaseTPDU: BaseTPDU{firstOctet: byte(MtSubmit), udhiMask: 0x40}}
+	return &Submit{BaseTPDU: BaseTPDU{firstOctet: byte(MtSubmit)}}
 }
 
 // DA returns the Submit da.
@@ -119,7 +119,6 @@ func (s *Submit) UnmarshalBinary(src []byte) error {
 	if err != nil {
 		return DecodeError("ud", ri, err)
 	}
-	s.udhiMask = 0x40
 	return nil
 }
 

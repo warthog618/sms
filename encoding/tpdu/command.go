@@ -18,7 +18,7 @@ type Command struct {
 // NewCommand creates a Command TPDU and initialises non-zero fields.
 func NewCommand() *Command {
 	// Command doesn't use dcs, but baseTPDU does to determine UD alphabet, so set it to 8bit.
-	return &Command{BaseTPDU: BaseTPDU{firstOctet: byte(MtCommand), udhiMask: 0x04, dcs: 0x04}}
+	return &Command{BaseTPDU: BaseTPDU{firstOctet: byte(MtCommand), dcs: 0x04}}
 }
 
 // MR returns the Command mr.
@@ -107,7 +107,6 @@ func (c *Command) UnmarshalBinary(src []byte) error {
 		return DecodeError("da", ri, err)
 	}
 	ri += n
-	c.udhiMask = 0x04
 	c.dcs = 0x04 // force BaseTPDU to interpret UD as 8bit, if nt set already
 	err = c.decodeUserData(src[ri:])
 	if err != nil {

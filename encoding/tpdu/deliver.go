@@ -17,7 +17,7 @@ type Deliver struct {
 
 // NewDeliver creates a Deliver TPDU and initialises non-zero fields.
 func NewDeliver() *Deliver {
-	return &Deliver{BaseTPDU: BaseTPDU{firstOctet: byte(MtDeliver), udhiMask: 0x20}}
+	return &Deliver{BaseTPDU: BaseTPDU{firstOctet: byte(MtDeliver)}}
 }
 
 // OA returns the Deliver oa.
@@ -104,7 +104,6 @@ func (d *Deliver) UnmarshalBinary(src []byte) error {
 	if err != nil {
 		return DecodeError("ud", ri, err)
 	}
-	d.udhiMask = 0x20
 	return nil
 }
 

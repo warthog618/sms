@@ -24,7 +24,7 @@ type marshalDeliverTestPattern struct {
 var marshalDeliverTestPatterns = []marshalDeliverTestPattern{
 	{"haha",
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4, udhiMask: 0x20, ud: []byte("Hahahaha")},
+			BaseTPDU: BaseTPDU{firstOctet: 4, ud: []byte("Hahahaha")},
 			oa:       Address{Addr: "6391", TOA: 0x91},
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))}},
@@ -33,7 +33,7 @@ var marshalDeliverTestPatterns = []marshalDeliverTestPattern{
 		nil},
 	{"bad oa",
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4, udhiMask: 0x20, ud: []byte("Hahahaha")},
+			BaseTPDU: BaseTPDU{firstOctet: 4, ud: []byte("Hahahaha")},
 			oa:       Address{Addr: "d391", TOA: 0x91},
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))}},
@@ -41,7 +41,7 @@ var marshalDeliverTestPatterns = []marshalDeliverTestPattern{
 		EncodeError("oa.addr", semioctet.ErrInvalidDigit('d'))},
 	{"bad scts",
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4, udhiMask: 0x20, ud: []byte("Hahahaha")},
+			BaseTPDU: BaseTPDU{firstOctet: 4, ud: []byte("Hahahaha")},
 			oa:       Address{Addr: "6391", TOA: 0x91},
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 24*3600))}},
@@ -49,7 +49,7 @@ var marshalDeliverTestPatterns = []marshalDeliverTestPattern{
 		EncodeError("scts", bcd.ErrInvalidInteger(96))},
 	{"bad ud",
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4, udhiMask: 0x20, dcs: 0x80, ud: []byte("Hahahaha")},
+			BaseTPDU: BaseTPDU{firstOctet: 4, dcs: 0x80, ud: []byte("Hahahaha")},
 			oa:       Address{Addr: "6391", TOA: 0x91},
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))}},
@@ -81,7 +81,7 @@ var unmarshalDeliverTestPatterns = []unmarshalDeliverTestPattern{
 	{"haha", []byte{0x04, 0x04, 0x91, 0x36, 0x19, 0x00, 0x00, 0x51, 0x50, 0x71, 0x32,
 		0x20, 0x05, 0x23, 0x08, 0xC8, 0x30, 0x3A, 0x8C, 0x0E, 0xA3, 0xC3},
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4, udhiMask: 0x20, ud: []byte("Hahahaha")},
+			BaseTPDU: BaseTPDU{firstOctet: 4, ud: []byte("Hahahaha")},
 			oa:       Address{Addr: "6391", TOA: 0x91},
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))}},

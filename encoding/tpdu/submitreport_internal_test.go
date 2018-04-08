@@ -23,7 +23,7 @@ type marshalSubmitReportTestPattern struct {
 var marshalSubmitReportTestPatterns = []marshalSubmitReportTestPattern{
 	{"minimal",
 		SubmitReport{
-			BaseTPDU: BaseTPDU{firstOctet: 1, udhiMask: 0x04},
+			BaseTPDU: BaseTPDU{firstOctet: 1},
 			fcs:      0x12,
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))},
@@ -32,7 +32,7 @@ var marshalSubmitReportTestPatterns = []marshalSubmitReportTestPattern{
 		nil},
 	{"full",
 		SubmitReport{
-			BaseTPDU: BaseTPDU{firstOctet: 1, udhiMask: 0x04, pid: 0xab, dcs: 0x04, ud: []byte("report")},
+			BaseTPDU: BaseTPDU{firstOctet: 1, pid: 0xab, dcs: 0x04, ud: []byte("report")},
 			fcs:      0x12, pi: 0x07,
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))},
@@ -42,7 +42,7 @@ var marshalSubmitReportTestPatterns = []marshalSubmitReportTestPattern{
 		nil},
 	{"bad scts",
 		SubmitReport{
-			BaseTPDU: BaseTPDU{firstOctet: 1, udhiMask: 0x04, dcs: 0x80, ud: []byte("report")},
+			BaseTPDU: BaseTPDU{firstOctet: 1, dcs: 0x80, ud: []byte("report")},
 			fcs:      0x12, pi: 0x07,
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 24*3600))}},
@@ -50,7 +50,7 @@ var marshalSubmitReportTestPatterns = []marshalSubmitReportTestPattern{
 		EncodeError("scts", bcd.ErrInvalidInteger(96))},
 	{"bad ud",
 		SubmitReport{
-			BaseTPDU: BaseTPDU{firstOctet: 1, udhiMask: 0x04, dcs: 0x80, ud: []byte("report")},
+			BaseTPDU: BaseTPDU{firstOctet: 1, dcs: 0x80, ud: []byte("report")},
 			fcs:      0x12, pi: 0x06},
 		nil,
 		EncodeError("ud.alphabet", ErrInvalid)},
@@ -79,7 +79,7 @@ type unmarshalSubmitReportTestPattern struct {
 var unmarshalSubmitReportTestPatterns = []unmarshalSubmitReportTestPattern{
 	{"minimal", []byte{0x01, 0x12, 0x00, 0x51, 0x50, 0x71, 0x32, 0x20, 0x05, 0x23},
 		SubmitReport{
-			BaseTPDU: BaseTPDU{firstOctet: 1, udhiMask: 0x04},
+			BaseTPDU: BaseTPDU{firstOctet: 1},
 			fcs:      0x12,
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))},
@@ -87,7 +87,7 @@ var unmarshalSubmitReportTestPatterns = []unmarshalSubmitReportTestPattern{
 		nil},
 	{"pid", []byte{0x01, 0x12, 0x01, 0x51, 0x50, 0x71, 0x32, 0x20, 0x05, 0x23, 0xab},
 		SubmitReport{
-			BaseTPDU: BaseTPDU{firstOctet: 1, udhiMask: 0x04, pid: 0xab},
+			BaseTPDU: BaseTPDU{firstOctet: 1, pid: 0xab},
 			fcs:      0x12, pi: 0x01,
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))},
@@ -95,7 +95,7 @@ var unmarshalSubmitReportTestPatterns = []unmarshalSubmitReportTestPattern{
 		nil},
 	{"dcs", []byte{0x00, 0x12, 0x02, 0x51, 0x50, 0x71, 0x32, 0x20, 0x05, 0x23, 0x04},
 		SubmitReport{
-			BaseTPDU: BaseTPDU{firstOctet: 0, udhiMask: 0x04, dcs: 0x04},
+			BaseTPDU: BaseTPDU{firstOctet: 0, dcs: 0x04},
 			fcs:      0x12, pi: 02,
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))},
@@ -103,7 +103,7 @@ var unmarshalSubmitReportTestPatterns = []unmarshalSubmitReportTestPattern{
 		nil},
 	{"ud", []byte{0x00, 0x12, 0x06, 0x51, 0x50, 0x71, 0x32, 0x20, 0x05, 0x23, 0x04, 0x06, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74},
 		SubmitReport{
-			BaseTPDU: BaseTPDU{firstOctet: 0, udhiMask: 0x04, dcs: 0x04, ud: []byte("report")},
+			BaseTPDU: BaseTPDU{firstOctet: 0, dcs: 0x04, ud: []byte("report")},
 			fcs:      0x12, pi: 0x06,
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))},
@@ -147,7 +147,7 @@ var unmarshalSubmitReportTestPatterns = []unmarshalSubmitReportTestPattern{
 		DecodeError("dcs", 10, ErrUnderflow)},
 	{"underflow ud", []byte{0x00, 0x12, 0x06, 0x51, 0x50, 0x71,
 		0x32, 0x20, 0x05, 0x23, 0x04},
-		SubmitReport{BaseTPDU: BaseTPDU{firstOctet: 0x00, udhiMask: 0x04, dcs: 0x04},
+		SubmitReport{BaseTPDU: BaseTPDU{firstOctet: 0x00, dcs: 0x04},
 			fcs: 0x12, pi: 0x06,
 			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))},

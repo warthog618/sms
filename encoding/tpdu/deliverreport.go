@@ -14,7 +14,7 @@ type DeliverReport struct {
 
 // NewDeliverReport creates a DeliverReport TPDU and initialises non-zero fields.
 func NewDeliverReport() *DeliverReport {
-	return &DeliverReport{BaseTPDU: BaseTPDU{firstOctet: byte(MtDeliver), udhiMask: 0x04}}
+	return &DeliverReport{BaseTPDU: BaseTPDU{firstOctet: byte(MtDeliver)}}
 }
 
 // FCS returns the DeliverReport fcs.
@@ -111,7 +111,6 @@ func (d *DeliverReport) UnmarshalBinary(src []byte) error {
 		d.dcs = src[ri]
 		ri++
 	}
-	d.udhiMask = 0x04
 	if d.pi&0x04 == 0x04 {
 		err := d.decodeUserData(src[ri:])
 		if err != nil {

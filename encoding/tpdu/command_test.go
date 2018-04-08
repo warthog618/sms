@@ -19,10 +19,6 @@ func TestNewCommand(t *testing.T) {
 	if c.UDHI() {
 		t.Errorf("UDHI initially set to true")
 	}
-	c.SetFirstOctet(0x04)
-	if !c.UDHI() {
-		t.Errorf("UDHI can't be set - wrong udhiMask?")
-	}
 }
 
 func TestCommandSetMR(t *testing.T) {
