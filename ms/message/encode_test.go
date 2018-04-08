@@ -68,7 +68,6 @@ func TestEncode(t *testing.T) {
 			}
 			for i, o := range p.out {
 				expected[i].SetFirstOctet(1)
-				expected[i].SetUDHIMask(64)
 				expected[i].SetDA(o.da)
 				expected[i].SetDCS(tpdu.DCS(o.dcs))
 				expected[i].SetUDH(o.udh)
@@ -154,7 +153,6 @@ func TestEncodeWithTemplate(t *testing.T) {
 			}
 			for i, o := range p.out {
 				expected[i].SetFirstOctet(65)
-				expected[i].SetUDHIMask(64)
 				expected[i].SetDA(o.da)
 				expected[i].SetDCS(tpdu.DCS(o.dcs))
 				expected[i].SetUDH(o.udh)
@@ -203,7 +201,6 @@ func TestEncode8Bit(t *testing.T) {
 			}
 			for i, o := range p.out {
 				expected[i].SetFirstOctet(1)
-				expected[i].SetUDHIMask(64)
 				expected[i].SetDA(o.da)
 				expected[i].SetDCS(tpdu.DCS(o.dcs))
 				expected[i].SetUDH(o.udh)
@@ -270,7 +267,6 @@ func TestEncode8BitWithTemplate(t *testing.T) {
 			}
 			for i, o := range p.out {
 				expected[i].SetFirstOctet(65)
-				expected[i].SetUDHIMask(64)
 				expected[i].SetDA(o.da)
 				expected[i].SetDCS(tpdu.DCS(o.dcs))
 				expected[i].SetUDH(o.udh)
