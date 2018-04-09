@@ -164,6 +164,22 @@ func NewUDDecoder() (*UDDecoder, error) {
 	return i, nil
 }
 
+// AddAllCharsets makes all possible character sets available to Decode.
+// This is equivalent to calling AddLockingCharset and AddShiftCharset for all
+// possible NationalLanguageIdentifiers.
+func (d *UDDecoder) AddAllCharsets() {
+	if d.locking == nil {
+		d.locking = make(map[charset.NationalLanguageIdentifier]bool)
+	}
+	if d.shift == nil {
+		d.shift = make(map[charset.NationalLanguageIdentifier]bool)
+	}
+	for nli := charset.Turkish; nli <= charset.Urdu; nli++ {
+		d.locking[nli] = true
+		d.shift[nli] = true
+	}
+}
+
 // AddLockingCharset adds a locking character set to the sets available to Decode.
 func (d *UDDecoder) AddLockingCharset(nli charset.NationalLanguageIdentifier) {
 	if d.locking == nil {
@@ -231,6 +247,18 @@ type UDEncoder struct {
 func NewUDEncoder() (*UDEncoder, error) {
 	e := &UDEncoder{}
 	return e, nil
+}
+
+// AddAllCharsets makes all possible character sets available to Encode.
+// This is equivalent to calling AddLockingCharset and AddShiftCharset for all
+// possible NationalLanguageIdentifiers, in increasing order.
+func (e *UDEncoder) AddAllCharsets() {
+	e.l = make([]charset.NationalLanguageIdentifier, 0, charset.Urdu)
+	e.s = make([]charset.NationalLanguageIdentifier, 0, charset.Urdu)
+	for nli := charset.Turkish; nli <= charset.Urdu; nli++ {
+		e.l = append(e.l, nli)
+		e.s = append(e.s, nli)
+	}
 }
 
 // AddLockingCharset adds a locking character set to the sets available to Encode.
