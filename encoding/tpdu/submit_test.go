@@ -21,10 +21,6 @@ func TestNewSubmit(t *testing.T) {
 	if d.UDHI() {
 		t.Errorf("UDHI initially set to true")
 	}
-	d.SetFirstOctet(0x40)
-	if !d.UDHI() {
-		t.Errorf("UDHI can't be set - wrong udhiMask?")
-	}
 }
 
 func TestSubmitMaxUDL(t *testing.T) {
@@ -34,42 +30,10 @@ func TestSubmitMaxUDL(t *testing.T) {
 	}
 }
 
-func TestDeliverSetDA(t *testing.T) {
-	// also tests Deliver.DA
-	s := tpdu.Submit{}
-	da := s.DA()
-	nda := tpdu.Address{}
-	if da != nda {
-		t.Errorf("initial da should be 0")
-	}
-	p := tpdu.Address{Addr: "61409865629", TOA: 0x91}
-	s.SetDA(p)
-	da = s.DA()
-	if da != p {
-		t.Errorf("expected oa %v, got %v", p, da)
-	}
-}
-
-func TestSubmitSetMR(t *testing.T) {
-	// also tests Submit.MR
-	s := tpdu.Submit{}
-	m := s.MR()
-	if m != 0 {
-		t.Errorf("initial mr should be 0")
-	}
-	for _, p := range []byte{0x00, 0xab, 0x00, 0xff} {
-		s.SetMR(p)
-		m = s.MR()
-		if m != p {
-			t.Errorf("expected mr %d, got %d", p, m)
-		}
-	}
-}
-
 func TestSubmitSetValidityPeriod(t *testing.T) {
 	// also tests Submit.VP
 	s := tpdu.Submit{}
-	vp := s.VP()
+	vp := s.VP
 	if vp.Format != tpdu.VpfNotPresent {
 		t.Errorf("initial vp should be nil")
 	}
@@ -82,9 +46,9 @@ func TestSubmitSetValidityPeriod(t *testing.T) {
 		{pvp, 0x08},
 		{tpdu.ValidityPeriod{}, 0x00}} {
 		s.SetVP(p.vp)
-		vp = s.VP()
-		if p.fo != s.FirstOctet() {
-			t.Errorf("expected firstOctet 0x%02x, got 0x%02x", p.fo, s.FirstOctet())
+		vp = s.VP
+		if p.fo != s.FirstOctet {
+			t.Errorf("expected firstOctet 0x%02x, got 0x%02x", p.fo, s.FirstOctet)
 		}
 		if !assert.Equal(t, vp, p.vp) {
 			t.Errorf("expected vp %v, got %v", p.vp, vp)

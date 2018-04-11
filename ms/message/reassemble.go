@@ -88,12 +88,12 @@ func (c *Concatenator) Concatenate(segments []*tpdu.Deliver) (*Message, error) {
 	var danglingSurrogate tpdu.UserData
 	for i, s := range segments {
 		a, _ := s.Alphabet()
-		ud := s.UD()
+		ud := s.UD
 		if danglingSurrogate != nil {
 			ud = append(danglingSurrogate, ud...)
 			danglingSurrogate = nil
 		}
-		d, err := c.d.Decode(ud, s.UDH(), a)
+		d, err := c.d.Decode(ud, s.UDH, a)
 		if err != nil {
 			switch e := err.(type) {
 			case ucs2.ErrDanglingSurrogate:
@@ -110,5 +110,5 @@ func (c *Concatenator) Concatenate(segments []*tpdu.Deliver) (*Message, error) {
 	for _, t := range ts {
 		m = append(m, t...)
 	}
-	return &Message{string(m), segments[0].OA().Number(), segments}, nil
+	return &Message{string(m), segments[0].OA.Number(), segments}, nil
 }

@@ -48,7 +48,7 @@ func TestDecoderRegisterDecoder(t *testing.T) {
 		t.Fatal(err)
 	}
 	e := errors.New("called registered decoder")
-	f := func(src []byte) (tpdu.TPDU, error) {
+	f := func(src []byte) (interface{}, error) {
 		return nil, e
 	}
 	err = d.RegisterDecoder(tpdu.MtDeliver, tpdu.MT, f)
@@ -75,7 +75,7 @@ func TestDecoderDecode(t *testing.T) {
 		t.Fatal(err)
 	}
 	e := errors.New("called registered decoder")
-	f := func(src []byte) (tpdu.TPDU, error) {
+	f := func(src []byte) (interface{}, error) {
 		return nil, e
 	}
 	err = d.RegisterDecoder(tpdu.MtDeliver, tpdu.MT, f)
@@ -90,7 +90,7 @@ func TestDecoderDecode(t *testing.T) {
 		t.Errorf("unexpected TPDU returned on decode: got %v", p)
 	}
 	s := tpdu.Submit{}
-	f = func(src []byte) (tpdu.TPDU, error) {
+	f = func(src []byte) (interface{}, error) {
 		return &s, nil
 	}
 	err = d.RegisterDecoder(tpdu.MtSubmit, tpdu.MO, f)

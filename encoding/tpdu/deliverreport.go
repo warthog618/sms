@@ -7,70 +7,50 @@ package tpdu
 
 // DeliverReport represents a SMS-Deliver-Report PDU as defined in 3GPP TS 23.038 Section 9.2.2.1a.
 type DeliverReport struct {
-	BaseTPDU
-	fcs byte
-	pi  byte
+	TPDU
+	FCS byte
+	PI  byte
 }
 
 // NewDeliverReport creates a DeliverReport TPDU and initialises non-zero fields.
 func NewDeliverReport() *DeliverReport {
-	return &DeliverReport{BaseTPDU: BaseTPDU{firstOctet: byte(MtDeliver)}}
-}
-
-// FCS returns the DeliverReport fcs.
-func (d *DeliverReport) FCS() byte {
-	return d.fcs
-}
-
-// PI returns the DeliverReport pi.
-func (d *DeliverReport) PI() byte {
-	return d.pi
+	return &DeliverReport{TPDU: TPDU{FirstOctet: byte(MtDeliver)}}
 }
 
 // SetDCS sets the DeliverReport dcs field and the corresponding bit of the pi.
-func (d *DeliverReport) SetDCS(dcs DCS) {
-	d.pi = d.pi | 0x02
-	d.BaseTPDU.SetDCS(dcs)
-}
-
-// SetFCS sets the DeliverReport fcs field.
-func (d *DeliverReport) SetFCS(fcs byte) {
-	d.fcs = fcs
-}
-
-// SetPI sets the DeliverReport pi field.
-func (d *DeliverReport) SetPI(pi byte) {
-	d.pi = pi
+func (d *DeliverReport) SetDCS(dcs byte) {
+	d.PI = d.PI | 0x02
+	d.TPDU.DCS = dcs
 }
 
 // SetPID sets the DeliverReport pid field and the corresponding bit of the pi.
 func (d *DeliverReport) SetPID(pid byte) {
-	d.pi = d.pi | 0x01
-	d.BaseTPDU.SetPID(pid)
+	d.PI = d.PI | 0x01
+	d.TPDU.PID = pid
 }
 
 // SetUD sets the DeliverReport ud field and the corresponding bit of the pi.
 func (d *DeliverReport) SetUD(ud UserData) {
-	d.pi = d.pi | 0x04
-	d.BaseTPDU.SetUD(ud)
+	d.PI = d.PI | 0x04
+	d.TPDU.UD = ud
 }
 
 // SetUDH sets the User Data Header of the DeliverReport and the corresponding bit of the pi.
 func (d *DeliverReport) SetUDH(udh UserDataHeader) {
-	d.pi = d.pi | 0x04
-	d.BaseTPDU.SetUDH(udh)
+	d.PI = d.PI | 0x04
+	d.TPDU.SetUDH(udh)
 }
 
 // MarshalBinary marshals an SMS-Deliver-Report TPDU.
 func (d *DeliverReport) MarshalBinary() ([]byte, error) {
-	b := []byte{d.firstOctet, d.fcs, d.pi}
-	if d.pi&0x01 == 0x01 {
-		b = append(b, d.pid)
+	b := []byte{d.FirstOctet, d.FCS, d.PI}
+	if d.PI&0x01 == 0x01 {
+		b = append(b, d.PID)
 	}
-	if d.pi&0x02 == 0x02 {
-		b = append(b, d.dcs)
+	if d.PI&0x02 == 0x02 {
+		b = append(b, d.DCS)
 	}
-	if d.pi&0x4 == 0x4 {
+	if d.PI&0x4 == 0x4 {
 		ud, err := d.encodeUserData()
 		if err != nil {
 			return nil, EncodeError("ud", err)
@@ -85,33 +65,33 @@ func (d *DeliverReport) UnmarshalBinary(src []byte) error {
 	if len(src) < 1 {
 		return DecodeError("firstOctet", 0, ErrUnderflow)
 	}
-	d.firstOctet = src[0]
+	d.FirstOctet = src[0]
 	ri := 1
 	if len(src) <= ri {
 		return DecodeError("fcs", ri, ErrUnderflow)
 	}
-	d.fcs = src[ri]
+	d.FCS = src[ri]
 	ri++
 	if len(src) <= ri {
 		return DecodeError("pi", ri, ErrUnderflow)
 	}
-	d.pi = src[ri]
+	d.PI = src[ri]
 	ri++
-	if d.pi&0x01 == 0x01 {
+	if d.PI&0x01 == 0x01 {
 		if len(src) <= ri {
 			return DecodeError("pid", ri, ErrUnderflow)
 		}
-		d.pid = src[ri]
+		d.PID = src[ri]
 		ri++
 	}
-	if d.pi&0x02 == 0x02 {
+	if d.PI&0x02 == 0x02 {
 		if len(src) <= ri {
 			return DecodeError("dcs", ri, ErrUnderflow)
 		}
-		d.dcs = src[ri]
+		d.DCS = src[ri]
 		ri++
 	}
-	if d.pi&0x04 == 0x04 {
+	if d.PI&0x04 == 0x04 {
 		err := d.decodeUserData(src[ri:])
 		if err != nil {
 			return DecodeError("ud", ri, err)
@@ -120,7 +100,7 @@ func (d *DeliverReport) UnmarshalBinary(src []byte) error {
 	return nil
 }
 
-func decodeDeliverReport(src []byte) (TPDU, error) {
+func decodeDeliverReport(src []byte) (interface{}, error) {
 	d := NewDeliverReport()
 	if err := d.UnmarshalBinary(src); err != nil {
 		return nil, err

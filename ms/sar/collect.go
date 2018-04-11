@@ -54,7 +54,7 @@ func (c *Collector) Close() {
 // Collect adds a TPDU to the collection.
 // If all the components of a concatenated TPDU are available then they are returned.
 func (c *Collector) Collect(pdu *tpdu.Deliver) (d []*tpdu.Deliver, err error) {
-	segments, seqno, mref, ok := pdu.UDH().ConcatInfo()
+	segments, seqno, mref, ok := pdu.UDH.ConcatInfo()
 	if !ok || segments < 2 {
 		// short circuit single segment - no need for a pipe
 		return []*tpdu.Deliver{pdu}, nil
@@ -62,7 +62,7 @@ func (c *Collector) Collect(pdu *tpdu.Deliver) (d []*tpdu.Deliver, err error) {
 	if seqno < 1 || seqno > segments {
 		return nil, ErrReassemblyInconsistency
 	}
-	oa := pdu.OA()
+	oa := pdu.OA
 	key := fmt.Sprintf("%02x:%s:%d:%d", oa.TOA, oa.Addr, mref, segments)
 	c.Lock()
 	defer c.Unlock()

@@ -98,13 +98,13 @@ func TestConcatenate(t *testing.T) {
 	u1 := tpdu.NewDeliver()
 	dcs, _ := tpdu.DCS(0).WithAlphabet(tpdu.AlphaUCS2)
 	oa := tpdu.Address{TOA: 0x91, Addr: "1234"}
-	u1.SetDCS(dcs)
-	u1.SetOA(oa)
-	u1.SetUD([]byte{0xd8, 0x3d, 0xde, 0x01, 0xd8, 0x3d})
+	u1.DCS = byte(dcs)
+	u1.OA = oa
+	u1.UD = []byte{0xd8, 0x3d, 0xde, 0x01, 0xd8, 0x3d}
 	u2 := tpdu.NewDeliver()
-	u2.SetDCS(dcs)
-	u2.SetOA(oa)
-	u2.SetUD([]byte{0xde, 0x01, 0xd8, 0x3d, 0xde, 0x01})
+	u2.DCS = byte(dcs)
+	u2.OA = oa
+	u2.UD = []byte{0xde, 0x01, 0xd8, 0x3d, 0xde, 0x01}
 	d, _ := tpdu.NewUDDecoder()
 	c := message.NewConcatenator(d)
 	m, err := c.Concatenate([]*tpdu.Deliver{u1, u2})

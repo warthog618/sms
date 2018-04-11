@@ -36,7 +36,7 @@ func TestCollectorClose(t *testing.T) {
 		t.Fatalf("failed to create Collector")
 	}
 	d := tpdu.Deliver{}
-	d.SetOA(tpdu.Address{Addr: "1234", TOA: 0x91})
+	d.OA = tpdu.Address{Addr: "1234", TOA: 0x91}
 	d.SetUDH(tpdu.UserDataHeader{tpdu.InformationElement{ID: 0, Data: []byte{5, 2, 1}}})
 	c.Collect(&d)
 	c.Close() // with pipe active
@@ -197,7 +197,7 @@ func TestCollectorCollectExpiry(t *testing.T) {
 	for _, p := range expiredPatterns {
 		f := func(t *testing.T) {
 			in := tpdu.Deliver{}
-			in.SetOA(p.oa)
+			in.OA = p.oa
 			in.SetUDH(p.in)
 			out, err := c.Collect(&in)
 			if err != p.err {
@@ -213,7 +213,7 @@ func TestCollectorCollectExpiry(t *testing.T) {
 			for i, udh := range p.out {
 				if udh != nil {
 					r := tpdu.Deliver{}
-					r.SetOA(p.oa)
+					r.OA = p.oa
 					r.SetUDH(*udh)
 					expected[i] = &r
 				}
@@ -235,7 +235,7 @@ func TestCollectorCollectExpiry(t *testing.T) {
 
 func testCollect(t *testing.T, c *sar.Collector, p collectTestPattern) {
 	in := tpdu.Deliver{}
-	in.SetOA(p.oa)
+	in.OA = p.oa
 	in.SetUDH(p.in)
 	out, err := c.Collect(&in)
 	if err != p.err {
@@ -247,7 +247,7 @@ func testCollect(t *testing.T, c *sar.Collector, p collectTestPattern) {
 	}
 	for i, udh := range p.out {
 		r := tpdu.Deliver{}
-		r.SetOA(p.oa)
+		r.OA = p.oa
 		if udh != nil {
 			r.SetUDH(*udh)
 		}

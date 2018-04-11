@@ -61,20 +61,20 @@ func (e *Encoder) Encode(number, msg string) ([]tpdu.Submit, error) {
 	e.mutex.Lock()
 	if e.t != nil {
 		*s = *e.t
-		s.SetUDH(append(e.t.UDH(), udh...))
+		s.SetUDH(append(e.t.UDH, udh...))
 	} else {
 		s.SetUDH(udh)
 	}
 	if len(number) > 0 && number[0] == '+' {
 		number = number[1:]
 	}
-	s.SetDA(tpdu.Address{TOA: 0x80 | byte(tpdu.TonInternational<<4) | byte(tpdu.NpISDN), Addr: number})
-	dcs, err := s.DCS().WithAlphabet(alpha)
+	s.DA = tpdu.Address{TOA: 0x80 | byte(tpdu.TonInternational<<4) | byte(tpdu.NpISDN), Addr: number}
+	dcs, err := tpdu.DCS(s.DCS).WithAlphabet(alpha)
 	if err != nil {
 		// ignore the template dcs
 		dcs, _ = tpdu.DCS(0).WithAlphabet(alpha)
 	}
-	s.SetDCS(dcs)
+	s.DCS = byte(dcs)
 	segments := e.segment(d, s)
 	e.mutex.Unlock()
 	return segments, nil
@@ -92,13 +92,13 @@ func (e *Encoder) Encode8Bit(number string, d []byte) ([]tpdu.Submit, error) {
 	if len(number) > 0 && number[0] == '+' {
 		number = number[1:]
 	}
-	s.SetDA(tpdu.Address{TOA: 0x80 | byte(tpdu.TonInternational<<4) | byte(tpdu.NpISDN), Addr: number})
-	dcs, err := s.DCS().WithAlphabet(tpdu.Alpha8Bit)
+	s.DA = tpdu.Address{TOA: 0x80 | byte(tpdu.TonInternational<<4) | byte(tpdu.NpISDN), Addr: number}
+	dcs, err := tpdu.DCS(s.DCS).WithAlphabet(tpdu.Alpha8Bit)
 	if err != nil {
 		// ignore the template dcs
 		dcs, _ = tpdu.DCS(0).WithAlphabet(tpdu.Alpha8Bit)
 	}
-	s.SetDCS(dcs)
+	s.DCS = byte(dcs)
 	segments := e.segment(d, s)
 	e.mutex.Unlock()
 	return segments, nil
@@ -108,7 +108,7 @@ func (e *Encoder) segment(d []byte, s *tpdu.Submit) []tpdu.Submit {
 	segments := e.s.Segment(d, s)
 	for _, sg := range segments {
 		e.msgCount++
-		sg.SetMR(byte(e.msgCount))
+		sg.MR = byte(e.msgCount)
 	}
 	return segments
 }

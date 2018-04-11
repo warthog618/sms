@@ -16,7 +16,7 @@ type ValidityPeriod struct {
 	Format   ValidityPeriodFormat
 	Time     Timestamp     // for VpfAbsolute
 	Duration time.Duration // for VpfRelative and VpfEnhanced
-	Efi      byte          // enhanced functionality indicator - first octet of enhanced format
+	EFI      byte          // enhanced functionality indicator - first octet of enhanced format
 }
 
 // SetAbsolute seth the validity period to an absolute time.
@@ -24,7 +24,7 @@ func (v *ValidityPeriod) SetAbsolute(t Timestamp) {
 	v.Format = VpfAbsolute
 	v.Duration = 0
 	v.Time = t
-	v.Efi = 0
+	v.EFI = 0
 }
 
 // SetRelative sets the validity period to a relative time.
@@ -32,7 +32,7 @@ func (v *ValidityPeriod) SetRelative(d time.Duration) {
 	v.Format = VpfRelative
 	v.Duration = d
 	v.Time = Timestamp{}
-	v.Efi = 0
+	v.EFI = 0
 }
 
 // SetEnhanced sets the validity period to an enhnaced format as determined
@@ -41,7 +41,7 @@ func (v *ValidityPeriod) SetEnhanced(d time.Duration, efi byte) {
 	v.Format = VpfEnhanced
 	v.Duration = d
 	v.Time = Timestamp{}
-	v.Efi = efi
+	v.EFI = efi
 }
 
 // MarshalBinary marshals a ValidityPeriod.
@@ -50,12 +50,12 @@ func (v *ValidityPeriod) MarshalBinary() ([]byte, error) {
 	case VpfAbsolute:
 		return v.Time.MarshalBinary()
 	case VpfEnhanced:
-		evpf := EnhancedValidityPeriodFormat(v.Efi & 0x7)
+		evpf := EnhancedValidityPeriodFormat(v.EFI & 0x7)
 		if evpf > EvpfRelativeHHMMSS {
 			return nil, EncodeError("fi", ErrInvalid)
 		}
 		dst := make([]byte, 7)
-		dst[0] = v.Efi
+		dst[0] = v.EFI
 		switch evpf {
 		case EvpfRelative:
 			dst[1] = durationToRelative(v.Duration)
@@ -154,7 +154,7 @@ func (v *ValidityPeriod) unmarshalVPEnhanced(src []byte) (int, error) {
 			return used + 1, DecodeError("enhanced", i, ErrNonZero)
 		}
 	}
-	v.Efi = efi
+	v.EFI = efi
 	v.Duration = d
 	return 7, nil
 }

@@ -48,8 +48,8 @@ func TestVPSetEnhanced(t *testing.T) {
 	if v.Duration != seconds {
 		t.Errorf("duration is %v, expected %v", v.Duration, seconds)
 	}
-	if v.Efi != byte(efi) {
-		t.Errorf("efi is %x, expected %x", v.Efi, efi)
+	if v.EFI != byte(efi) {
+		t.Errorf("efi is %x, expected %x", v.EFI, efi)
 	}
 }
 
@@ -102,39 +102,39 @@ var marshalVPPatterns = []marshalVPPattern{
 	{"enhancedNotPresent",
 		tpdu.ValidityPeriod{
 			Format: tpdu.VpfEnhanced,
-			Efi:    byte(tpdu.EvpfNotPresent)},
+			EFI:    byte(tpdu.EvpfNotPresent)},
 		[]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 		nil},
 	{"enhancedRelative5m",
 		tpdu.ValidityPeriod{
 			Format: tpdu.VpfEnhanced,
-			Efi:    byte(tpdu.EvpfRelative)},
+			EFI:    byte(tpdu.EvpfRelative)},
 		[]byte{0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 		nil},
 	{"enhancedRelative10m",
 		tpdu.ValidityPeriod{
 			Format:   tpdu.VpfEnhanced,
-			Efi:      byte(tpdu.EvpfRelative),
+			EFI:      byte(tpdu.EvpfRelative),
 			Duration: 10 * time.Minute},
 		[]byte{0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00},
 		nil},
 	{"enhancedRelativeSeconds",
 		tpdu.ValidityPeriod{
 			Format:   tpdu.VpfEnhanced,
-			Efi:      byte(tpdu.EvpfRelativeSeconds),
+			EFI:      byte(tpdu.EvpfRelativeSeconds),
 			Duration: time.Hour},
 		[]byte{0x02, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00},
 		nil},
 	{"enhancedHHMMSS",
 		tpdu.ValidityPeriod{
 			Format:   tpdu.VpfEnhanced,
-			Efi:      byte(tpdu.EvpfRelativeHHMMSS),
+			EFI:      byte(tpdu.EvpfRelativeHHMMSS),
 			Duration: 3*time.Hour + 12*time.Minute + 45*time.Second,
 		},
 		[]byte{0x03, 0x30, 0x21, 0x54, 0x00, 0x00, 0x00},
 		nil},
 	{"invalid enhanced",
-		tpdu.ValidityPeriod{Format: tpdu.VpfEnhanced, Efi: 0xff},
+		tpdu.ValidityPeriod{Format: tpdu.VpfEnhanced, EFI: 0xff},
 		nil,
 		tpdu.EncodeError("fi", tpdu.ErrInvalid)},
 }
@@ -211,14 +211,14 @@ var unmarshalVPPatterns = []unmarshalVPPattern{
 		tpdu.VpfEnhanced, 7,
 		tpdu.ValidityPeriod{
 			Format: tpdu.VpfEnhanced,
-			Efi:    byte(tpdu.EvpfNotPresent)},
+			EFI:    byte(tpdu.EvpfNotPresent)},
 		nil},
 	{"enhancedRelative5m",
 		[]byte{0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 		tpdu.VpfEnhanced, 7,
 		tpdu.ValidityPeriod{
 			Format:   tpdu.VpfEnhanced,
-			Efi:      byte(tpdu.EvpfRelative),
+			EFI:      byte(tpdu.EvpfRelative),
 			Duration: 5 * time.Minute},
 		nil},
 	{"enhancedRelative10m",
@@ -226,7 +226,7 @@ var unmarshalVPPatterns = []unmarshalVPPattern{
 		tpdu.VpfEnhanced, 7,
 		tpdu.ValidityPeriod{
 			Format:   tpdu.VpfEnhanced,
-			Efi:      byte(tpdu.EvpfRelative),
+			EFI:      byte(tpdu.EvpfRelative),
 			Duration: 10 * time.Minute},
 		nil},
 	{"enhancedRelativeSeconds",
@@ -234,7 +234,7 @@ var unmarshalVPPatterns = []unmarshalVPPattern{
 		tpdu.VpfEnhanced, 7,
 		tpdu.ValidityPeriod{
 			Format:   tpdu.VpfEnhanced,
-			Efi:      byte(tpdu.EvpfRelativeSeconds),
+			EFI:      byte(tpdu.EvpfRelativeSeconds),
 			Duration: 255 * time.Second},
 		nil},
 	{"enhancedHHMMSS",
@@ -242,7 +242,7 @@ var unmarshalVPPatterns = []unmarshalVPPattern{
 		tpdu.VpfEnhanced, 7,
 		tpdu.ValidityPeriod{
 			Format:   tpdu.VpfEnhanced,
-			Efi:      byte(tpdu.EvpfRelativeHHMMSS),
+			EFI:      byte(tpdu.EvpfRelativeHHMMSS),
 			Duration: 3*time.Hour + 12*time.Minute + 45*time.Second,
 		},
 		nil},

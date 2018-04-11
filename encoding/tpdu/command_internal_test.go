@@ -22,20 +22,20 @@ type marshalCommandTestPattern struct {
 var marshalCommandTestPatterns = []marshalCommandTestPattern{
 	{"command",
 		Command{
-			BaseTPDU: BaseTPDU{firstOctet: 2,
-				pid: 0xab, ud: []byte("a command")},
-			mr: 0x42, ct: 0x89, mn: 0x34,
-			da: Address{Addr: "6391", TOA: 0x91},
+			TPDU: TPDU{FirstOctet: 2,
+				PID: 0xab, UD: []byte("a command")},
+			MR: 0x42, CT: 0x89, MN: 0x34,
+			DA: Address{Addr: "6391", TOA: 0x91},
 		},
 		[]byte{0x02, 0x42, 0xab, 0x89, 0x34, 0x04, 0x91, 0x36, 0x19, 0x09, 0x61,
 			0x20, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64},
 		nil},
 	{"bad da",
 		Command{
-			BaseTPDU: BaseTPDU{firstOctet: 2,
-				pid: 0xab, ud: []byte("a command")},
-			mr: 0x42, ct: 0x89, mn: 0x34,
-			da: Address{Addr: "d391", TOA: 0x91},
+			TPDU: TPDU{FirstOctet: 2,
+				PID: 0xab, UD: []byte("a command")},
+			MR: 0x42, CT: 0x89, MN: 0x34,
+			DA: Address{Addr: "d391", TOA: 0x91},
 		},
 		nil,
 		EncodeError("da.addr", semioctet.ErrInvalidDigit('d'))},
@@ -65,41 +65,41 @@ var unmarshalCommandTestPatterns = []unmarshalCommandTestPattern{
 	{"command", []byte{0x02, 0x42, 0xab, 0x89, 0x34, 0x04, 0x91, 0x36, 0x19, 0x09, 0x61,
 		0x20, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64},
 		Command{
-			BaseTPDU: BaseTPDU{firstOctet: 2, dcs: 0x04,
-				pid: 0xab, ud: []byte("a command")},
-			mr: 0x42, ct: 0x89, mn: 0x34,
-			da: Address{Addr: "6391", TOA: 0x91},
+			TPDU: TPDU{FirstOctet: 2, DCS: 0x04,
+				PID: 0xab, UD: []byte("a command")},
+			MR: 0x42, CT: 0x89, MN: 0x34,
+			DA: Address{Addr: "6391", TOA: 0x91},
 		},
 		nil},
 	{"underflow fo", []byte{}, Command{}, DecodeError("firstOctet", 0, ErrUnderflow)},
 	{"underflow mr", []byte{0x02},
-		Command{BaseTPDU: BaseTPDU{firstOctet: 2}},
+		Command{TPDU: TPDU{FirstOctet: 2}},
 		DecodeError("mr", 1, ErrUnderflow)},
 	{"underflow pid", []byte{0x02, 0x42},
 		Command{
-			BaseTPDU: BaseTPDU{firstOctet: 2},
-			mr:       0x42},
+			TPDU: TPDU{FirstOctet: 2},
+			MR:   0x42},
 		DecodeError("pid", 2, ErrUnderflow)},
 	{"underflow ct", []byte{0x02, 0x42, 0xab},
 		Command{
-			BaseTPDU: BaseTPDU{firstOctet: 2, pid: 0xab},
-			mr:       0x42},
+			TPDU: TPDU{FirstOctet: 2, PID: 0xab},
+			MR:   0x42},
 		DecodeError("ct", 3, ErrUnderflow)},
 	{"underflow mn", []byte{0x02, 0x42, 0xab, 0x89},
 		Command{
-			BaseTPDU: BaseTPDU{firstOctet: 2, pid: 0xab},
-			mr:       0x42, ct: 0x89},
+			TPDU: TPDU{FirstOctet: 2, PID: 0xab},
+			MR:   0x42, CT: 0x89},
 		DecodeError("mn", 4, ErrUnderflow)},
 	{"underflow da", []byte{0x02, 0x42, 0xab, 0x89, 0x34, 0x04, 0x91, 0x36, 0xF9, 0x09},
 		Command{
-			BaseTPDU: BaseTPDU{firstOctet: 2, pid: 0xab},
-			mr:       0x42, ct: 0x89, mn: 0x34},
+			TPDU: TPDU{FirstOctet: 2, PID: 0xab},
+			MR:   0x42, CT: 0x89, MN: 0x34},
 		DecodeError("da.addr", 7, ErrUnderflow)},
 	{"underflow ud", []byte{0x02, 0x42, 0xab, 0x89, 0x34, 0x04, 0x91, 0x36, 0x19},
 		Command{
-			BaseTPDU: BaseTPDU{firstOctet: 2, pid: 0xab, dcs: 0x04},
-			mr:       0x42, ct: 0x89, mn: 0x34,
-			da: Address{Addr: "6391", TOA: 0x91},
+			TPDU: TPDU{FirstOctet: 2, PID: 0xab, DCS: 0x04},
+			MR:   0x42, CT: 0x89, MN: 0x34,
+			DA: Address{Addr: "6391", TOA: 0x91},
 		},
 		DecodeError("ud.udl", 9, ErrUnderflow)},
 }
@@ -155,7 +155,7 @@ func testDecodeCommand(t *testing.T, cd ConcreteDecoder) {
 		if !ok {
 			t.Error("returned unexpected tpdu type")
 		}
-		if string(deli.UD()) != "a command" {
+		if string(deli.UD) != "a command" {
 			t.Error("returned unexpected tpdu user data")
 		}
 	}

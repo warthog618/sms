@@ -23,51 +23,19 @@ func TestNewDeliverReport(t *testing.T) {
 	}
 }
 
-func TestDeliverReportSetFCS(t *testing.T) {
-	// also tests DeliverReport.FCS
-	d := tpdu.DeliverReport{}
-	m := d.FCS()
-	if m != 0 {
-		t.Errorf("initial fcs should be 0")
-	}
-	for _, p := range []byte{0x00, 0xab, 0x00, 0xff} {
-		d.SetFCS(p)
-		m = d.FCS()
-		if m != p {
-			t.Errorf("expected fcs %d, got %d", p, m)
-		}
-	}
-}
-
-func TestDeliverReportSetPI(t *testing.T) {
-	// also tests DeliverReport.PI
-	d := tpdu.DeliverReport{}
-	m := d.PI()
-	if m != 0 {
-		t.Errorf("initial pi should be 0")
-	}
-	for _, p := range []byte{0x00, 0xab, 0x00, 0xff} {
-		d.SetPI(p)
-		m = d.PI()
-		if m != p {
-			t.Errorf("expected pi %d, got %d", p, m)
-		}
-	}
-}
-
 func TestDeliverReportSetDCS(t *testing.T) {
 	b := tpdu.DeliverReport{}
-	pi := b.PI()
+	pi := b.PI
 	if pi != 0 {
 		t.Errorf("initial pi should be 0")
 	}
-	for _, p := range []tpdu.DCS{0x00, 0xab, 0x00, 0xff} {
+	for _, p := range []byte{0x00, 0xab, 0x00, 0xff} {
 		b.SetDCS(p)
-		d := b.DCS()
+		d := b.DCS
 		if d != p {
 			t.Errorf("expected dcs %d, got %d", p, d)
 		}
-		pi = b.PI()
+		pi = b.PI
 		if pi&0x02 == 0x00 {
 			t.Errorf("expected pi 0x02, got 0x%02x", pi)
 		}
@@ -76,17 +44,17 @@ func TestDeliverReportSetDCS(t *testing.T) {
 
 func TestDeliverReportSetPID(t *testing.T) {
 	b := tpdu.DeliverReport{}
-	pi := b.PI()
+	pi := b.PI
 	if pi != 0 {
 		t.Errorf("initial pi should be 0")
 	}
 	for _, p := range []byte{0x00, 0xab, 0x00, 0xff} {
 		b.SetPID(p)
-		d := b.PID()
+		d := b.PID
 		if d != p {
 			t.Errorf("expected pid %d, got %d", p, d)
 		}
-		pi = b.PI()
+		pi = b.PI
 		if pi&0x01 == 0x00 {
 			t.Errorf("expected pi 0x01, got 0x%02x", pi)
 		}
@@ -95,17 +63,17 @@ func TestDeliverReportSetPID(t *testing.T) {
 
 func TestDeliverReportSetUD(t *testing.T) {
 	b := tpdu.DeliverReport{}
-	pi := b.PI()
+	pi := b.PI
 	if pi != 0 {
 		t.Errorf("initial pi should be 0")
 	}
 	for _, p := range []byte{0x00, 0xab, 0x00, 0xff} {
 		b.SetUD([]byte{p})
-		d := b.UD()
+		d := b.UD
 		if !bytes.Equal(d, []byte{p}) {
 			t.Errorf("expected ud %d, got %d", p, d)
 		}
-		pi = b.PI()
+		pi = b.PI
 		if pi&0x04 == 0x00 {
 			t.Errorf("expected pi 0x01, got 0x%02x", pi)
 		}
@@ -114,18 +82,18 @@ func TestDeliverReportSetUD(t *testing.T) {
 
 func TestDeliverReportSetUDH(t *testing.T) {
 	b := tpdu.DeliverReport{}
-	pi := b.PI()
+	pi := b.PI
 	if pi != 0 {
 		t.Errorf("initial pi should be 0")
 	}
 	for _, p := range []tpdu.UserDataHeader{{
 		tpdu.InformationElement{ID: 1, Data: []byte{1, 2, 3}}}} {
 		b.SetUDH(p)
-		d := b.UDH()
+		d := b.UDH
 		if !assert.Equal(t, d, p) {
 			t.Errorf("expected udh %d, got %d", p, d)
 		}
-		pi = b.PI()
+		pi = b.PI
 		if pi&0x04 == 0x00 {
 			t.Errorf("expected pi 0x01, got 0x%02x", pi)
 		}

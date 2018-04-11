@@ -7,20 +7,15 @@ package tpdu
 
 // Submit represents a SMS-Submit PDU as defined in 3GPP TS 23.038 Section 9.2.2.2.
 type Submit struct {
-	BaseTPDU
-	mr byte
-	da Address
-	vp ValidityPeriod
+	TPDU
+	MR byte
+	DA Address
+	VP ValidityPeriod
 }
 
 // NewSubmit creates a Submit TPDU and initialises non-zero fields.
 func NewSubmit() *Submit {
-	return &Submit{BaseTPDU: BaseTPDU{firstOctet: byte(MtSubmit)}}
-}
-
-// DA returns the Submit da.
-func (s *Submit) DA() Address {
-	return s.da
+	return &Submit{TPDU: TPDU{FirstOctet: byte(MtSubmit)}}
 }
 
 // MaxUDL returns the maximum number of octets that can be encoded into the UD.
@@ -29,44 +24,24 @@ func (s *Submit) MaxUDL() int {
 	return 140
 }
 
-// MR returns the Submit mr.
-func (s *Submit) MR() byte {
-	return s.mr
-}
-
-// SetDA sets the Submit oa field.
-func (s *Submit) SetDA(da Address) {
-	s.da = da
-}
-
-// SetMR sets the Submit mr field.
-func (s *Submit) SetMR(mr byte) {
-	s.mr = mr
-}
-
 // SetVP sets the validity period and the corresponding VPF bits
 // in the firstOctet.
 func (s *Submit) SetVP(vp ValidityPeriod) {
-	s.firstOctet = s.firstOctet&^0x0c | byte(vp.Format<<2)
-	s.vp = vp
-}
-
-// VP returns the Submit vp.
-func (s *Submit) VP() ValidityPeriod {
-	return s.vp
+	s.FirstOctet = s.FirstOctet&^0x0c | byte(vp.Format<<2)
+	s.VP = vp
 }
 
 // MarshalBinary marshals an SMS-Submit TPDU.
 func (s *Submit) MarshalBinary() ([]byte, error) {
-	b := []byte{s.firstOctet, s.mr}
-	da, err := s.da.MarshalBinary()
+	b := []byte{s.FirstOctet, s.MR}
+	da, err := s.DA.MarshalBinary()
 	if err != nil {
 		return nil, EncodeError("da", err)
 	}
 	b = append(b, da...)
-	b = append(b, s.pid, s.dcs)
-	if s.vp.Format != VpfNotPresent {
-		vp, verr := s.vp.MarshalBinary()
+	b = append(b, s.PID, s.DCS)
+	if s.VP.Format != VpfNotPresent {
+		vp, verr := s.VP.MarshalBinary()
 		if verr != nil {
 			return nil, EncodeError("vp", verr)
 		}
@@ -87,14 +62,14 @@ func (s *Submit) UnmarshalBinary(src []byte) error {
 	if len(src) < 1 {
 		return DecodeError("firstOctet", 0, ErrUnderflow)
 	}
-	s.firstOctet = src[0]
+	s.FirstOctet = src[0]
 	ri := 1
 	if len(src) <= ri {
 		return DecodeError("mr", ri, ErrUnderflow)
 	}
-	s.mr = src[ri]
+	s.MR = src[ri]
 	ri++
-	n, err := s.da.UnmarshalBinary(src[ri:])
+	n, err := s.DA.UnmarshalBinary(src[ri:])
 	if err != nil {
 		return DecodeError("da", ri, err)
 	}
@@ -102,15 +77,15 @@ func (s *Submit) UnmarshalBinary(src []byte) error {
 	if len(src) <= ri {
 		return DecodeError("pid", ri, ErrUnderflow)
 	}
-	s.pid = src[ri]
+	s.PID = src[ri]
 	ri++
 	if len(src) <= ri {
 		return DecodeError("dcs", ri, ErrUnderflow)
 	}
-	s.dcs = src[ri]
+	s.DCS = src[ri]
 	ri++
-	vpf := ValidityPeriodFormat((s.firstOctet >> 3) & 0x3)
-	n, err = s.vp.UnmarshalBinary(src[ri:], vpf)
+	vpf := ValidityPeriodFormat((s.FirstOctet >> 3) & 0x3)
+	n, err = s.VP.UnmarshalBinary(src[ri:], vpf)
 	if err != nil {
 		return DecodeError("vp", ri, err)
 	}
@@ -122,7 +97,7 @@ func (s *Submit) UnmarshalBinary(src []byte) error {
 	return nil
 }
 
-func decodeSubmit(src []byte) (TPDU, error) {
+func decodeSubmit(src []byte) (interface{}, error) {
 	s := NewSubmit()
 	if err := s.UnmarshalBinary(src); err != nil {
 		return nil, err

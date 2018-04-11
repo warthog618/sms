@@ -13,100 +13,55 @@ const (
 	udhiMask byte = 0x40
 )
 
-// BaseTPDU is the base type for SMS TPDUs.
-type BaseTPDU struct {
-	firstOctet byte
-	pid        byte
-	dcs        byte
-	udh        UserDataHeader
-	// ud contains the short message from the User Data.
+// TPDU is the base type for SMS TPDUs.
+type TPDU struct {
+	FirstOctet byte
+	PID        byte
+	DCS        byte
+	UDH        UserDataHeader
+	// UD contains the short message from the User Data.
 	// It does not include the User Data Header, which is provided in udh.
-	// The interpretation of ud depends on the Alphabet.
-	// For Alpha7Bit, ud is an array of GSM7 septets, each septet stored in the lower 7 bits of a byte.
+	// The interpretation of UD depends on the Alphabet.
+	// For Alpha7Bit, UD is an array of GSM7 septets, each septet stored in the lower 7 bits of a byte.
 	//  These have NOT been converted to the corresponding UTF8.
 	//  Use the gsm7 package to convert to UTF8.
-	// For AlphaUCS2, ud is an array of UCS2 characters packed into a byte array in Big Endian.
+	// For AlphaUCS2, UD is an array of UCS2 characters packed into a byte array in Big Endian.
 	//  These have NOT been converted to the corresponding UTF8.
 	//  Use the usc2 package to convert to UTF8.
-	// For Alpha8Bit, ud contains the raw octets.
-	ud UserData
+	// For Alpha8Bit, UD contains the raw octets.
+	UD UserData
 }
 
 // Alphabet returns the alphabet field from the DCS of the SMS TPDU.
-func (p *BaseTPDU) Alphabet() (Alphabet, error) {
-	return DCS(p.dcs).Alphabet()
-}
-
-// DCS returns the TPDU dcs field.
-func (p *BaseTPDU) DCS() DCS {
-	return DCS(p.dcs)
-}
-
-// FirstOctet returns the TPDU firstOctet field.
-func (p *BaseTPDU) FirstOctet() byte {
-	return p.firstOctet
-}
-
-// PID returns the TPDU pid field.
-func (p *BaseTPDU) PID() byte {
-	return p.pid
+func (p *TPDU) Alphabet() (Alphabet, error) {
+	return DCS(p.DCS).Alphabet()
 }
 
 // MTI returns the MessageType from the first octet of the SMS TPDU.
-func (p *BaseTPDU) MTI() MessageType {
-	return MessageType(p.firstOctet & 0x3)
-}
-
-// SetDCS sets the TPDU dcs field.
-func (p *BaseTPDU) SetDCS(dcs DCS) {
-	p.dcs = byte(dcs)
-}
-
-// SetFirstOctet sets the TPDU firstOctet field.
-func (p *BaseTPDU) SetFirstOctet(fo byte) {
-	p.firstOctet = fo
-}
-
-// SetPID sets the TPDU pid field.
-func (p *BaseTPDU) SetPID(pid byte) {
-	p.pid = pid
-}
-
-// SetUD sets the TPDU ud field.
-func (p *BaseTPDU) SetUD(ud UserData) {
-	p.ud = ud
+func (p *TPDU) MTI() MessageType {
+	return MessageType(p.FirstOctet & 0x3)
 }
 
 // SetUDH sets the User Data Header of the TPDU.
-func (p *BaseTPDU) SetUDH(udh UserDataHeader) {
+func (p *TPDU) SetUDH(udh UserDataHeader) {
 	if udh == nil {
-		p.udh = nil
-		p.firstOctet = (p.firstOctet &^ udhiMask)
+		p.UDH = nil
+		p.FirstOctet = (p.FirstOctet &^ udhiMask)
 	} else {
-		p.udh = udh
-		p.firstOctet = (p.firstOctet | udhiMask)
+		p.UDH = udh
+		p.FirstOctet = (p.FirstOctet | udhiMask)
 	}
-}
-
-// UD returns the User Data.
-func (p *BaseTPDU) UD() UserData {
-	return p.ud
-}
-
-// UDH returns the User Data Header.
-func (p *BaseTPDU) UDH() UserDataHeader {
-	return p.udh
 }
 
 // UDHI returns the User Data Header Indicator bit from the SMS TPDU first octet.
 // This is generally the same as testing the length of the udh - unless the dcs
 // has been intentionally overwritten to create an inconsistency.
-func (p *BaseTPDU) UDHI() bool {
-	return p.firstOctet&udhiMask != 0
+func (p *TPDU) UDHI() bool {
+	return p.FirstOctet&udhiMask != 0
 }
 
 // decodeUserData unmarshals the User Data field from the binary src.
-func (p *BaseTPDU) decodeUserData(src []byte) error {
+func (p *TPDU) decodeUserData(src []byte) error {
 	if len(src) < 1 {
 		return DecodeError("udl", 0, ErrUnderflow)
 	}
@@ -144,7 +99,7 @@ func (p *BaseTPDU) decodeUserData(src []byte) error {
 		ri += udhl
 	}
 	if ri == len(src) {
-		p.udh = udh
+		p.UDH = udh
 		return nil
 	}
 	switch alphabet {
@@ -153,16 +108,16 @@ func (p *BaseTPDU) decodeUserData(src []byte) error {
 		if err != nil {
 			return DecodeError("sm", ri, err)
 		}
-		p.ud = sm
+		p.UD = sm
 	case AlphaUCS2:
 		if len(src[ri:])&0x01 == 0x01 {
 			return DecodeError("sm", ri, ErrOverlength)
 		}
 		fallthrough
 	case Alpha8Bit:
-		p.ud = append([]byte(nil), src[ri:]...)
+		p.UD = append([]byte(nil), src[ri:]...)
 	}
-	p.udh = udh
+	p.UDH = udh
 	return nil
 }
 
@@ -199,24 +154,24 @@ func decode7Bit(sml, udhl int, src []byte) ([]byte, error) {
 // For other alphabet values the User Data is encoded as is.
 // No checks of encoded size are performed here as that depends on concrete TPDU type,
 // and that can check the length of the returned b.
-func (p *BaseTPDU) encodeUserData() (b []byte, err error) {
-	udh, err := p.udh.MarshalBinary()
+func (p *TPDU) encodeUserData() (b []byte, err error) {
+	udh, err := p.UDH.MarshalBinary()
 	if err != nil {
 		return nil, EncodeError("udh", err)
 	}
-	ud := p.ud
+	ud := p.UD
 	alphabet, err := p.Alphabet()
 	if err != nil {
 		return nil, EncodeError("alphabet", err)
 	}
-	udl := len(p.ud) // assume octets
+	udl := len(p.UD) // assume octets
 	switch alphabet {
 	case Alpha7Bit:
 		fillBits := 0
 		if dangling := len(udh) % 7; dangling != 0 {
 			fillBits = 7 - dangling
 		}
-		ud = gsm7.Pack7Bit(p.ud, fillBits)
+		ud = gsm7.Pack7Bit(p.UD, fillBits)
 		// udl is in septets so convert
 		if udl > 0 {
 			udl = udl + (len(udh)*8+fillBits)/7

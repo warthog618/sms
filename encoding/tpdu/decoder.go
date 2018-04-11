@@ -6,8 +6,6 @@
 package tpdu
 
 import (
-	"encoding"
-
 	"github.com/pkg/errors"
 )
 
@@ -31,22 +29,8 @@ func NewDecoder(opts ...DecoderOption) (*Decoder, error) {
 	return d, nil
 }
 
-// TPDU represents the minimal interface provided by TPDU implementations.
-type TPDU interface {
-	encoding.BinaryMarshaler
-	encoding.BinaryUnmarshaler
-	// MTI provides a clue as to the underlying TPDU type.
-	MTI() MessageType
-	// Alphabet defines how the UD field is encoded.
-	Alphabet() (Alphabet, error)
-	// UD provides the UserData, the format of which depends on the Alphabet.
-	UD() UserData
-	// UDH provides the UserDataHeader, which is optional and so may be empty.
-	UDH() UserDataHeader
-}
-
 // ConcreteDecoder is a function that decodes a binary TPDU into a particular TPDU struct.
-type ConcreteDecoder func([]byte) (TPDU, error)
+type ConcreteDecoder func([]byte) (interface{}, error)
 
 // RegisterDecoder registers a decoder for the given MessageType and Direction.
 func (d *Decoder) RegisterDecoder(mt MessageType, drn Direction, f ConcreteDecoder) error {
@@ -64,7 +48,7 @@ func (d *Decoder) RegisterDecoder(mt MessageType, drn Direction, f ConcreteDecod
 // TPDUs depending on whether the SMS is being sent to the MS, or is from the MS.)
 //
 // The reverse of this operation is MarshalBinary on the returned TPDU.
-func (d *Decoder) Decode(src []byte, drn Direction) (TPDU, error) {
+func (d *Decoder) Decode(src []byte, drn Direction) (interface{}, error) {
 	if len(src) < 1 {
 		return nil, DecodeError("firstOctet", 0, ErrUnderflow)
 	}

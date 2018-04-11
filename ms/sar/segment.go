@@ -45,13 +45,13 @@ func (s *Segmenter) Segment(msg []byte, t *tpdu.Submit) []tpdu.Submit {
 		return nil
 	}
 	alpha, _ := t.Alphabet()
-	udhl := t.UDH().UDHL()
+	udhl := t.UDH.UDHL()
 	bs := maxSML(t.MaxUDL(), udhl, alpha)
 	if len(msg) <= bs {
 		// single segment
 		pdus := make([]tpdu.Submit, 1)
 		pdus[0] = *t
-		pdus[0].SetUD(msg)
+		pdus[0].UD = msg
 		return pdus
 	}
 	// allow for concat entry in UDH
@@ -85,8 +85,8 @@ func (s *Segmenter) Segment(msg []byte, t *tpdu.Submit) []tpdu.Submit {
 			ie.ID = 0
 			ie.Data = []byte{byte(msgCount), byte(count), byte(i + 1)}
 		}
-		sg.SetUDH(append(t.UDH(), ie))
-		sg.SetUD(chunks[i])
+		sg.SetUDH(append(t.UDH, ie))
+		sg.UD = chunks[i]
 	}
 	return pdus
 }

@@ -22,12 +22,12 @@ func TestNewSegmenter(t *testing.T) {
 
 type segmentInPattern struct {
 	msg []byte
-	dcs int
+	dcs byte
 	udh tpdu.UserDataHeader
 }
 
 type segmentOutPattern struct {
-	dcs int
+	dcs byte
 	udh tpdu.UserDataHeader
 	ud  tpdu.UserData
 }
@@ -64,22 +64,22 @@ func TestSegment(t *testing.T) {
 			},
 		},
 		{"8bit",
-			segmentInPattern{[]byte("hello"), int(tpdu.Alpha8Bit << 2), nil},
+			segmentInPattern{[]byte("hello"), byte(tpdu.Alpha8Bit << 2), nil},
 			[]segmentOutPattern{{4, nil, []byte("hello")}}},
 		{"ucs2",
-			segmentInPattern{[]byte("hello!"), int(tpdu.AlphaUCS2 << 2), nil},
+			segmentInPattern{[]byte("hello!"), byte(tpdu.AlphaUCS2 << 2), nil},
 			[]segmentOutPattern{{8, nil, []byte("hello!")}}},
 		{"reserved",
-			segmentInPattern{[]byte("hello"), int(tpdu.AlphaReserved << 2), nil},
+			segmentInPattern{[]byte("hello"), byte(tpdu.AlphaReserved << 2), nil},
 			[]segmentOutPattern{{12, nil, []byte("hello")}}},
 		{"7bit udh",
 			segmentInPattern{[]byte("hello"), 0, tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}}},
 			[]segmentOutPattern{{0, tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}}, []byte("hello")}}},
 		{"8bit udh",
-			segmentInPattern{[]byte("hello"), int(tpdu.Alpha8Bit << 2), tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}}},
+			segmentInPattern{[]byte("hello"), byte(tpdu.Alpha8Bit << 2), tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}}},
 			[]segmentOutPattern{{4, tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}}, []byte("hello")}}},
 		{"ucs udh",
-			segmentInPattern{[]byte("hello"), int(tpdu.AlphaUCS2 << 2), tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}}},
+			segmentInPattern{[]byte("hello"), byte(tpdu.AlphaUCS2 << 2), tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}}},
 			[]segmentOutPattern{{8, tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}}, []byte("hello")}}},
 		{"two segment 7bit udh",
 			segmentInPattern{[]byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you might think"),
@@ -92,7 +92,7 @@ func TestSegment(t *testing.T) {
 		},
 		{"two segment 8bit udh",
 			segmentInPattern{[]byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you might think"),
-				int(tpdu.Alpha8Bit << 2), tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}}},
+				byte(tpdu.Alpha8Bit << 2), tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}}},
 			[]segmentOutPattern{
 				{4, tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}, tpdu.InformationElement{ID: 0, Data: []byte{4, 2, 1}}},
 					[]byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 charac")},
@@ -101,7 +101,7 @@ func TestSegment(t *testing.T) {
 		},
 		{"two segment ucs2 udh",
 			segmentInPattern{[]byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you might think"),
-				int(tpdu.AlphaUCS2 << 2), tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}}},
+				byte(tpdu.AlphaUCS2 << 2), tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}}},
 			[]segmentOutPattern{
 				{8, tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}, tpdu.InformationElement{ID: 0, Data: []byte{5, 2, 1}}},
 					[]byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 chara")},
@@ -113,7 +113,7 @@ func TestSegment(t *testing.T) {
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			tmpl := tpdu.Submit{}
-			tmpl.SetDCS(tpdu.DCS(p.in.dcs))
+			tmpl.DCS = p.in.dcs
 			tmpl.SetUDH(p.in.udh)
 			out := s.Segment(p.in.msg, &tmpl)
 			expected := make([]tpdu.Submit, len(p.out))
@@ -121,9 +121,9 @@ func TestSegment(t *testing.T) {
 				expected = nil
 			}
 			for i, o := range p.out {
-				expected[i].SetDCS(tpdu.DCS(o.dcs))
+				expected[i].DCS = o.dcs
 				expected[i].SetUDH(o.udh)
-				expected[i].SetUD(o.ud)
+				expected[i].UD = o.ud
 			}
 			assert.Equal(t, expected, out)
 		}
@@ -177,7 +177,7 @@ func TestSegmentWide(t *testing.T) {
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			tmpl := tpdu.Submit{}
-			tmpl.SetDCS(tpdu.DCS(p.in.dcs))
+			tmpl.DCS = p.in.dcs
 			tmpl.SetUDH(p.in.udh)
 			out := s.Segment(p.in.msg, &tmpl)
 			expected := make([]tpdu.Submit, len(p.out))
@@ -185,9 +185,9 @@ func TestSegmentWide(t *testing.T) {
 				expected = nil
 			}
 			for i, o := range p.out {
-				expected[i].SetDCS(tpdu.DCS(o.dcs))
+				expected[i].DCS = o.dcs
 				expected[i].SetUDH(o.udh)
-				expected[i].SetUD(o.ud)
+				expected[i].UD = o.ud
 			}
 			assert.Equal(t, expected, out)
 		}

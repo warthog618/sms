@@ -24,34 +24,34 @@ type marshalDeliverTestPattern struct {
 var marshalDeliverTestPatterns = []marshalDeliverTestPattern{
 	{"haha",
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4, ud: []byte("Hahahaha")},
-			oa:       Address{Addr: "6391", TOA: 0x91},
-			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
+			TPDU: TPDU{FirstOctet: 4, UD: []byte("Hahahaha")},
+			OA:   Address{Addr: "6391", TOA: 0x91},
+			SCTS: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))}},
 		[]byte{0x04, 0x04, 0x91, 0x36, 0x19, 0x00, 0x00, 0x51, 0x50, 0x71, 0x32, 0x20,
 			0x05, 0x23, 0x08, 0xC8, 0x30, 0x3A, 0x8C, 0x0E, 0xA3, 0xC3},
 		nil},
 	{"bad oa",
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4, ud: []byte("Hahahaha")},
-			oa:       Address{Addr: "d391", TOA: 0x91},
-			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
+			TPDU: TPDU{FirstOctet: 4, UD: []byte("Hahahaha")},
+			OA:   Address{Addr: "d391", TOA: 0x91},
+			SCTS: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))}},
 		nil,
 		EncodeError("oa.addr", semioctet.ErrInvalidDigit('d'))},
 	{"bad scts",
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4, ud: []byte("Hahahaha")},
-			oa:       Address{Addr: "6391", TOA: 0x91},
-			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
+			TPDU: TPDU{FirstOctet: 4, UD: []byte("Hahahaha")},
+			OA:   Address{Addr: "6391", TOA: 0x91},
+			SCTS: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 24*3600))}},
 		nil,
 		EncodeError("scts", bcd.ErrInvalidInteger(96))},
 	{"bad ud",
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4, dcs: 0x80, ud: []byte("Hahahaha")},
-			oa:       Address{Addr: "6391", TOA: 0x91},
-			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
+			TPDU: TPDU{FirstOctet: 4, DCS: 0x80, UD: []byte("Hahahaha")},
+			OA:   Address{Addr: "6391", TOA: 0x91},
+			SCTS: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))}},
 		nil,
 		EncodeError("ud.alphabet", ErrInvalid)},
@@ -81,42 +81,42 @@ var unmarshalDeliverTestPatterns = []unmarshalDeliverTestPattern{
 	{"haha", []byte{0x04, 0x04, 0x91, 0x36, 0x19, 0x00, 0x00, 0x51, 0x50, 0x71, 0x32,
 		0x20, 0x05, 0x23, 0x08, 0xC8, 0x30, 0x3A, 0x8C, 0x0E, 0xA3, 0xC3},
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4, ud: []byte("Hahahaha")},
-			oa:       Address{Addr: "6391", TOA: 0x91},
-			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
+			TPDU: TPDU{FirstOctet: 4, UD: []byte("Hahahaha")},
+			OA:   Address{Addr: "6391", TOA: 0x91},
+			SCTS: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))}},
 		nil},
 	{"underflow fo", []byte{}, Deliver{}, DecodeError("firstOctet", 0, ErrUnderflow)},
 	{"underflow oa", []byte{0x04, 0x04, 0x91, 0x36, 0xF9, 0x00, 0x00},
-		Deliver{BaseTPDU: BaseTPDU{firstOctet: 4}},
+		Deliver{TPDU: TPDU{FirstOctet: 4}},
 		DecodeError("oa.addr", 3, ErrUnderflow)},
 	{"underflow pid", []byte{0x04, 0x04, 0x91, 0x36, 0x19},
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4},
-			oa:       Address{Addr: "6391", TOA: 0x91}},
+			TPDU: TPDU{FirstOctet: 4},
+			OA:   Address{Addr: "6391", TOA: 0x91}},
 		DecodeError("pid", 5, ErrUnderflow)},
 	{"underflow dcs", []byte{0x04, 0x04, 0x91, 0x36, 0x19, 0x00},
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4},
-			oa:       Address{Addr: "6391", TOA: 0x91}},
+			TPDU: TPDU{FirstOctet: 4},
+			OA:   Address{Addr: "6391", TOA: 0x91}},
 		DecodeError("dcs", 6, ErrUnderflow)},
 	{"underflow scts", []byte{0x04, 0x04, 0x91, 0x36, 0x19, 0x00, 0x00, 0x51},
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4},
-			oa:       Address{Addr: "6391", TOA: 0x91}},
+			TPDU: TPDU{FirstOctet: 4},
+			OA:   Address{Addr: "6391", TOA: 0x91}},
 		DecodeError("scts", 7, ErrUnderflow)},
 	{"bad scts", []byte{0x04, 0x04, 0x91, 0x36, 0x19, 0x00, 0x00, 0x51, 0x50, 0xf1,
 		0x32, 0x20, 0x05, 0x23},
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4},
-			oa:       Address{Addr: "6391", TOA: 0x91}},
+			TPDU: TPDU{FirstOctet: 4},
+			OA:   Address{Addr: "6391", TOA: 0x91}},
 		DecodeError("scts", 7, bcd.ErrInvalidOctet(0xf1))},
 	{"underflow ud", []byte{0x04, 0x04, 0x91, 0x36, 0x19, 0x00, 0x00, 0x51, 0x50,
 		0x71, 0x32, 0x20, 0x05, 0x23, 0x08},
 		Deliver{
-			BaseTPDU: BaseTPDU{firstOctet: 4},
-			oa:       Address{Addr: "6391", TOA: 0x91},
-			scts: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
+			TPDU: TPDU{FirstOctet: 4},
+			OA:   Address{Addr: "6391", TOA: 0x91},
+			SCTS: Timestamp{Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 				time.FixedZone("SCTS", 8*3600))}},
 		DecodeError("ud.sm", 15, ErrUnderflow)},
 }
@@ -186,7 +186,7 @@ func testDecodeDeliver(t *testing.T, cd ConcreteDecoder) {
 		if !ok {
 			t.Error("returned unexpected tpdu type")
 		}
-		if string(deli.UD()) != "Hahahaha" {
+		if string(deli.UD) != "Hahahaha" {
 			t.Error("returned unexpected tpdu user data")
 		}
 	}

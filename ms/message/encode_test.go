@@ -26,7 +26,7 @@ func TestNewEncoder(t *testing.T) {
 
 type encodeOutPattern struct {
 	da  tpdu.Address
-	dcs int
+	dcs byte
 	udh tpdu.UserDataHeader
 	ud  tpdu.UserData
 }
@@ -67,11 +67,11 @@ func TestEncode(t *testing.T) {
 				expected = nil
 			}
 			for i, o := range p.out {
-				expected[i].SetFirstOctet(1)
-				expected[i].SetDA(o.da)
-				expected[i].SetDCS(tpdu.DCS(o.dcs))
+				expected[i].FirstOctet = 1
+				expected[i].DA = o.da
+				expected[i].DCS = o.dcs
 				expected[i].SetUDH(o.udh)
-				expected[i].SetUD(o.ud)
+				expected[i].UD = o.ud
 			}
 			assert.Equal(t, expected, out)
 		}
@@ -138,7 +138,7 @@ func TestEncodeWithTemplate(t *testing.T) {
 	s := sar.NewSegmenter()
 	e := message.NewEncoder(ude, s)
 	tmpl := tpdu.NewSubmit()
-	tmpl.SetDCS(0xe3) // doesn't support alphabet
+	tmpl.DCS = 0xe3 // doesn't support alphabet
 	tmpl.SetUDH(tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}})
 	e.SetT(tmpl)
 	for _, p := range patterns {
@@ -152,11 +152,11 @@ func TestEncodeWithTemplate(t *testing.T) {
 				expected = nil
 			}
 			for i, o := range p.out {
-				expected[i].SetFirstOctet(65)
-				expected[i].SetDA(o.da)
-				expected[i].SetDCS(tpdu.DCS(o.dcs))
+				expected[i].FirstOctet = 65
+				expected[i].DA = o.da
+				expected[i].DCS = o.dcs
 				expected[i].SetUDH(o.udh)
-				expected[i].SetUD(o.ud)
+				expected[i].UD = o.ud
 			}
 			assert.Equal(t, expected, out)
 		}
@@ -200,11 +200,11 @@ func TestEncode8Bit(t *testing.T) {
 				expected = nil
 			}
 			for i, o := range p.out {
-				expected[i].SetFirstOctet(1)
-				expected[i].SetDA(o.da)
-				expected[i].SetDCS(tpdu.DCS(o.dcs))
+				expected[i].FirstOctet = 1
+				expected[i].DA = o.da
+				expected[i].DCS = o.dcs
 				expected[i].SetUDH(o.udh)
-				expected[i].SetUD(o.ud)
+				expected[i].UD = o.ud
 			}
 			assert.Equal(t, expected, out)
 		}
@@ -252,7 +252,7 @@ func TestEncode8BitWithTemplate(t *testing.T) {
 	s := sar.NewSegmenter()
 	e := message.NewEncoder(ude, s)
 	tmpl := tpdu.NewSubmit()
-	tmpl.SetDCS(0xe3) // doesn't support alphabet
+	tmpl.DCS = 0xe3 // doesn't support alphabet
 	tmpl.SetUDH(tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}})
 	e.SetT(tmpl)
 	for _, p := range patterns {
@@ -266,11 +266,11 @@ func TestEncode8BitWithTemplate(t *testing.T) {
 				expected = nil
 			}
 			for i, o := range p.out {
-				expected[i].SetFirstOctet(65)
-				expected[i].SetDA(o.da)
-				expected[i].SetDCS(tpdu.DCS(o.dcs))
+				expected[i].FirstOctet = 65
+				expected[i].DA = o.da
+				expected[i].DCS = o.dcs
 				expected[i].SetUDH(o.udh)
-				expected[i].SetUD(o.ud)
+				expected[i].UD = o.ud
 			}
 			assert.Equal(t, expected, out)
 		}
