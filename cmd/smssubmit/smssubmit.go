@@ -49,18 +49,17 @@ func main() {
 	}
 	if len(pdus) == 1 {
 		b, _ := pdus[0].MarshalBinary()
-		fmt.Printf("Submit PDU:\n%s\n", hex.EncodeToString(b))
+		fmt.Printf("Submit TPDU:\n%s\n", hex.EncodeToString(b))
 		return
 	}
 	for i, p := range pdus {
 		b, _ := p.MarshalBinary()
-		fmt.Printf("Submit PDU %d:\n%s\n", i+1, hex.EncodeToString(b))
+		fmt.Printf("Submit TPDU %d:\n%s\n", i+1, hex.EncodeToString(b))
 	}
 
 }
 
 func usage() {
-
 	fmt.Fprintf(os.Stderr, "smssubmit encodes a message into a SMS Submit TPDU.\n"+
 		"The message is encoded using the GSM7 default alphabet, or if necessary\n"+
 		"an optionally specified character set, or failing those as UCS-2.\n"+
