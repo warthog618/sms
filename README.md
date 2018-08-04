@@ -3,6 +3,7 @@
 A Go library for encoding and decoding SMSs.
 
 [![Build Status](https://travis-ci.org/warthog618/sms.svg)](https://travis-ci.org/warthog618/sms)
+[![Coverage Status](https://coveralls.io/repos/github/warthog618/sms/badge.svg?branch=master)](https://coveralls.io/github/warthog618/sms?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/warthog618/sms)](https://goreportcard.com/report/github.com/warthog618/sms)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/warthog618/sms/blob/master/LICENSE)
 
