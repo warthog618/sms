@@ -30,11 +30,11 @@ var charsetName = []string{
 
 func main() {
 	for nli := charset.Default; nli <= charset.Urdu; nli++ {
-		fmt.Println(charsetName[nli] + " Locking")
+		fmt.Printf("%s Locking (NLI=%d)\n", charsetName[nli], nli)
 		Display(charset.NewDecoder(nli))
 		fmt.Println()
-		fmt.Println(charsetName[nli] + " Shift")
-		Display(charset.NewDecoder(nli))
+		fmt.Printf("%s Shift (NLI=%d)\n", charsetName[nli], nli)
+		Display(charset.NewExtDecoder(nli))
 		fmt.Println()
 	}
 }
