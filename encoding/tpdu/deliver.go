@@ -17,7 +17,10 @@ type Deliver struct {
 
 // NewDeliver creates a Deliver TPDU and initialises non-zero fields.
 func NewDeliver() *Deliver {
-	return &Deliver{TPDU: TPDU{FirstOctet: byte(MtDeliver)}}
+	return &Deliver{
+		TPDU: TPDU{FirstOctet: byte(MtDeliver)},
+		OA: Address{TOA: 0x80},
+	}
 }
 
 // MaxUDL returns the maximum number of octets that can be encoded into the UD.
