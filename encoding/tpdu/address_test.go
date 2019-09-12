@@ -128,7 +128,7 @@ func TestAddressTypeOfNumber(t *testing.T) {
 			a := tpdu.NewAddress()
 			a.SetTypeOfNumber((p))
 			ton := a.TypeOfNumber()
-			if ton != p&0x3 {
+			if ton != p&0x7 {
 				t.Errorf("failed to set and get TypeOfNumber 0x%02x, got 0x%02x", p, ton)
 			}
 		}
