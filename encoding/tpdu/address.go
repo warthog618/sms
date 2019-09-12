@@ -118,7 +118,7 @@ func (a *Address) SetNumberingPlan(np NumberingPlan) {
 
 // SetTypeOfNumber sets the TON field in the TOA.
 func (a *Address) SetTypeOfNumber(ton TypeOfNumber) {
-	a.TOA = (a.TOA &^ 0x30) | (byte(ton&0x3) << 4)
+	a.TOA = (a.TOA &^ 0x70) | (byte(ton&0x7) << 4)
 }
 
 // TypeOfNumber extracts the TON field from the TOA.
