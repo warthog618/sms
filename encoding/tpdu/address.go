@@ -66,8 +66,8 @@ func (a *Address) UnmarshalBinary(src []byte) (int, error) {
 	ri := 2
 	switch ton {
 	case TonAlphanumeric:
-		// l is digits, i.e. GSM7 septets, and so requires conversion to octets....
-		ol := (l*7 + 7) / 8
+		// l is number of nibbles
+		ol := l / 2
 		if len(src) < ri+ol {
 			return len(src), DecodeError("addr", ri, ErrUnderflow)
 		}
