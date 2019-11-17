@@ -56,8 +56,8 @@ func (s *Submit) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary unmarshals an SMS-Submit TPDU.
-// In the case of error the Submit will be partially unmarshalled, up to
-// the point that the decoding error was detected.
+// In the case of error the Submit will be partially unmarshalled, up to the
+// point that the decoding error was detected.
 func (s *Submit) UnmarshalBinary(src []byte) error {
 	if len(src) < 1 {
 		return DecodeError("firstOctet", 0, ErrUnderflow)

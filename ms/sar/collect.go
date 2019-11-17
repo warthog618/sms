@@ -14,8 +14,8 @@ import (
 	"github.com/warthog618/sms/encoding/tpdu"
 )
 
-// Collector contains reassembly pipes that buffer concatenated TPDUs until
-// a full set is available to be concatenated.
+// Collector contains reassembly pipes that buffer concatenated TPDUs until a
+// full set is available to be concatenated.
 type Collector struct {
 	sync.Mutex // covers pipes and closing closed
 	pipes      map[string]*pipe
@@ -52,7 +52,8 @@ func (c *Collector) Close() {
 }
 
 // Collect adds a TPDU to the collection.
-// If all the components of a concatenated TPDU are available then they are returned.
+// If all the components of a concatenated TPDU are available then they are
+// returned.
 func (c *Collector) Collect(pdu *tpdu.Deliver) (d []*tpdu.Deliver, err error) {
 	segments, seqno, mref, ok := pdu.UDH.ConcatInfo()
 	if !ok || segments < 2 {
@@ -77,7 +78,8 @@ func (c *Collector) Collect(pdu *tpdu.Deliver) (d []*tpdu.Deliver, err error) {
 			return nil, ErrDuplicateSegment
 		}
 		if !p.cleanup.Stop() {
-			// timer has fired, but cleanup hasn't been performed yet - so need a new pipe
+			// timer has fired, but cleanup hasn't been performed yet - so need
+			// a new pipe
 			ok = false
 		}
 	}
@@ -128,11 +130,12 @@ var (
 	// ErrDuplicateSegment indicates a segment has arrived for a reassembly
 	// that already has that segment.
 	// The segments are duplicates in terms of their concatentation information.
-	// They may differ in other fields, particularly UD, but those fields cannot
-	// be used to determine which of the two may better fit the reassembly, so
-	// the first is kept and the second discarded.
+	// They may differ in other fields, particularly UD, but those fields
+	// cannot be used to determine which of the two may better fit the
+	// reassembly, so the first is kept and the second discarded.
 	ErrDuplicateSegment = errors.New("duplcate segment")
-	// ErrReassemblyInconsistency indicates a segment has arrived for a reassembly
-	// that has a seqno greater than the number of segments in the reassembly.
+	// ErrReassemblyInconsistency indicates a segment has arrived for a
+	// reassembly that has a seqno greater than the number of segments in the
+	// reassembly.
 	ErrReassemblyInconsistency = errors.New("reassembly inconsistency")
 )

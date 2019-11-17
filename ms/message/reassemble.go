@@ -52,8 +52,9 @@ func (r *Reassembler) Close() {
 	r.c.Close()
 }
 
-// Reassemble takes a binary Deliver TPDU and adds it to the reassembly collection.
-// If the Deliver is the last TPDU in a set then the completed Message is returned.
+// Reassemble takes a binary Deliver TPDU and adds it to the reassembly
+// collection. If the Deliver is the last TPDU in a set then the completed
+// Message is returned.
 func (r *Reassembler) Reassemble(b []byte) (*Message, error) {
 	d := tpdu.NewDeliver()
 	err := d.UnmarshalBinary(b)

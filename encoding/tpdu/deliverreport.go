@@ -5,7 +5,8 @@
 
 package tpdu
 
-// DeliverReport represents a SMS-Deliver-Report PDU as defined in 3GPP TS 23.038 Section 9.2.2.1a.
+// DeliverReport represents a SMS-Deliver-Report PDU as defined in 3GPP TS
+// 23.038 Section 9.2.2.1a.
 type DeliverReport struct {
 	TPDU
 	FCS byte
@@ -35,7 +36,8 @@ func (d *DeliverReport) SetUD(ud UserData) {
 	d.TPDU.UD = ud
 }
 
-// SetUDH sets the User Data Header of the DeliverReport and the corresponding bit of the pi.
+// SetUDH sets the User Data Header of the DeliverReport and the corresponding
+// bit of the pi.
 func (d *DeliverReport) SetUDH(udh UserDataHeader) {
 	d.PI = d.PI | 0x04
 	d.TPDU.SetUDH(udh)

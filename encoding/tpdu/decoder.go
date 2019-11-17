@@ -29,7 +29,8 @@ func NewDecoder(opts ...DecoderOption) (*Decoder, error) {
 	return d, nil
 }
 
-// ConcreteDecoder is a function that decodes a binary TPDU into a particular TPDU struct.
+// ConcreteDecoder is a function that decodes a binary TPDU into a particular
+// TPDU struct.
 type ConcreteDecoder func([]byte) (interface{}, error)
 
 // RegisterDecoder registers a decoder for the given MessageType and Direction.
@@ -45,7 +46,8 @@ func (d *Decoder) RegisterDecoder(mt MessageType, drn Direction, f ConcreteDecod
 // Decode returns the TPDU decoded from the SMS TPDU in src.
 // The direction of the SMS must be provided so the the decoder can correctly
 // determine the type of TPDU from the MTI. (the same MTI is used for different
-// TPDUs depending on whether the SMS is being sent to the MS, or is from the MS.)
+// TPDUs depending on whether the SMS is being sent to the MS, or is from the
+// MS.)
 //
 // The reverse of this operation is MarshalBinary on the returned TPDU.
 func (d *Decoder) Decode(src []byte, drn Direction) (interface{}, error) {

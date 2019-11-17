@@ -23,7 +23,8 @@ func (t *Timestamp) MarshalBinary() (dst []byte, err error) {
 	f := []int{y, int(t.Month()), t.Day(), t.Hour(), t.Minute(), t.Second()}
 	for i, v := range f {
 		dst[i], err = bcd.Encode(v)
-		// this should never trip, assuming the time methods return values in the expected ranges...
+		// this should never trip, assuming the time methods return values in
+		// the expected ranges...
 		if err != nil {
 			return nil, err
 		}

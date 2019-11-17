@@ -3,6 +3,7 @@
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
 
+// Package bcd provides conversions to and from BCD format.
 package bcd
 
 import (
@@ -50,9 +51,8 @@ func Encode(u int) (byte, error) {
 
 // EncodeSigned converts an integer in the range -79..79 into two BCD digits.
 // The return value is the two BCD digits encoded into a byte, with the most
-// significant digit stored in the lowest nibble, and any error detected
-// during conversion.  If the integer is negative then bit 3 of the byte is
-// set to 1 .
+// significant digit stored in the lowest nibble, and any error detected during
+// conversion.  If the integer is negative then bit 3 of the byte is set to 1 .
 func EncodeSigned(s int) (byte, error) {
 	if s < -79 || s > 79 {
 		return 0, ErrInvalidInteger(s)

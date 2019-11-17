@@ -4,6 +4,6 @@
 // license that can be found in the LICENSE file.
 
 // Package sar provides capabilties to segment large messages into a set of
-// concatenated Submit TPDUs for transmit, and to collect the set of
-// Deliver TPDUs corresponding to a received message.
+// concatenated Submit TPDUs for transmit, and to collect the set of Deliver
+// TPDUs corresponding to a received message.
 package sar

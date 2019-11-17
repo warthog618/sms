@@ -50,8 +50,8 @@ func (e *Encoder) SetT(t *tpdu.Submit) {
 }
 
 // Encode builds a set of Submit TPDUs from the destination number and UTF8 message.
-// Long messages are split into multiple concatenated TPDUs, while short messages
-// may fit in one.
+// Long messages are split into multiple concatenated TPDUs, while short
+// messages may fit in one.
 func (e *Encoder) Encode(number, msg string) ([]tpdu.Submit, error) {
 	d, udh, alpha, err := e.e.Encode(msg)
 	if err != nil {
@@ -80,9 +80,10 @@ func (e *Encoder) Encode(number, msg string) ([]tpdu.Submit, error) {
 	return segments, nil
 }
 
-// Encode8Bit builds a set of Submit TPDUs from the destination number and raw binary message.
-// Long messages are split into multiple concatenated TPDUs, while short messages
-// may fit in one.
+// Encode8Bit builds a set of Submit TPDUs from the destination number and raw
+// binary message.
+// Long messages are split into multiple concatenated TPDUs, while short
+// messages may fit in one.
 func (e *Encoder) Encode8Bit(number string, d []byte) ([]tpdu.Submit, error) {
 	s := tpdu.NewSubmit()
 	e.mutex.Lock()

@@ -5,7 +5,8 @@
 
 package tpdu
 
-// SubmitReport represents a SMS-Submit-Report PDU as defined in 3GPP TS 23.038 Section 9.2.2.2a.
+// SubmitReport represents a SMS-Submit-Report PDU as defined in 3GPP TS 23.038
+// Section 9.2.2.2a.
 type SubmitReport struct {
 	TPDU
 	FCS  byte
@@ -36,7 +37,8 @@ func (s *SubmitReport) SetUD(ud UserData) {
 	s.TPDU.UD = ud
 }
 
-// SetUDH sets the User Data Header of the SubmitReport and the corresponding bit of the pi.
+// SetUDH sets the User Data Header of the SubmitReport and the corresponding
+// bit of the pi.
 func (s *SubmitReport) SetUDH(udh UserDataHeader) {
 	s.PI = s.PI | 0x04
 	s.TPDU.SetUDH(udh)

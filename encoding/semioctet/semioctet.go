@@ -3,6 +3,7 @@
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
 
+// Package semioctet provides conversions to and from semioctet format.
 package semioctet
 
 import (
@@ -14,13 +15,12 @@ import (
 // The trailing 'F' is never returned but is provided to detect fill.
 var decodeDigits = "0123456789*#abcF"
 
-// Decode converts a semi-octet encoded field into the corresponding
-// array of UTF-8 digits, as per 3GPP TS 23.040 Section 9.1.2.3
+// Decode converts a semi-octet encoded field into the corresponding array of
+// UTF-8 digits, as per 3GPP TS 23.040 Section 9.1.2.3
 // Conversion is terminated by the length of the src or dst.
 // The length of the dst indicates the maximum number of digits to return.
-// The return values are the decoded field (a slice of dst),
-// the number of bytes read from src, and any error detected during the
-// conversion.
+// The return values are the decoded field (a slice of dst), the number of
+// bytes read from src, and any error detected during the conversion.
 func Decode(dst, src []byte) ([]byte, int, error) {
 	wi := 0
 	ri := 0
@@ -49,8 +49,8 @@ var encodeDigits = map[byte]int{
 	'8': 8, '9': 9, '*': 10, '#': 11, 'a': 12, 'b': 13, 'c': 14,
 }
 
-// Encode converts an array of UTF-8 digits into semi-octet format,
-// as per 3GPP TS 23.040 Section 9.1.2.3
+// Encode converts an array of UTF-8 digits into semi-octet format, as per 3GPP
+// TS 23.040 Section 9.1.2.3
 // The return values are the encoded field, and any error detected during the
 // conversion.
 func Encode(src []byte) ([]byte, error) {
@@ -73,14 +73,15 @@ func Encode(src []byte) ([]byte, error) {
 			hi = true
 		}
 	}
-	if hi == true {
+	if hi {
 		p = p | 0xf0
 		b[wi] = byte(p)
 	}
 	return b, nil
 }
 
-// ErrInvalidDigit indicates that the digit can not be encoded into semioctet format.
+// ErrInvalidDigit indicates that the digit can not be encoded into semioctet
+// format.
 type ErrInvalidDigit byte
 
 func (e ErrInvalidDigit) Error() string {
@@ -88,7 +89,7 @@ func (e ErrInvalidDigit) Error() string {
 }
 
 var (
-	// ErrMissingFill indicates the final src octet does not contain the expected
-	// fill character 'F'.
+	// ErrMissingFill indicates the final src octet does not contain the
+	// expected fill character 'F'.
 	ErrMissingFill = errors.New("semioctet: last src octet missing expected fill")
 )

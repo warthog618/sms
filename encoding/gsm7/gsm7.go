@@ -3,6 +3,7 @@
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
 
+// Package gsm7 provides conversions to and from 7bit packed user data.
 package gsm7
 
 import (

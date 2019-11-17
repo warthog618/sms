@@ -11,7 +11,8 @@ import (
 	"github.com/warthog618/sms/encoding/bcd"
 )
 
-// ValidityPeriod represents the validity period as defined in 3GPP TS 34.040 Section 9.2.3.12.
+// ValidityPeriod represents the validity period as defined in 3GPP TS 34.040
+// Section 9.2.3.12.
 type ValidityPeriod struct {
 	Format   ValidityPeriodFormat
 	Time     Timestamp     // for VpfAbsolute
@@ -19,7 +20,7 @@ type ValidityPeriod struct {
 	EFI      byte          // enhanced functionality indicator - first octet of enhanced format
 }
 
-// SetAbsolute seth the validity period to an absolute time.
+// SetAbsolute sets the validity period to an absolute time.
 func (v *ValidityPeriod) SetAbsolute(t Timestamp) {
 	v.Format = VpfAbsolute
 	v.Duration = 0
@@ -87,8 +88,8 @@ func (v *ValidityPeriod) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary unmarshals a ValidityPeriod stored in the given format.
-// Returns the number of bytes read from the src, and any error detected
-// during the unmarshalling.
+// Returns the number of bytes read from the src, and any error detected during
+// the unmarshalling.
 func (v *ValidityPeriod) UnmarshalBinary(src []byte, vpf ValidityPeriodFormat) (int, error) {
 	v.Format = VpfNotPresent
 	switch vpf {
@@ -165,29 +166,35 @@ type ValidityPeriodFormat byte
 const (
 	// VpfNotPresent indicates no VP is present.
 	VpfNotPresent ValidityPeriodFormat = iota
-	// VpfEnhanced indicates the VP is stored in enhanced format as per 3GPP TS 23.038 Section 9.2.3.12.3.
+	// VpfEnhanced indicates the VP is stored in enhanced format as per 3GPP TS
+	// 23.038 Section 9.2.3.12.3.
 	VpfEnhanced
-	// VpfRelative indicates the VP is stored in relative format as per 3GPP TS 23.038 Section 9.2.3.12.1.
+	// VpfRelative indicates the VP is stored in relative format as per 3GPP TS
+	// 23.038 Section 9.2.3.12.1.
 	VpfRelative
-	// VpfAbsolute indicates the VP is stored in absolute format as per 3GPP TS 23.038 Section 9.2.3.12.2.
-	// The absolute format is the same format as the SCTS.
+	// VpfAbsolute indicates the VP is stored in absolute format as per 3GPP TS
+	// 23.038 Section 9.2.3.12.2. The absolute format is the same format as the
+	// SCTS.
 	VpfAbsolute
 )
 
 // EnhancedValidityPeriodFormat identifies the subformat of the ValidityPeriod
-// when encoded to binary in enhanced format, as per 3GPP TS 23.038 Section 9.2.3.12.3
+// when encoded to binary in enhanced format, as per 3GPP TS 23.038 Section
+// 9.2.3.12.3
 type EnhancedValidityPeriodFormat byte
 
 const (
 	// EvpfNotPresent indicates no VP is present.
 	EvpfNotPresent EnhancedValidityPeriodFormat = iota
-	// EvpfRelative indicates the VP is stored in relative format as per 3GPP TS 23.038 Section 9.2.3.12.1.
+	// EvpfRelative indicates the VP is stored in relative format as per 3GPP
+	// TS 23.038 Section 9.2.3.12.1.
 	EvpfRelative
 	// EvpfRelativeSeconds indicates the VP is stored in relative format as an
 	// integer number of seconds, from 0 to 255.
 	EvpfRelativeSeconds
-	// EvpfRelativeHHMMSS indicates the VP is stored in relative format as a period of
-	// hours, minutes and seconds in semioctet format as per SCTS time.
+	// EvpfRelativeHHMMSS indicates the VP is stored in relative format as a
+	// period of hours, minutes and seconds in semioctet format as per SCTS
+	// time.
 	EvpfRelativeHHMMSS
 	// All other values currently reserved.
 )

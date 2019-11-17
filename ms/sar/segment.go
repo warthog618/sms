@@ -34,10 +34,11 @@ func (s *Segmenter) SetWide(w bool) {
 }
 
 // Segment returns the set of SMS-Submit TPDUs required to transmit the message
-// using the given alphabet.  A template for the SMS-Submit TPDUs is passed in,
-// and provides all the fields in the resulting TPDUs, other than the UD, which
-// is populated using the message.  For multi-part messages, the UDH provided
-// in the template is extended with a concatenation IE.
+// using the given alphabet.
+// A template for the SMS-Submit TPDUs is passed in, and provides all the
+// fields in the resulting TPDUs, other than the UD, which is populated using
+// the message.  For multi-part messages, the UDH provided in the template is
+// extended with a concatenation IE.
 // The template UDH must not contain a concatenation IE (ID 0) or the resulting
 // TPDUs will be non-conformant.
 func (s *Segmenter) Segment(msg []byte, t *tpdu.Submit) []tpdu.Submit {
@@ -156,8 +157,8 @@ func chunkUCS2(msg []byte, bs int) [][]byte {
 		return nil
 	}
 	bs = bs &^ 0x1
-	// rough count of blocks - may be off due to not splitting surrogates,
-	// but not worth working out the precise count in advance.
+	// rough count of blocks - may be off due to not splitting surrogates, but
+	// not worth working out the precise count in advance.
 	count := 1 + len(msg)/bs
 	chunks := make([][]byte, 0, count)
 	bstart := 0

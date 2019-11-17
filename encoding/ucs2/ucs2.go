@@ -1,3 +1,4 @@
+// Package ucs2 provides conversions between UCS-2 and UTF-8.
 package ucs2
 
 import (

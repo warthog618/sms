@@ -3,6 +3,8 @@
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
 
+// Package tpdu provides the core TPDU types and conversions to and from
+// their binary form.
 package tpdu
 
 import (
@@ -19,13 +21,15 @@ type TPDU struct {
 	PID        byte
 	DCS        byte
 	UDH        UserDataHeader
-	// UD contains the short message from the User Data.
-	// It does not include the User Data Header, which is provided in udh.
-	// The interpretation of UD depends on the Alphabet.
-	// For Alpha7Bit, UD is an array of GSM7 septets, each septet stored in the lower 7 bits of a byte.
+	// UD contains the short message from the User Data. It does not include
+	// the User Data Header, which is provided in udh. The interpretation of UD
+	// depends on the Alphabet.
+	// For Alpha7Bit, UD is an array of GSM7 septets, each septet stored in the
+	// lower 7 bits of a byte.
 	//  These have NOT been converted to the corresponding UTF8.
 	//  Use the gsm7 package to convert to UTF8.
-	// For AlphaUCS2, UD is an array of UCS2 characters packed into a byte array in Big Endian.
+	// For AlphaUCS2, UD is an array of UCS2 characters packed into a byte
+	// array in Big Endian.
 	//  These have NOT been converted to the corresponding UTF8.
 	//  Use the usc2 package to convert to UTF8.
 	// For Alpha8Bit, UD contains the raw octets.
@@ -53,7 +57,8 @@ func (p *TPDU) SetUDH(udh UserDataHeader) {
 	}
 }
 
-// UDHI returns the User Data Header Indicator bit from the SMS TPDU first octet.
+// UDHI returns the User Data Header Indicator bit from the SMS TPDU first
+// octet.
 // This is generally the same as testing the length of the udh - unless the dcs
 // has been intentionally overwritten to create an inconsistency.
 func (p *TPDU) UDHI() bool {
@@ -122,8 +127,8 @@ func (p *TPDU) decodeUserData(src []byte) error {
 }
 
 // decode7Bit decodes the GSM7 encoded binary src into a byte array.
-// sml is the number of septets expected, and udhl is the number of octets
-// in the UDH, including the UDHL field.
+// sml is the number of septets expected, and udhl is the number of octets in
+// the UDH, including the UDHL field.
 func decode7Bit(sml, udhl int, src []byte) ([]byte, error) {
 	var fillBits int
 	if udhl > 0 {
@@ -149,11 +154,11 @@ func decode7Bit(sml, udhl int, src []byte) ([]byte, error) {
 
 // encodeUserData marshals the User Data into binary.
 // The User Data Header is also encoded if present.
-// If Alphabet is GSM7 then the User Data is assumed to be unpacked GSM7 septets
-// and is packed prior to encoding.
+// If Alphabet is GSM7 then the User Data is assumed to be unpacked GSM7
+// septets and is packed prior to encoding.
 // For other alphabet values the User Data is encoded as is.
-// No checks of encoded size are performed here as that depends on concrete TPDU type,
-// and that can check the length of the returned b.
+// No checks of encoded size are performed here as that depends on concrete
+// TPDU type, and that can check the length of the returned b.
 func (p *TPDU) encodeUserData() (b []byte, err error) {
 	udh, err := p.UDH.MarshalBinary()
 	if err != nil {
@@ -194,18 +199,21 @@ func (p *TPDU) encodeUserData() (b []byte, err error) {
 	return b, nil
 }
 
-// MessageType identifies the type of TPDU encoded in a binary stream,
-// as defined in 3GPP TS 23.040 Section 9.2.3.1.
-// Note that the direction of the TPDU must also be known to determine
-// how to interpret the TPDU.
+// MessageType identifies the type of TPDU encoded in a binary stream, as
+// defined in 3GPP TS 23.040 Section 9.2.3.1.
+// Note that the direction of the TPDU must also be known to determine how to
+// interpret the TPDU.
 type MessageType int
 
 const (
-	// MtDeliver identifies the message as a SMS-Deliver or SMS-Deliver-Report TPDU.
+	// MtDeliver identifies the message as a SMS-Deliver or SMS-Deliver-Report
+	// TPDU.
 	MtDeliver MessageType = iota
-	// MtSubmit identifies the message as a SMS-Submit or SMS-Submit-Report TPDU.
+	// MtSubmit identifies the message as a SMS-Submit or SMS-Submit-Report
+	// TPDU.
 	MtSubmit
-	// MtCommand identifies the message as a SMS-Command or SMS-Status-Report TPDU.
+	// MtCommand identifies the message as a SMS-Command or SMS-Status-Report
+	// TPDU.
 	MtCommand
 	// MtReserved identifies the message as an unknown type of SMS TPDU.
 	MtReserved

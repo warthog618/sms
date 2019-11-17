@@ -5,10 +5,12 @@
 
 package tpdu
 
-// DCS represents the SMS Data Coding Scheme field as defined in 3GPP TS 23.040 Section 4.
+// DCS represents the SMS Data Coding Scheme field as defined in 3GPP TS 23.040
+// Section 4.
 type DCS byte
 
-// Alphabet defines the encoding of the SMS User Data, as defined in 3GPP TS 23.038 Section 4.
+// Alphabet defines the encoding of the SMS User Data, as defined in 3GPP TS
+// 23.038 Section 4.
 type Alphabet int
 
 const (
@@ -48,8 +50,8 @@ func (d DCS) Alphabet() (Alphabet, error) {
 }
 
 // WithAlphabet sets the Alphabet bits of the DCS, given the state of the other
-// bits.  An error is returned if the state is incompatible with setting the
-// alphabet.
+// bits.
+// An error is returned if the state is incompatible with setting the alphabet.
 func (d DCS) WithAlphabet(a Alphabet) (DCS, error) {
 	switch {
 	case d&0x80 == 0x00: // 0xxx
@@ -94,9 +96,10 @@ func (d DCS) Class() (MessageClass, error) {
 	}
 }
 
-// WithClass sets the MessageClass bits of the DCS, given the state of the other
-// bits.  An error is returned if the state is incompatible with setting the
-// message class.
+// WithClass sets the MessageClass bits of the DCS, given the state of the
+// other bits.
+// An error is returned if the state is incompatible with setting the message
+// class.
 func (d DCS) WithClass(c MessageClass) (DCS, error) {
 	switch {
 	case d&0x80 == 0x00: // 0xxx
@@ -108,8 +111,8 @@ func (d DCS) WithClass(c MessageClass) (DCS, error) {
 	}
 }
 
-// Compressed indicates whether the text is compressed using the algorithm defined
-// in 3GPP TS 23.024, as determined from the DCS.
+// Compressed indicates whether the text is compressed using the algorithm
+// defined in 3GPP TS 23.024, as determined from the DCS.
 // The DCS is assumed to be defined as per 3GPP TS 23.038 Section 4.
 func (d DCS) Compressed() bool {
 	// only true for 0x1xxxxx (binary)

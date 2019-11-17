@@ -5,7 +5,8 @@
 
 package tpdu
 
-// StatusReport represents a SMS-Status-Report PDU as defined in 3GPP TS 23.038 Section 9.2.2.3.
+// StatusReport represents a SMS-Status-Report PDU as defined in 3GPP TS 23.038
+// Section 9.2.2.3.
 type StatusReport struct {
 	TPDU
 	MR   byte
@@ -39,7 +40,8 @@ func (s *StatusReport) SetUD(ud UserData) {
 	s.TPDU.UD = ud
 }
 
-// SetUDH sets the User Data Header of the StatusReport and the corresponding bit of the pi.
+// SetUDH sets the User Data Header of the StatusReport and the corresponding
+// bit of the pi.
 func (s *StatusReport) SetUDH(udh UserDataHeader) {
 	s.PI = s.PI | 0x04
 	s.TPDU.SetUDH(udh)

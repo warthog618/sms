@@ -13,8 +13,10 @@ import (
 	"github.com/warthog618/sms/encoding/ucs2"
 )
 
-// UserData represents the User Data field as defined in 3GPP TS 23.040 Section 9.2.3.24.
-// The UserData is comprised of an optional User Data Header and a short message field.
+// UserData represents the User Data field as defined in 3GPP TS 23.040 Section
+// 9.2.3.24.
+// The UserData is comprised of an optional User Data Header and a short
+// message field.
 type UserData []byte
 
 // UserDataHeader represents the header section of the User Data as defined in
@@ -37,7 +39,8 @@ func (udh UserDataHeader) UDHL() int {
 	return udhl
 }
 
-// MarshalBinary marshals the User Data Header, including the UDHL, into binary.
+// MarshalBinary marshals the User Data Header, including the UDHL, into
+// binary.
 func (udh UserDataHeader) MarshalBinary() ([]byte, error) {
 	if len(udh) == 0 {
 		return nil, nil
@@ -52,10 +55,11 @@ func (udh UserDataHeader) MarshalBinary() ([]byte, error) {
 	return b, nil
 }
 
-// UnmarshalBinary reads the InformationElements from the binary User Data Haeder.
+// UnmarshalBinary reads the InformationElements from the binary User Data
+// Header.
 // The src contains the complete UDH, including the UDHL and all IEs.
-// The function returns the number of bytes read from src, and any error detected
-// while unmarshalling.
+// The function returns the number of bytes read from src, and any error
+// detected while unmarshalling.
 func (udh *UserDataHeader) UnmarshalBinary(src []byte) (int, error) {
 	if len(src) < 1 {
 		return 0, DecodeError("udhl", 0, ErrUnderflow)
@@ -109,9 +113,12 @@ func (udh UserDataHeader) IEs(id byte) []InformationElement {
 	return ies
 }
 
-// ConcatInfo extracts the segmentation info contained in the provided User Data Header.
-// If the UDH contains no segmentation information then ok is false and zero values are returned.
-// The returned values do not distinguish between 8bit and 16bit message reference numbers.
+// ConcatInfo extracts the segmentation info contained in the provided User
+// Data Header.
+// If the UDH contains no segmentation information then ok is false and zero
+// values are returned.
+// The returned values do not distinguish between 8bit and 16bit message
+// reference numbers.
 func (udh UserDataHeader) ConcatInfo() (segments, seqno, mref int, ok bool) {
 	if len(udh) == 0 {
 		// single segment - most likely case
@@ -123,9 +130,10 @@ func (udh UserDataHeader) ConcatInfo() (segments, seqno, mref int, ok bool) {
 	return udh.ConcatInfo16()
 }
 
-// ConcatInfo8 extracts the segmentation info contained in the provided
-// User Data Header, for the 8bit message reference case.
-// If the UDH contains no segmentation information then ok is false and zero values are returned.
+// ConcatInfo8 extracts the segmentation info contained in the provided User
+// Data Header, for the 8bit message reference case.
+// If the UDH contains no segmentation information then ok is false and zero
+// values are returned.
 func (udh UserDataHeader) ConcatInfo8() (segments, seqno, mref int, ok bool) {
 	if c, k := udh.IE(0x00); k && len(c.Data) == 3 {
 		ok = true
@@ -136,9 +144,10 @@ func (udh UserDataHeader) ConcatInfo8() (segments, seqno, mref int, ok bool) {
 	return
 }
 
-// ConcatInfo16 extracts the segmentation info contained in the provided
-// User Data Header, for the 16bit message reference case.
-// If the UDH contains no segmentation information then ok is false and zero values are returned.
+// ConcatInfo16 extracts the segmentation info contained in the provided User
+// Data Header, for the 16bit message reference case.
+// If the UDH contains no segmentation information then ok is false and zero
+// values are returned.
 func (udh UserDataHeader) ConcatInfo16() (segments, seqno, mref int, ok bool) {
 	if c, k := udh.IE(0x08); k && len(c.Data) == 4 {
 		ok = true
@@ -180,7 +189,8 @@ func (d *UDDecoder) AddAllCharsets() {
 	}
 }
 
-// AddLockingCharset adds a locking character set to the sets available to Decode.
+// AddLockingCharset adds a locking character set to the sets available to
+// Decode.
 func (d *UDDecoder) AddLockingCharset(nli charset.NationalLanguageIdentifier) {
 	if d.locking == nil {
 		d.locking = make(map[charset.NationalLanguageIdentifier]bool)
@@ -198,9 +208,9 @@ func (d *UDDecoder) AddShiftCharset(nli charset.NationalLanguageIdentifier) {
 
 // Decode converts TPDU UD into the corresponding UTF8 message.
 // The UD is expected to be unpacked, as stored in TPDU UD.
-// If the UD is GSM7 encoded then it is translated to UTF8 with the default character set,
-// or with the character set specified in the UDH, assuming the corresponding
-// language has been registered with the UDDecoder.
+// If the UD is GSM7 encoded then it is translated to UTF8 with the default
+// character set, or with the character set specified in the UDH, assuming the
+// corresponding language has been registered with the UDDecoder.
 // If the UDH specifies a character set that has not been registered then the
 // translation will fall back to the default character set.
 func (d *UDDecoder) Decode(ud UserData, udh UserDataHeader, alpha Alphabet) ([]byte, error) {
@@ -210,9 +220,9 @@ func (d *UDDecoder) Decode(ud UserData, udh UserDataHeader, alpha Alphabet) ([]b
 		return []byte(string(m)), err
 	case Alpha8Bit:
 		return ud, nil
-	default:
-		fallthrough
 	case Alpha7Bit:
+		fallthrough
+	default:
 		gd := gsm7.NewDecoder()
 		if ie, ok := udh.IE(lockingIEI); ok {
 			if len(ie.Data) >= 1 {
@@ -281,11 +291,11 @@ const (
 // TPDU, and so may need to be segmented into several concatenated messages.
 // Encode attempts to pick the most compact alphabet for the given message.
 // It assumes GSM7 is the most compact, and, if the default character set is
-// insufficient, tries combinations of supported language character sets,
-// in the order they were added to the UDEncoder.
+// insufficient, tries combinations of supported language character sets, in
+// the order they were added to the UDEncoder.
 // It is not optimal as it performs language selection on the whole message,
-// rather than determining the best for each segment in turn.
-// (which is totally allowed as stated in 3GPP TS 23.040 9.2.3.24.15 + 16)
+// rather than determining the best for each segment in turn. (which is totally
+// allowed as stated in 3GPP TS 23.040 9.2.3.24.15 + 16)
 // But this may be a safer approach - to allow for the decoder being
 // non-compliant, and the benefit of per-segment language encoding is minimal.
 // In most cases there is no benefit at all.

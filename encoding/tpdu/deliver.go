@@ -10,8 +10,8 @@ type Deliver struct {
 	TPDU
 	OA Address
 	// The SCTS timestamp indicates the time the SMS was sent.
-	// The time is the originator's local time, the timezone of which may differ from the
-	// receiver's.
+	// The time is the originator's local time, the timezone of which may
+	// differ from the receiver's.
 	SCTS Timestamp
 }
 
@@ -19,7 +19,7 @@ type Deliver struct {
 func NewDeliver() *Deliver {
 	return &Deliver{
 		TPDU: TPDU{FirstOctet: byte(MtDeliver)},
-		OA: Address{TOA: 0x80},
+		OA:   Address{TOA: 0x80},
 	}
 }
 
@@ -52,8 +52,8 @@ func (d *Deliver) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary unmarshals a SMS-Deliver PDU from the corresponding byte array.
-// In the case of error the Deliver will be partially unmarshalled, up to
-// the point that the decoding error was detected.
+// In the case of error the Deliver will be partially unmarshalled, up to the
+// point that the decoding error was detected.
 func (d *Deliver) UnmarshalBinary(src []byte) error {
 	if len(src) < 1 {
 		return DecodeError("firstOctet", 0, ErrUnderflow)
@@ -103,7 +103,8 @@ func RegisterDeliverDecoder(d *Decoder) error {
 	return d.RegisterDecoder(MtDeliver, MT, decodeDeliver)
 }
 
-// RegisterReservedDecoder registers a decoder for the Deliver TPDU for the Reserved message type.
+// RegisterReservedDecoder registers a decoder for the Deliver TPDU for the
+// Reserved message type.
 func RegisterReservedDecoder(d *Decoder) error {
 	return d.RegisterDecoder(MtReserved, MT, decodeDeliver)
 }

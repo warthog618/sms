@@ -5,7 +5,8 @@
 
 package tpdu
 
-// Command represents an SMS Command TPDU as defined in 3GPP TS 23.040 Section 9.2.2.4.
+// Command represents an SMS Command TPDU as defined in 3GPP TS 23.040 Section
+// 9.2.2.4.
 type Command struct {
 	TPDU
 	MR byte
@@ -17,7 +18,8 @@ type Command struct {
 
 // NewCommand creates a Command TPDU and initialises non-zero fields.
 func NewCommand() *Command {
-	// Command doesn't use dcs, but TPDU does to determine UD alphabet, so set it to 8bit.
+	// Command doesn't use dcs, but TPDU does to determine UD alphabet, so set
+	// it to 8bit.
 	return &Command{TPDU: TPDU{FirstOctet: byte(MtCommand), DCS: 0x04}}
 }
 
