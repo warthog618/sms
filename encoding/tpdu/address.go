@@ -37,7 +37,7 @@ func (a *Address) MarshalBinary() (dst []byte, err error) {
 		if err != nil {
 			return nil, EncodeError("addr", err)
 		}
-		l = len(addr)
+		l = (len(addr)*7 + 3) / 4
 		addr = gsm7.Pack7Bit(addr, 0)
 	default:
 		addr, err = semioctet.Encode([]byte(a.Addr))
@@ -60,18 +60,21 @@ func (a *Address) UnmarshalBinary(src []byte) (int, error) {
 	if len(src) < 2 {
 		return 0, DecodeError("addr", 0, ErrUnderflow)
 	}
-	l := int(src[0]) // len is digits and ignores toa
+	l := int(src[0])  // len is semi-octets and ignores toa
+	ol := (l + 1) / 2 // octet length
 	toa := src[1]
 	ton := TypeOfNumber((toa >> 4) & 0x07)
 	ri := 2
+	if len(src) < ri+ol {
+		return len(src), DecodeError("addr", ri, ErrUnderflow)
+	}
 	switch ton {
 	case TonAlphanumeric:
-		// l is digits, i.e. GSM7 septets, and so requires conversion to octets....
-		ol := (l*7 + 7) / 8
-		if len(src) < ri+ol {
-			return len(src), DecodeError("addr", ri, ErrUnderflow)
-		}
 		u := gsm7.Unpack7Bit(src[ri:ri+ol], 0)
+		if (len(u)*7+3)/4 > l {
+			// drop septet of fill
+			u = u[:len(u)-1]
+		}
 		d := gsm7.NewDecoder().WithExtCharset(nil).Strict() // without escapes
 		baddr, err := d.Decode(u)
 		if err != nil {
@@ -80,16 +83,12 @@ func (a *Address) UnmarshalBinary(src []byte) (int, error) {
 		ri += ol
 		a.Addr = string(baddr)
 	default:
-		sl := (l + 1) / 2
-		if len(src) < ri+sl {
-			return len(src), DecodeError("addr", ri, ErrUnderflow)
-		}
-		baddr, n, err := semioctet.Decode(make([]byte, l), src[ri:ri+sl])
+		baddr, n, err := semioctet.Decode(make([]byte, l), src[ri:ri+ol])
 		ri += n
 		if err != nil {
 			return ri, DecodeError("addr", ri-n, err)
 		}
-		if n != sl || len(baddr) < l {
+		if n != ol || len(baddr) < l {
 			return ri, DecodeError("addr", ri-n, ErrUnderflow)
 		}
 		a.Addr = string(baddr)
