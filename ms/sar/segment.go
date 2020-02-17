@@ -15,26 +15,33 @@ import (
 // Segmenter segments a large outgoing message into the set of Submit TPDUs
 // required to contain it.
 type Segmenter struct {
-	mutex    sync.Mutex // covers msgCount and wide
+	ief      func(msgCount, segCount, segment int) tpdu.InformationElement
+	mutex    sync.Mutex // covers msgCount
 	msgCount int
-	wide     bool
 }
+
+// With16BitMR creates InformationElements with 16bit message references
+// instead of 8bit.
+func With16BitMR(s *Segmenter) {
+	s.ief = newInfoElement16bit
+}
+
+// SegmenterOption is an option that alters the behaviour of a Segmenter at
+// construction time.
+type SegmenterOption func(*Segmenter)
 
 // NewSegmenter creates a Segmenter.
-func NewSegmenter() *Segmenter {
-	return new(Segmenter)
-}
-
-// SetWide sets the Segmenter wide flag.
-// If true then the segmenter will use 16bit message references instead of 8bit.
-func (s *Segmenter) SetWide(w bool) {
-	s.mutex.Lock()
-	s.wide = w
-	s.mutex.Unlock()
+func NewSegmenter(options ...SegmenterOption) *Segmenter {
+	s := Segmenter{ief: newInfoElement}
+	for _, option := range options {
+		option(&s)
+	}
+	return &s
 }
 
 // Segment returns the set of SMS-Submit TPDUs required to transmit the message
 // using the given alphabet.
+//
 // A template for the SMS-Submit TPDUs is passed in, and provides all the
 // fields in the resulting TPDUs, other than the UD, which is populated using
 // the message.  For multi-part messages, the UDH provided in the template is
@@ -58,45 +65,56 @@ func (s *Segmenter) Segment(msg []byte, t *tpdu.Submit) []tpdu.Submit {
 	// allow for concat entry in UDH
 	bs = maxSML(t.MaxUDL(), udhl+5, alpha)
 	// any point checking for bs==0?
-	var chunks [][]byte
-	switch alpha {
-	default: // default to 7Bit
-		chunks = chunk7Bit(msg, bs)
-	case tpdu.AlphaUCS2:
-		chunks = chunkUCS2(msg, bs)
-	case tpdu.Alpha8Bit:
-		chunks = chunk8Bit(msg, bs)
-	}
+	chunks := chunk(msg, alpha, bs)
 	count := len(chunks)
 	pdus := make([]tpdu.Submit, count)
 	s.mutex.Lock()
 	s.msgCount++
 	msgCount := s.msgCount
-	wide := s.wide
 	s.mutex.Unlock()
 	for i := 0; i < count; i++ {
 		sg := &pdus[i]
 		*sg = *t
-		ie := tpdu.InformationElement{}
-		if wide {
-			ie.ID = 8
-			ie.Data = []byte{0, 0, byte(count), byte(i + 1)}
-			binary.BigEndian.PutUint16(ie.Data, uint16(msgCount))
-		} else {
-			ie.ID = 0
-			ie.Data = []byte{byte(msgCount), byte(count), byte(i + 1)}
-		}
+		ie := s.ief(msgCount, count, i+1)
 		sg.SetUDH(append(t.UDH, ie))
 		sg.UD = chunks[i]
 	}
 	return pdus
 }
 
+func newInfoElement(msgCount, segCount, segment int) tpdu.InformationElement {
+	ie := tpdu.InformationElement{}
+	ie.ID = 0
+	ie.Data = []byte{byte(msgCount), byte(segCount), byte(segment)}
+	return ie
+}
+
+func newInfoElement16bit(msgCount, segCount, segment int) tpdu.InformationElement {
+	ie := tpdu.InformationElement{}
+	ie.ID = 8
+	ie.Data = []byte{0, 0, byte(segCount), byte(segment)}
+	binary.BigEndian.PutUint16(ie.Data, uint16(msgCount))
+	return ie
+}
+
 const (
 	esc byte = 0x1b
 )
 
+// chunk splits a message into chunks that are not larger than bs.
+func chunk(msg []byte, alpha tpdu.Alphabet, bs int) [][]byte {
+	switch alpha {
+	default: // default to 7Bit
+		return chunk7Bit(msg, bs)
+	case tpdu.AlphaUCS2:
+		return chunkUCS2(msg, bs)
+	case tpdu.Alpha8Bit:
+		return chunk8Bit(msg, bs)
+	}
+}
+
 // chunk7Bit splits a GSM7 message into chunks that are not larger than bs.
+//
 // Escaped characters are not split across blocks, so the resulting blocks may
 // be one septet shorter than bs.
 func chunk7Bit(msg []byte, bs int) [][]byte {
@@ -145,6 +163,7 @@ const (
 )
 
 // chunkUCS2 splits a UCS2/UTF-16 message into chunks that are not larger than bs.
+//
 // bs should be even, but if odd is reduced by one.
 // To allow for reassemblers that cannot handle split surrogate pairs, they are
 // not split during chunking, so the resulting blocks may be slightly smaller
@@ -178,8 +197,9 @@ func chunkUCS2(msg []byte, bs int) [][]byte {
 }
 
 // maxSML returns the block size for the SM in concatentated SMSs.
+//
 // For 8bit and UCS-2 it returns the number of bytes.
-// For 7bit it returns the number of septets, though ,as the 7bit is unpacked
+// For 7bit it returns the number of septets, though, as the 7bit is unpacked
 // at this stage, it also corresponds to the number of bytes.
 func maxSML(maxUDL, udhl int, alpha tpdu.Alphabet) int {
 	bs := maxUDL

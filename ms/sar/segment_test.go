@@ -131,7 +131,7 @@ func TestSegment(t *testing.T) {
 	}
 }
 
-func TestSegmentWide(t *testing.T) {
+func TestWith16BitMR(t *testing.T) {
 	patterns := []struct {
 		name string
 		in   segmentInPattern
@@ -172,8 +172,7 @@ func TestSegmentWide(t *testing.T) {
 					[]byte("you might think")}},
 		},
 	}
-	s := sar.NewSegmenter()
-	s.SetWide(true)
+	s := sar.NewSegmenter(sar.With16BitMR)
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			tmpl := tpdu.Submit{}
