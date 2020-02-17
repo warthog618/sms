@@ -91,8 +91,8 @@ func (udh *UserDataHeader) UnmarshalBinary(src []byte) (int, error) {
 	return udhl, nil
 }
 
-// IE returns the last instance of the GetIE with the given id in the UDH.
-// If no such GetIE is found then the function returns false.
+// IE returns the last instance of the IE with the given id in the UDH.
+// If no such IE is found then the function returns false.
 func (udh UserDataHeader) IE(id byte) (InformationElement, bool) {
 	for i := len(udh) - 1; i >= 0; i-- {
 		if udh[i].ID == id {
@@ -102,7 +102,7 @@ func (udh UserDataHeader) IE(id byte) (InformationElement, bool) {
 	return InformationElement{}, false
 }
 
-// IEs returns all instances of the GetIEs with the given id in the UDH.
+// IEs returns all instances of the IEs with the given id in the UDH.
 func (udh UserDataHeader) IEs(id byte) []InformationElement {
 	ies := []InformationElement(nil)
 	for _, ie := range udh {
