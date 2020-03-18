@@ -35,7 +35,7 @@ var charsetName = []string{
 }
 
 type language struct {
-	nli             charset.NationalLanguageIdentifier
+	nli             int
 	mapSize         int
 	extSize         int
 	extDuplicates   int

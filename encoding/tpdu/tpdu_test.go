@@ -24,7 +24,7 @@ func TestTPDUAlphabet(t *testing.T) {
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			d := tpdu.TPDU{}
-			d.DCS = p.in
+			d.DCS = tpdu.DCS(p.in)
 			c, err := d.Alphabet()
 			if err != p.err {
 				t.Fatalf("error converting 0x%02x: %v", p.in, err)

@@ -31,7 +31,7 @@ func TestStatusReportSetDCS(t *testing.T) {
 	}
 	for _, p := range []byte{0x00, 0xab, 0x00, 0xff} {
 		b.SetDCS(p)
-		d := b.DCS
+		d := byte(b.DCS)
 		if d != p {
 			t.Errorf("expected dcs %d, got %d", p, d)
 		}

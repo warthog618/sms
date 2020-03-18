@@ -21,7 +21,7 @@ func NewDeliverReport() *DeliverReport {
 // SetDCS sets the DeliverReport dcs field and the corresponding bit of the pi.
 func (d *DeliverReport) SetDCS(dcs byte) {
 	d.PI = d.PI | 0x02
-	d.TPDU.DCS = dcs
+	d.TPDU.DCS = DCS(dcs)
 }
 
 // SetPID sets the DeliverReport pid field and the corresponding bit of the pi.
@@ -50,7 +50,7 @@ func (d *DeliverReport) MarshalBinary() ([]byte, error) {
 		b = append(b, d.PID)
 	}
 	if d.PI&0x02 == 0x02 {
-		b = append(b, d.DCS)
+		b = append(b, byte(d.DCS))
 	}
 	if d.PI&0x4 == 0x4 {
 		ud, err := d.encodeUserData()
@@ -90,7 +90,7 @@ func (d *DeliverReport) UnmarshalBinary(src []byte) error {
 		if len(src) <= ri {
 			return DecodeError("dcs", ri, ErrUnderflow)
 		}
-		d.DCS = src[ri]
+		d.DCS = DCS(src[ri])
 		ri++
 	}
 	if d.PI&0x04 == 0x04 {

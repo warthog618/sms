@@ -30,14 +30,57 @@ type Encoder struct {
 	ext charset.Encoder
 }
 
+type DecoderOption interface {
+	applyDecoderOption(*Decoder)
+}
+
+type EncoderOption interface {
+	applyEncoderOption(*Encoder)
+}
+
 // NewDecoder returns a new GSM7 decoder which uses the default character set.
-func NewDecoder() Decoder {
-	return Decoder{charset.DefaultDecoder(), charset.DefaultExtDecoder(), false}
+func NewDecoder(options ...DecoderOption) Decoder {
+	d := Decoder{}
+	for _, option := range options {
+		option.applyDecoderOption(&d)
+	}
+	if d.set == nil {
+		d.set = charset.DefaultDecoder()
+	}
+	if d.ext == nil {
+		d.ext = charset.DefaultExtDecoder()
+	}
+	return d
 }
 
 // NewEncoder returns a new GSM7 encoder which uses the default character set.
-func NewEncoder() Encoder {
-	return Encoder{charset.DefaultEncoder(), charset.DefaultExtEncoder()}
+func NewEncoder(options ...EncoderOption) Encoder {
+	e := Encoder{}
+	for _, option := range options {
+		option.applyEncoderOption(&e)
+	}
+	if e.set == nil {
+		e.set = charset.DefaultEncoder()
+	}
+	if e.ext == nil {
+		e.ext = charset.DefaultExtEncoder()
+	}
+	return e
+}
+
+// Decode converts the src from unpacked GSM7 to UTF-8.
+func Decode(src []byte, options ...DecoderOption) ([]byte, error) {
+	d := NewDecoder(options...)
+	return d.Decode(src)
+}
+
+// Encode converts the src from UTF-8 to GSM7 and writes the result to dst.
+//
+// The return value includes the encoded GSM7 bytes, and any error that
+// occurred during encoding.
+func Encode(src []byte, options ...EncoderOption) ([]byte, error) {
+	e := NewEncoder(options...)
+	return e.Encode(src)
 }
 
 // Decode converts the src from unpacked GSM7 to UTF-8.
@@ -81,6 +124,49 @@ func (d *Decoder) Decode(src []byte) ([]byte, error) {
 	return dst, nil
 }
 
+type CharsetOption struct {
+	nli int
+}
+
+func (o CharsetOption) applyDecoderOption(d *Decoder) {
+	d.set = charset.NewDecoder(o.nli)
+}
+
+func (o CharsetOption) applyEncoderOption(e *Encoder) {
+	e.set = charset.NewEncoder(o.nli)
+}
+
+type ExtCharsetOption struct {
+	nli int
+}
+
+func (o ExtCharsetOption) applyDecoderOption(d *Decoder) {
+	d.ext = charset.NewExtDecoder(o.nli)
+}
+
+func (o ExtCharsetOption) applyEncoderOption(e *Encoder) {
+	e.ext = charset.NewExtEncoder(o.nli)
+}
+
+// WithCharset specifies the character set map used for encoding or decoding.
+func WithCharset(nli int) CharsetOption {
+	return CharsetOption{nli}
+}
+
+// WithExtCharset replaces the extension character set map used for encoding or
+// decoding.
+func WithExtCharset(nli int) ExtCharsetOption {
+	return ExtCharsetOption{nli}
+}
+
+type NullDecoder struct{}
+
+func (o NullDecoder) applyDecoderOption(d *Decoder) {
+	d.ext = make(charset.Decoder)
+}
+
+var WithoutExtCharset = NullDecoder{}
+
 // WithCharset replaces the character set map used by the Decoder.
 func (d Decoder) WithCharset(set charset.Decoder) Decoder {
 	d.set = set
@@ -101,6 +187,7 @@ func (d Decoder) Strict() Decoder {
 }
 
 // Encode converts the src from UTF-8 to GSM7 and writes the result to dst.
+//
 // The return value includes the encoded GSM7 bytes, and any error that
 // occurred during encoding.
 func (e *Encoder) Encode(src []byte) ([]byte, error) {

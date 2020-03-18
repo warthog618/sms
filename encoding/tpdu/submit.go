@@ -13,9 +13,91 @@ type Submit struct {
 	VP ValidityPeriod
 }
 
+// SubmitOption is a construction option for Submit PDUs.
+type SubmitOption interface {
+	applySubmitOption(*Submit)
+}
+
 // NewSubmit creates a Submit TPDU and initialises non-zero fields.
-func NewSubmit() *Submit {
-	return &Submit{TPDU: TPDU{FirstOctet: byte(MtSubmit)}}
+func NewSubmit(options ...SubmitOption) *Submit {
+	s := &Submit{TPDU: TPDU{FirstOctet: byte(MtSubmit)}}
+	for _, option := range options {
+		option.applySubmitOption(s)
+	}
+	return s
+}
+
+// FromSubmitOption provides a template PDU to be copied into the new PDU.
+type FromSubmitOption struct {
+	t Submit
+}
+
+func (o FromSubmitOption) applySubmitOption(s *Submit) {
+	s.Clone(&o.t)
+}
+
+// FromSubmit provides a template PDU to be copied into the new PDU.
+//
+// The template PDU is copied.
+func FromSubmit(t *Submit) FromSubmitOption {
+	s := Submit{}
+	s = *t
+	s.UDH = append(t.UDH[:0:0], t.UDH...)
+	return FromSubmitOption{s}
+}
+
+func (udh UserDataHeader) applySubmitOption(s *Submit) {
+	s.SetUDH(append(s.UDH, udh...))
+}
+
+// WithUserDataHeader provides a custom base user data header for the Submit PDU.
+//
+// This user header is copied and may be extended during user data encoding.
+func WithUserDataHeader(udh UserDataHeader) UserDataHeader {
+	return udh
+}
+
+func (alpha Alphabet) applySubmitOption(s *Submit) {
+	dcs, err := DCS(s.DCS).WithAlphabet(alpha)
+	if err != nil {
+		// ignore the template dcs
+		dcs, _ = DCS(0).WithAlphabet(alpha)
+	}
+	s.DCS = dcs
+}
+
+// WithAlphabet specifies the alphabet used to encode user data in the Submit PDU.
+func WithAlphabet(alpha Alphabet) Alphabet {
+	return alpha
+}
+
+// To specifies the destination number the PDU is addressed to.
+//
+// The number is assumed to be in international format.
+func To(number string) AddressOption {
+	if len(number) > 0 && number[0] == '+' {
+		number = number[1:]
+	}
+	return AddressOption{
+		Address{
+			TOA:  0x80 | byte(TonInternational<<4) | byte(NpISDN),
+			Addr: number,
+		}}
+}
+
+// AddressOption provides a destination address for the Submit PDU.
+type AddressOption struct {
+	addr Address
+}
+
+func (o AddressOption) applySubmitOption(s *Submit) {
+	s.DA = o.addr
+}
+
+// Clone copies the Submit PDU attribules into a target.
+func (s *Submit) Clone(t *Submit) {
+	*s = *t
+	s.UDH = append(t.UDH[:0:0], t.UDH...)
 }
 
 // MaxUDL returns the maximum number of octets that can be encoded into the UD.
@@ -39,7 +121,7 @@ func (s *Submit) MarshalBinary() ([]byte, error) {
 		return nil, EncodeError("da", err)
 	}
 	b = append(b, da...)
-	b = append(b, s.PID, s.DCS)
+	b = append(b, s.PID, byte(s.DCS))
 	if s.VP.Format != VpfNotPresent {
 		vp, verr := s.VP.MarshalBinary()
 		if verr != nil {
@@ -82,7 +164,7 @@ func (s *Submit) UnmarshalBinary(src []byte) error {
 	if len(src) <= ri {
 		return DecodeError("dcs", ri, ErrUnderflow)
 	}
-	s.DCS = src[ri]
+	s.DCS = DCS(src[ri])
 	ri++
 	vpf := ValidityPeriodFormat((s.FirstOctet >> 3) & 0x3)
 	n, err = s.VP.UnmarshalBinary(src[ri:], vpf)

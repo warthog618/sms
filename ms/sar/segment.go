@@ -58,7 +58,7 @@ func (s *Segmenter) Segment(msg []byte, t *tpdu.Submit) []tpdu.Submit {
 	if len(msg) <= bs {
 		// single segment
 		pdus := make([]tpdu.Submit, 1)
-		pdus[0] = *t
+		pdus[0].Clone(t)
 		pdus[0].UD = msg
 		return pdus
 	}
@@ -74,7 +74,7 @@ func (s *Segmenter) Segment(msg []byte, t *tpdu.Submit) []tpdu.Submit {
 	s.mutex.Unlock()
 	for i := 0; i < count; i++ {
 		sg := &pdus[i]
-		*sg = *t
+		sg.Clone(t)
 		ie := s.ief(msgCount, count, i+1)
 		sg.SetUDH(append(t.UDH, ie))
 		sg.UD = chunks[i]

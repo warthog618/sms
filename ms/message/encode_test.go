@@ -16,9 +16,11 @@ import (
 )
 
 func TestNewEncoder(t *testing.T) {
-	ude, _ := tpdu.NewUDEncoder()
+	ude := tpdu.NewUDEncoder()
 	s := sar.NewSegmenter()
-	e := message.NewEncoder(ude, s)
+	e := message.NewEncoder(
+		message.WithUDEncoder(ude),
+		message.WithSegmenter(s))
 	if e == nil {
 		t.Fatalf("failed to create Encoder")
 	}
@@ -26,7 +28,7 @@ func TestNewEncoder(t *testing.T) {
 
 type encodeOutPattern struct {
 	da  tpdu.Address
-	dcs byte
+	dcs tpdu.DCS
 	udh tpdu.UserDataHeader
 	ud  tpdu.UserData
 }
@@ -53,9 +55,7 @@ func TestEncode(t *testing.T) {
 			nil,
 		},
 	}
-	ude, _ := tpdu.NewUDEncoder()
-	s := sar.NewSegmenter()
-	e := message.NewEncoder(ude, s)
+	e := message.NewEncoder()
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			out, err := e.Encode(p.number, p.msg)
@@ -87,8 +87,7 @@ func (m MockUDEncoder) Encode(msg string) (tpdu.UserData, tpdu.UserDataHeader, t
 
 func TestEncodeError(t *testing.T) {
 	ude := MockUDEncoder{}
-	s := sar.NewSegmenter()
-	e := message.NewEncoder(ude, s)
+	e := message.NewEncoder(message.WithUDEncoder(ude))
 	out, err := e.Encode("1234", "hello")
 	if err.Error() != "mock encode failed for 'hello'" {
 		t.Errorf("encode returned unexpected error %v", err)
@@ -134,13 +133,10 @@ func TestEncodeWithTemplate(t *testing.T) {
 			nil,
 		},
 	}
-	ude, _ := tpdu.NewUDEncoder()
-	s := sar.NewSegmenter()
-	e := message.NewEncoder(ude, s)
 	tmpl := tpdu.NewSubmit()
 	tmpl.DCS = 0xe3 // doesn't support alphabet
 	tmpl.SetUDH(tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}})
-	e.SetT(tmpl)
+	e := message.NewEncoder(message.FromSubmitPDU(tmpl))
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			out, err := e.Encode(p.number, p.msg)
@@ -186,9 +182,7 @@ func TestEncode8Bit(t *testing.T) {
 			nil,
 		},
 	}
-	ude, _ := tpdu.NewUDEncoder()
-	s := sar.NewSegmenter()
-	e := message.NewEncoder(ude, s)
+	e := message.NewEncoder()
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			out, err := e.Encode8Bit(p.number, []byte(p.msg))
@@ -248,13 +242,10 @@ func TestEncode8BitWithTemplate(t *testing.T) {
 			nil,
 		},
 	}
-	ude, _ := tpdu.NewUDEncoder()
-	s := sar.NewSegmenter()
-	e := message.NewEncoder(ude, s)
 	tmpl := tpdu.NewSubmit()
 	tmpl.DCS = 0xe3 // doesn't support alphabet
 	tmpl.SetUDH(tpdu.UserDataHeader{tpdu.InformationElement{ID: 3, Data: []byte{1, 2, 3}}})
-	e.SetT(tmpl)
+	e := message.NewEncoder(message.FromSubmitPDU(tmpl))
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			out, err := e.Encode8Bit(p.number, []byte(p.msg))

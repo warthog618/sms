@@ -9,20 +9,21 @@ import (
 	"sync"
 
 	"github.com/warthog618/sms/encoding/tpdu"
+	"github.com/warthog618/sms/ms/sar"
 )
 
 // Encoder builds Submit TPDUs from simple inputs such as the destination
 // number and the message in a UTF8 form.
 type Encoder struct {
-	e        DataEncoder
+	ude      UDEncoder
 	s        Segmenter
-	mutex    sync.Mutex // covers msgCount and t
+	sf       SubmitFactory
+	mutex    sync.Mutex // covers msgCount
 	msgCount int
-	t        *tpdu.Submit
 }
 
-// DataEncoder converts a UTF-8 message into the corresponding TPDU user data.
-type DataEncoder interface {
+// UDEncoder converts a UTF-8 message into the corresponding TPDU user data.
+type UDEncoder interface {
 	Encode(msg string) (tpdu.UserData, tpdu.UserDataHeader, tpdu.Alphabet, error)
 }
 
@@ -32,52 +33,132 @@ type Segmenter interface {
 	Segment(msg []byte, t *tpdu.Submit) []tpdu.Submit
 }
 
-// NewEncoder creates an Encoder.
-func NewEncoder(e DataEncoder, s Segmenter) *Encoder {
-	return &Encoder{e, s, sync.Mutex{}, 0, nil}
+// SubmitFactory is a function that creates Submit TPDUs.
+type SubmitFactory func(options ...tpdu.SubmitOption) *tpdu.Submit
+
+// EncoderOption is a construction option for the Encoder.
+type EncoderOption interface {
+	applyEncoderOption(*Encoder)
 }
 
-// SetT sets the template Submit TPDU used by Encode.
-// The Submit TPDU is used to populate the fields for encoded Submit TPDUs,
-// with the exception of the MR, DA and UD which are explicitly set by Encode.
-// Encode also sets the DCS alphabet, and may add elements to the UDH.
-// The provided DCS may contain a message class, but will be completely ignored
-// if the value is incompatible with setting the alphabet.
-func (e *Encoder) SetT(t *tpdu.Submit) {
-	e.mutex.Lock()
-	e.t = t
-	e.mutex.Unlock()
+func WithCharset(nli ...int) EncoderOption {
+	return CharsetOption{nli}
+}
+
+type CharsetOption struct {
+	nli []int
+}
+
+func (o CharsetOption) applyEncoderOption(e *Encoder) {
+	e.ude = tpdu.NewUDEncoder(tpdu.WithCharset(o.nli...))
+}
+
+func WithLockingCharset(nli ...int) EncoderOption {
+	return LockingCharsetOption{nli}
+}
+
+type LockingCharsetOption struct {
+	nli []int
+}
+
+func (o LockingCharsetOption) applyEncoderOption(e *Encoder) {
+	e.ude = tpdu.NewUDEncoder(tpdu.WithLockingCharset(o.nli...))
+}
+
+func WithShiftCharset(nli ...int) EncoderOption {
+	return ShiftCharsetOption{nli}
+}
+
+type ShiftCharsetOption struct {
+	nli []int
+}
+
+func (o ShiftCharsetOption) applyEncoderOption(e *Encoder) {
+	e.ude = tpdu.NewUDEncoder(tpdu.WithShiftCharset(o.nli...))
+}
+
+// NewEncoder creates an Encoder.
+func NewEncoder(options ...EncoderOption) *Encoder {
+	e := Encoder{}
+	for _, option := range options {
+		option.applyEncoderOption(&e)
+	}
+	if e.ude == nil {
+		e.ude = tpdu.NewUDEncoder()
+	}
+	if e.s == nil {
+		e.s = sar.NewSegmenter()
+	}
+	if e.sf == nil {
+		e.sf = tpdu.NewSubmit
+	}
+	return &e
+}
+
+type UDEncoderOption struct {
+	ude UDEncoder
+}
+
+func (o UDEncoderOption) applyEncoderOption(e *Encoder) {
+	e.ude = o.ude
+}
+
+// WithUDEncoder specifies the user data encoder to be used when encoding messages.
+func WithUDEncoder(ude UDEncoder) UDEncoderOption {
+	return UDEncoderOption{ude}
+}
+
+type SegmenterOption struct {
+	s Segmenter
+}
+
+func (o SegmenterOption) applyEncoderOption(e *Encoder) {
+	e.s = o.s
+}
+
+// WithSegmenter specifies the segmenter to be used when encoding messages.
+func WithSegmenter(s Segmenter) SegmenterOption {
+	return SegmenterOption{s}
+}
+
+type SubmitFactoryOption struct {
+	sf SubmitFactory
+}
+
+func (o SubmitFactoryOption) applyEncoderOption(e *Encoder) {
+	e.sf = o.sf
+}
+
+// WithSubmitFactory specifies the factory for the template Submit TPDU for
+// encoding messages.
+func WithSubmitFactory(sf SubmitFactory) SubmitFactoryOption {
+	return SubmitFactoryOption{sf}
+}
+
+// FromSubmitPDU specifies a static template Submit TPDU for encoding
+// messages.
+func FromSubmitPDU(t *tpdu.Submit) SubmitFactoryOption {
+	sf := func(options ...tpdu.SubmitOption) *tpdu.Submit {
+		options = append([]tpdu.SubmitOption{tpdu.FromSubmit(t)}, options...)
+		return tpdu.NewSubmit(options...)
+	}
+	return SubmitFactoryOption{sf}
 }
 
 // Encode builds a set of Submit TPDUs from the destination number and UTF8 message.
 // Long messages are split into multiple concatenated TPDUs, while short
 // messages may fit in one.
 func (e *Encoder) Encode(number, msg string) ([]tpdu.Submit, error) {
-	d, udh, alpha, err := e.e.Encode(msg)
+	d, udh, alpha, err := e.ude.Encode(msg)
 	if err != nil {
 		return nil, err
 	}
-	s := tpdu.NewSubmit()
-	e.mutex.Lock()
-	if e.t != nil {
-		*s = *e.t
-		s.SetUDH(append(e.t.UDH, udh...))
-	} else {
-		s.SetUDH(udh)
-	}
-	if len(number) > 0 && number[0] == '+' {
-		number = number[1:]
-	}
-	s.DA = tpdu.Address{TOA: 0x80 | byte(tpdu.TonInternational<<4) | byte(tpdu.NpISDN), Addr: number}
-	dcs, err := tpdu.DCS(s.DCS).WithAlphabet(alpha)
-	if err != nil {
-		// ignore the template dcs
-		dcs, _ = tpdu.DCS(0).WithAlphabet(alpha)
-	}
-	s.DCS = byte(dcs)
-	segments := e.segment(d, s)
-	e.mutex.Unlock()
-	return segments, nil
+	s := e.sf(
+		tpdu.To(number),
+		tpdu.WithUserDataHeader(udh),
+		tpdu.WithAlphabet(alpha),
+	)
+	return e.segment(d, s), nil
 }
 
 // Encode8Bit builds a set of Submit TPDUs from the destination number and raw
@@ -85,31 +166,20 @@ func (e *Encoder) Encode(number, msg string) ([]tpdu.Submit, error) {
 // Long messages are split into multiple concatenated TPDUs, while short
 // messages may fit in one.
 func (e *Encoder) Encode8Bit(number string, d []byte) ([]tpdu.Submit, error) {
-	s := tpdu.NewSubmit()
-	e.mutex.Lock()
-	if e.t != nil {
-		*s = *e.t
-	}
-	if len(number) > 0 && number[0] == '+' {
-		number = number[1:]
-	}
-	s.DA = tpdu.Address{TOA: 0x80 | byte(tpdu.TonInternational<<4) | byte(tpdu.NpISDN), Addr: number}
-	dcs, err := tpdu.DCS(s.DCS).WithAlphabet(tpdu.Alpha8Bit)
-	if err != nil {
-		// ignore the template dcs
-		dcs, _ = tpdu.DCS(0).WithAlphabet(tpdu.Alpha8Bit)
-	}
-	s.DCS = byte(dcs)
-	segments := e.segment(d, s)
-	e.mutex.Unlock()
-	return segments, nil
+	s := e.sf(
+		tpdu.To(number),
+		tpdu.WithAlphabet(tpdu.Alpha8Bit),
+	)
+	return e.segment(d, s), nil
 }
 
 func (e *Encoder) segment(d []byte, s *tpdu.Submit) []tpdu.Submit {
 	segments := e.s.Segment(d, s)
+	e.mutex.Lock()
 	for _, sg := range segments {
 		e.msgCount++
 		sg.MR = byte(e.msgCount)
 	}
+	e.mutex.Unlock()
 	return segments
 }

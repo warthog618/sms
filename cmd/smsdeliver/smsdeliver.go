@@ -28,11 +28,10 @@ func main() {
 		flag.Usage()
 		os.Exit(1)
 	}
-	udd, err := tpdu.NewUDDecoder()
-	if err != nil {
-		log.Fatal(err)
-	}
-	udd.AddAllCharsets()
+	// !!! want all of this to be defaulted or options to NewReassembler...
+	// e.g. WithTimeout(time.Minute*5), WithAllCharsets
+	// Or meta WithCollector(c), WithUDDecoder(udd)...
+	udd := tpdu.NewUDDecoder(tpdu.WithAllCharsets)
 	c := sar.NewCollector(time.Minute*5, func(arg1 error) {})
 	x := message.NewReassembler(udd, c)
 	defer x.Close()
@@ -43,8 +42,7 @@ func main() {
 		}
 		tb := b
 		if pm {
-			pd := pdumode.Decoder{}
-			_, ntb, err := pd.Decode(b)
+			_, ntb, err := pdumode.Decode(b)
 			if err != nil {
 				log.Fatal(err)
 			}

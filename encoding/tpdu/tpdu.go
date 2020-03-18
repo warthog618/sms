@@ -19,7 +19,7 @@ const (
 type TPDU struct {
 	FirstOctet byte
 	PID        byte
-	DCS        byte
+	DCS        DCS
 	UDH        UserDataHeader
 	// UD contains the short message from the User Data. It does not include
 	// the User Data Header, which is provided in udh. The interpretation of UD
@@ -37,23 +37,23 @@ type TPDU struct {
 }
 
 // Alphabet returns the alphabet field from the DCS of the SMS TPDU.
-func (p *TPDU) Alphabet() (Alphabet, error) {
-	return DCS(p.DCS).Alphabet()
+func (t *TPDU) Alphabet() (Alphabet, error) {
+	return t.DCS.Alphabet()
 }
 
 // MTI returns the MessageType from the first octet of the SMS TPDU.
-func (p *TPDU) MTI() MessageType {
-	return MessageType(p.FirstOctet & 0x3)
+func (t *TPDU) MTI() MessageType {
+	return MessageType(t.FirstOctet & 0x3)
 }
 
 // SetUDH sets the User Data Header of the TPDU.
-func (p *TPDU) SetUDH(udh UserDataHeader) {
+func (t *TPDU) SetUDH(udh UserDataHeader) {
 	if udh == nil {
-		p.UDH = nil
-		p.FirstOctet = (p.FirstOctet &^ udhiMask)
+		t.UDH = nil
+		t.FirstOctet = (t.FirstOctet &^ udhiMask)
 	} else {
-		p.UDH = udh
-		p.FirstOctet = (p.FirstOctet | udhiMask)
+		t.UDH = udh
+		t.FirstOctet = (t.FirstOctet | udhiMask)
 	}
 }
 
@@ -61,12 +61,12 @@ func (p *TPDU) SetUDH(udh UserDataHeader) {
 // octet.
 // This is generally the same as testing the length of the udh - unless the dcs
 // has been intentionally overwritten to create an inconsistency.
-func (p *TPDU) UDHI() bool {
-	return p.FirstOctet&udhiMask != 0
+func (t *TPDU) UDHI() bool {
+	return t.FirstOctet&udhiMask != 0
 }
 
 // decodeUserData unmarshals the User Data field from the binary src.
-func (p *TPDU) decodeUserData(src []byte) error {
+func (t *TPDU) decodeUserData(src []byte) error {
 	if len(src) < 1 {
 		return DecodeError("udl", 0, ErrUnderflow)
 	}
@@ -77,7 +77,7 @@ func (p *TPDU) decodeUserData(src []byte) error {
 	var udh UserDataHeader
 	sml7 := 0
 	ri := 1
-	alphabet, err := p.Alphabet()
+	alphabet, err := t.Alphabet()
 	if err != nil {
 		return DecodeError("alphabet", ri, err)
 	}
@@ -93,7 +93,7 @@ func (p *TPDU) decodeUserData(src []byte) error {
 		return DecodeError("ud", ri, ErrOverlength)
 	}
 	var udhl int // Note that in this context udhl includes itself.
-	udhi := p.UDHI()
+	udhi := t.UDHI()
 	if udhi {
 		udh = make(UserDataHeader, 0)
 		l, err := udh.UnmarshalBinary(src[ri:])
@@ -104,7 +104,7 @@ func (p *TPDU) decodeUserData(src []byte) error {
 		ri += udhl
 	}
 	if ri == len(src) {
-		p.UDH = udh
+		t.UDH = udh
 		return nil
 	}
 	switch alphabet {
@@ -113,16 +113,16 @@ func (p *TPDU) decodeUserData(src []byte) error {
 		if err != nil {
 			return DecodeError("sm", ri, err)
 		}
-		p.UD = sm
+		t.UD = sm
 	case AlphaUCS2:
 		if len(src[ri:])&0x01 == 0x01 {
 			return DecodeError("sm", ri, ErrOverlength)
 		}
 		fallthrough
 	case Alpha8Bit:
-		p.UD = append([]byte(nil), src[ri:]...)
+		t.UD = append([]byte(nil), src[ri:]...)
 	}
-	p.UDH = udh
+	t.UDH = udh
 	return nil
 }
 
@@ -159,24 +159,24 @@ func decode7Bit(sml, udhl int, src []byte) ([]byte, error) {
 // For other alphabet values the User Data is encoded as is.
 // No checks of encoded size are performed here as that depends on concrete
 // TPDU type, and that can check the length of the returned b.
-func (p *TPDU) encodeUserData() (b []byte, err error) {
-	udh, err := p.UDH.MarshalBinary()
+func (t *TPDU) encodeUserData() (b []byte, err error) {
+	udh, err := t.UDH.MarshalBinary()
 	if err != nil {
 		return nil, EncodeError("udh", err)
 	}
-	ud := p.UD
-	alphabet, err := p.Alphabet()
+	ud := t.UD
+	alphabet, err := t.Alphabet()
 	if err != nil {
 		return nil, EncodeError("alphabet", err)
 	}
-	udl := len(p.UD) // assume octets
+	udl := len(t.UD) // assume octets
 	switch alphabet {
 	case Alpha7Bit:
 		fillBits := 0
 		if dangling := len(udh) % 7; dangling != 0 {
 			fillBits = 7 - dangling
 		}
-		ud = gsm7.Pack7Bit(p.UD, fillBits)
+		ud = gsm7.Pack7Bit(t.UD, fillBits)
 		// udl is in septets so convert
 		if udl > 0 {
 			udl = udl + (len(udh)*8+fillBits)/7

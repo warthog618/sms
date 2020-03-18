@@ -15,6 +15,7 @@ import (
 
 // UserData represents the User Data field as defined in 3GPP TS 23.040 Section
 // 9.2.3.24.
+//
 // The UserData is comprised of an optional User Data Header and a short
 // message field.
 type UserData []byte
@@ -57,6 +58,7 @@ func (udh UserDataHeader) MarshalBinary() ([]byte, error) {
 
 // UnmarshalBinary reads the InformationElements from the binary User Data
 // Header.
+//
 // The src contains the complete UDH, including the UDHL and all IEs.
 // The function returns the number of bytes read from src, and any error
 // detected while unmarshalling.
@@ -92,6 +94,7 @@ func (udh *UserDataHeader) UnmarshalBinary(src []byte) (int, error) {
 }
 
 // IE returns the last instance of the IE with the given id in the UDH.
+//
 // If no such IE is found then the function returns false.
 func (udh UserDataHeader) IE(id byte) (InformationElement, bool) {
 	for i := len(udh) - 1; i >= 0; i-- {
@@ -115,6 +118,7 @@ func (udh UserDataHeader) IEs(id byte) []InformationElement {
 
 // ConcatInfo extracts the segmentation info contained in the provided User
 // Data Header.
+//
 // If the UDH contains no segmentation information then ok is false and zero
 // values are returned.
 // The returned values do not distinguish between 8bit and 16bit message
@@ -132,6 +136,7 @@ func (udh UserDataHeader) ConcatInfo() (segments, seqno, mref int, ok bool) {
 
 // ConcatInfo8 extracts the segmentation info contained in the provided User
 // Data Header, for the 8bit message reference case.
+//
 // If the UDH contains no segmentation information then ok is false and zero
 // values are returned.
 func (udh UserDataHeader) ConcatInfo8() (segments, seqno, mref int, ok bool) {
@@ -163,47 +168,22 @@ func (udh UserDataHeader) ConcatInfo16() (segments, seqno, mref int, ok bool) {
 // Additional character sets can be added using the AddLockingCharset and
 // AddShiftCharset methods.
 type UDDecoder struct {
-	locking map[charset.NationalLanguageIdentifier]bool
-	shift   map[charset.NationalLanguageIdentifier]bool
+	locking map[int]bool
+	shift   map[int]bool
+}
+
+// UDDecoderOption is a construction option for UDDecoders.
+type UDDecoderOption interface {
+	applyDecoderOption(*UDDecoder)
 }
 
 // NewUDDecoder creates a new UD Decoder.
-func NewUDDecoder() (*UDDecoder, error) {
-	i := &UDDecoder{}
-	return i, nil
-}
-
-// AddAllCharsets makes all possible character sets available to Decode.
-// This is equivalent to calling AddLockingCharset and AddShiftCharset for all
-// possible NationalLanguageIdentifiers.
-func (d *UDDecoder) AddAllCharsets() {
-	if d.locking == nil {
-		d.locking = make(map[charset.NationalLanguageIdentifier]bool)
+func NewUDDecoder(options ...UDDecoderOption) *UDDecoder {
+	d := UDDecoder{}
+	for _, option := range options {
+		option.applyDecoderOption(&d)
 	}
-	if d.shift == nil {
-		d.shift = make(map[charset.NationalLanguageIdentifier]bool)
-	}
-	for nli := charset.Turkish; nli <= charset.Urdu; nli++ {
-		d.locking[nli] = true
-		d.shift[nli] = true
-	}
-}
-
-// AddLockingCharset adds a locking character set to the sets available to
-// Decode.
-func (d *UDDecoder) AddLockingCharset(nli charset.NationalLanguageIdentifier) {
-	if d.locking == nil {
-		d.locking = make(map[charset.NationalLanguageIdentifier]bool)
-	}
-	d.locking[nli] = true
-}
-
-// AddShiftCharset adds a shift character set to the sets available to Decode.
-func (d *UDDecoder) AddShiftCharset(nli charset.NationalLanguageIdentifier) {
-	if d.shift == nil {
-		d.shift = make(map[charset.NationalLanguageIdentifier]bool)
-	}
-	d.shift[nli] = true
+	return &d
 }
 
 // Decode converts TPDU UD into the corresponding UTF8 message.
@@ -223,24 +203,24 @@ func (d *UDDecoder) Decode(ud UserData, udh UserDataHeader, alpha Alphabet) ([]b
 	case Alpha7Bit:
 		fallthrough
 	default:
-		gd := gsm7.NewDecoder()
+		options := []gsm7.DecoderOption{}
 		if ie, ok := udh.IE(lockingIEI); ok {
 			if len(ie.Data) >= 1 {
-				nli := charset.NationalLanguageIdentifier(ie.Data[0])
+				nli := int(ie.Data[0])
 				if _, ok := d.locking[nli]; ok {
-					gd = gd.WithCharset(charset.NewDecoder(nli))
+					options = append(options, gsm7.WithCharset(nli))
 				}
 			}
 		}
 		if ie, ok := udh.IE(shiftIEI); ok {
 			if len(ie.Data) >= 1 {
-				nli := charset.NationalLanguageIdentifier(ie.Data[0])
+				nli := int(ie.Data[0])
 				if _, ok := d.shift[nli]; ok {
-					gd = gd.WithExtCharset(charset.NewExtDecoder(nli))
+					options = append(options, gsm7.WithExtCharset(nli))
 				}
 			}
 		}
-		return gd.Decode(ud)
+		return gsm7.Decode(ud, options...)
 	}
 }
 
@@ -249,36 +229,135 @@ func (d *UDDecoder) Decode(ud UserData, udh UserDataHeader, alpha Alphabet) ([]b
 // Additional character sets can be added using the AddLockingCharset and
 // AddShiftCharset methods.
 type UDEncoder struct {
-	l []charset.NationalLanguageIdentifier // locking charsets in order
-	s []charset.NationalLanguageIdentifier // shift charsets in order
+	l []int // locking charsets in order
+	s []int // shift charsets in order
+}
+
+// UDEncoderOption is a construction option for UDEncoders.
+type UDEncoderOption interface {
+	applyEncoderOption(*UDEncoder)
 }
 
 // NewUDEncoder creates a new UDEncoder.
-func NewUDEncoder() (*UDEncoder, error) {
-	e := &UDEncoder{}
-	return e, nil
+func NewUDEncoder(options ...UDEncoderOption) *UDEncoder {
+	e := UDEncoder{}
+	for _, option := range options {
+		option.applyEncoderOption(&e)
+	}
+	return &e
 }
 
-// AddAllCharsets makes all possible character sets available to Encode.
-// This is equivalent to calling AddLockingCharset and AddShiftCharset for all
-// possible NationalLanguageIdentifiers, in increasing order.
-func (e *UDEncoder) AddAllCharsets() {
-	e.l = make([]charset.NationalLanguageIdentifier, 0, charset.Urdu)
-	e.s = make([]charset.NationalLanguageIdentifier, 0, charset.Urdu)
-	for nli := charset.Turkish; nli <= charset.Urdu; nli++ {
-		e.l = append(e.l, nli)
-		e.s = append(e.s, nli)
+// CharsetOption specifies the locking and shift character sets available for
+// encoding and decoding.
+//
+// These are in addition to the default character set.
+type CharsetOption struct {
+	nli []int
+}
+
+func (o CharsetOption) applyDecoderOption(d *UDDecoder) {
+	if d.locking == nil {
+		d.locking = make(map[int]bool)
+	}
+	if d.shift == nil {
+		d.shift = make(map[int]bool)
+	}
+	for _, nli := range o.nli {
+		d.locking[nli] = true
+		d.shift[nli] = true
 	}
 }
 
-// AddLockingCharset adds a locking character set to the sets available to Encode.
-func (e *UDEncoder) AddLockingCharset(nli charset.NationalLanguageIdentifier) {
-	e.l = append(e.l, nli)
+func (o CharsetOption) applyEncoderOption(e *UDEncoder) {
+	e.l = append(e.l, o.nli...)
+	e.s = append(e.s, o.nli...)
 }
 
-// AddShiftCharset adds a shift character set to the sets available to Encode.
-func (e *UDEncoder) AddShiftCharset(nli charset.NationalLanguageIdentifier) {
-	e.s = append(e.s, nli)
+// LockingCharsetOption specifies the locking character sets available for
+// encoding and decoding.
+//
+// These are in addition to the default character set.
+type LockingCharsetOption struct {
+	nli []int
+}
+
+func (o LockingCharsetOption) applyDecoderOption(d *UDDecoder) {
+	if d.locking == nil {
+		d.locking = make(map[int]bool)
+	}
+	for _, nli := range o.nli {
+		d.locking[nli] = true
+	}
+}
+
+func (o LockingCharsetOption) applyEncoderOption(e *UDEncoder) {
+	e.l = append(e.l, o.nli...)
+}
+
+// ShiftCharsetOption specifies the shift character sets available for encoding
+// and decoding.
+//
+// These are in addition to the default character set.
+type ShiftCharsetOption struct {
+	nli []int
+}
+
+func (o ShiftCharsetOption) applyDecoderOption(d *UDDecoder) {
+	if d.shift == nil {
+		d.shift = make(map[int]bool)
+	}
+	for _, nli := range o.nli {
+		d.shift[nli] = true
+	}
+}
+
+func (o ShiftCharsetOption) applyEncoderOption(e *UDEncoder) {
+	e.s = append(e.s, o.nli...)
+}
+
+// AllCharsetsOption specifies that all character sets are available for
+// encoding and decoding.
+type AllCharsetsOption struct{}
+
+func (o AllCharsetsOption) applyEncoderOption(e *UDEncoder) {
+	e.l = make([]int, charset.Size)
+	for nli := charset.Start; nli < charset.End; nli++ {
+		e.l[nli-1] = nli
+	}
+	e.s = e.l
+}
+
+func (o AllCharsetsOption) applyDecoderOption(d *UDDecoder) {
+	if d.locking == nil {
+		d.locking = make(map[int]bool)
+	}
+	if d.shift == nil {
+		d.shift = make(map[int]bool)
+	}
+	for nli := charset.Start; nli < charset.End; nli++ {
+		d.locking[nli] = true
+		d.shift[nli] = true
+	}
+}
+
+// WithAllCharsets makes all possible character sets available to Encode.
+// This is equivalent to calling AddLockingCharset and AddShiftCharset for all
+// possible NationalLanguageIdentifiers, in increasing order.
+var WithAllCharsets = AllCharsetsOption{}
+
+// WithCharset adds character sets to the sets available to Encode.
+func WithCharset(nli ...int) CharsetOption {
+	return CharsetOption{nli}
+}
+
+// WithLockingCharset adds a set of locking character sets to the sets available to Encode.
+func WithLockingCharset(nli ...int) LockingCharsetOption {
+	return LockingCharsetOption{nli}
+}
+
+// WithShiftCharset adds a set of shift character sets to the sets available to Encode.
+func WithShiftCharset(nli ...int) ShiftCharsetOption {
+	return ShiftCharsetOption{nli}
 }
 
 const (
@@ -302,15 +381,13 @@ const (
 //
 // Failing GSM7 conversion it falls back to UCS2/UTF16.
 func (e *UDEncoder) Encode(msg string) (UserData, UserDataHeader, Alphabet, error) {
-	ge := gsm7.NewEncoder() // default charset
-	enc, err := ge.Encode([]byte(msg))
+	enc, err := gsm7.Encode([]byte(msg)) // default charset
 	if err == nil {
 		return enc, nil, Alpha7Bit, nil
 	}
 	// try locking tables with default shift
 	for _, nli := range e.l {
-		lge := ge.WithCharset(charset.NewEncoder(nli))
-		enc, err = lge.Encode([]byte(msg))
+		enc, err = gsm7.Encode([]byte(msg), gsm7.WithCharset(nli))
 		if err == nil {
 			return enc, UserDataHeader{
 					InformationElement{ID: lockingIEI, Data: []byte{byte(nli)}}},
@@ -319,8 +396,7 @@ func (e *UDEncoder) Encode(msg string) (UserData, UserDataHeader, Alphabet, erro
 	}
 	// try default with language shift tables
 	for _, nli := range e.s {
-		sge := ge.WithExtCharset(charset.NewExtEncoder(nli))
-		enc, err = sge.Encode([]byte(msg))
+		enc, err = gsm7.Encode([]byte(msg), gsm7.WithExtCharset(nli))
 		if err == nil {
 			return enc, UserDataHeader{
 					InformationElement{ID: shiftIEI, Data: []byte{byte(nli)}}},

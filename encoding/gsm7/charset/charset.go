@@ -3,6 +3,7 @@
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
 
+// Package charset provides encoders and decoders for GSM character sets.
 package charset
 
 // DefaultDecoder returns the default mapping table from GSM7 to UTF8.
@@ -14,7 +15,7 @@ func DefaultDecoder() Decoder {
 }
 
 // NewDecoder returns the mapping table from GSM7 to UTF8 for the given language.
-func NewDecoder(nli NationalLanguageIdentifier) Decoder {
+func NewDecoder(nli int) Decoder {
 	if di, ok := decoder[nli]; ok {
 		if *di.e == nil {
 			*di.e = di.g()
@@ -30,7 +31,7 @@ func DefaultExtDecoder() Decoder {
 }
 
 // NewExtDecoder returns the extension mapping table from GSM7 to UTF8 for the given language.
-func NewExtDecoder(nli NationalLanguageIdentifier) Decoder {
+func NewExtDecoder(nli int) Decoder {
 	if di, ok := extDecoder[nli]; ok {
 		return *di.e
 	}
@@ -46,7 +47,7 @@ func DefaultEncoder() Encoder {
 }
 
 // NewEncoder returns the mapping table from UTF8 to GSM7 for the given language.
-func NewEncoder(nli NationalLanguageIdentifier) Encoder {
+func NewEncoder(nli int) Encoder {
 	if ei, ok := encoder[nli]; ok {
 		if *ei.e == nil {
 			*ei.e = ei.g()
@@ -65,7 +66,7 @@ func DefaultExtEncoder() Encoder {
 }
 
 // NewExtEncoder returns the extension mapping table from UTF8 to GSM7 for the given language.
-func NewExtEncoder(nli NationalLanguageIdentifier) Encoder {
+func NewExtEncoder(nli int) Encoder {
 	if ei, ok := extEncoder[nli]; ok {
 		if *ei.e == nil {
 			*ei.e = ei.g()
@@ -87,7 +88,7 @@ type NationalLanguageIdentifier int
 
 const (
 	// Default character set.
-	Default NationalLanguageIdentifier = iota
+	Default int = iota
 	// Turkish character set.
 	Turkish
 	// Spanish character set
@@ -114,6 +115,15 @@ const (
 	Telugu
 	// Urdu character set
 	Urdu
+
+	// Helper consts for creating and iterating over slices
+
+	// End marker for loops (exclusive)
+	End
+	// Start point for loops (inclusive)
+	Start = Turkish
+	// Size is for array sizing (excluding default)
+	Size = End - Start
 )
 
 func generateEncoder(d Decoder) Encoder {
@@ -157,7 +167,7 @@ type encoderNGen struct {
 }
 
 var (
-	decoder = map[NationalLanguageIdentifier]decoderNGen{
+	decoder = map[int]decoderNGen{
 		Turkish: {&turkishDecoder, generateTurkishDecoder},
 		// Spanish uses default
 		Portuguese: {&portugueseDecoder, generatePortugueseDecoder},
@@ -172,7 +182,7 @@ var (
 		Telugu:     {&teluguDecoder, nil},
 		Urdu:       {&urduDecoder, nil},
 	}
-	extDecoder = map[NationalLanguageIdentifier]decoderNGen{
+	extDecoder = map[int]decoderNGen{
 		Turkish:    {&turkishExtDecoder, nil},
 		Spanish:    {&spanishExtDecoder, nil},
 		Portuguese: {&portugueseExtDecoder, nil},
@@ -187,7 +197,7 @@ var (
 		Telugu:     {&teluguExtDecoder, nil},
 		Urdu:       {&urduExtDecoder, nil},
 	}
-	encoder = map[NationalLanguageIdentifier]encoderNGen{
+	encoder = map[int]encoderNGen{
 		Turkish: {&turkishEncoder, generateTurkishEncoder},
 		// Spanish uses default
 		Portuguese: {&portugueseEncoder, generatePortugueseEncoder},
@@ -202,7 +212,7 @@ var (
 		Telugu:     {&teluguEncoder, generateTeluguEncoder},
 		Urdu:       {&urduEncoder, generateUrduEncoder},
 	}
-	extEncoder = map[NationalLanguageIdentifier]encoderNGen{
+	extEncoder = map[int]encoderNGen{
 		Turkish:    {&turkishExtEncoder, generateTurkishExtEncoder},
 		Spanish:    {&spanishExtEncoder, generateSpanishExtEncoder},
 		Portuguese: {&portugueseExtEncoder, generatePortugueseExtEncoder},

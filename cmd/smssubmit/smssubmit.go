@@ -12,18 +12,16 @@ import (
 	"log"
 	"os"
 
-	"github.com/warthog618/sms/encoding/gsm7/charset"
-	"github.com/warthog618/sms/encoding/tpdu"
+	"github.com/warthog618/sms"
 	"github.com/warthog618/sms/ms/message"
-	"github.com/warthog618/sms/ms/sar"
 )
 
 func main() {
 	var number, msg string
-	var language uint
+	var nli int
 	flag.StringVar(&number, "number", "", "Destination number in international format")
 	flag.StringVar(&msg, "message", "", "The message to encode")
-	flag.UintVar(&language, "language", 0, "The NLI of a character set to use in addition to the default")
+	flag.IntVar(&nli, "language", 0, "The NLI of a character set to use in addition to the default")
 	flag.Usage = usage
 	flag.Parse()
 	if number == "" || msg == "" {
@@ -31,18 +29,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	e, err := tpdu.NewUDEncoder()
-	if err != nil {
-		log.Println(err)
-		return
+	options := []message.EncoderOption(nil)
+	if nli != 0 {
+		options = append(options, message.WithCharset(nli))
 	}
-	if language != 0 {
-		e.AddLockingCharset(charset.NationalLanguageIdentifier(language))
-		e.AddShiftCharset(charset.NationalLanguageIdentifier(language))
-	}
-	sg := sar.NewSegmenter()
-	t := message.NewEncoder(e, sg)
-	pdus, err := t.Encode(number, msg)
+	pdus, err := sms.Encode(number, msg, options...)
 	if err != nil {
 		log.Println(err)
 		return
@@ -56,7 +47,6 @@ func main() {
 		b, _ := p.MarshalBinary()
 		fmt.Printf("Submit TPDU %d:\n%s\n", i+1, hex.EncodeToString(b))
 	}
-
 }
 
 func usage() {

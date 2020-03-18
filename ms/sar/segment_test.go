@@ -113,7 +113,7 @@ func TestSegment(t *testing.T) {
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			tmpl := tpdu.Submit{}
-			tmpl.DCS = p.in.dcs
+			tmpl.DCS = tpdu.DCS(p.in.dcs)
 			tmpl.SetUDH(p.in.udh)
 			out := s.Segment(p.in.msg, &tmpl)
 			expected := make([]tpdu.Submit, len(p.out))
@@ -121,7 +121,7 @@ func TestSegment(t *testing.T) {
 				expected = nil
 			}
 			for i, o := range p.out {
-				expected[i].DCS = o.dcs
+				expected[i].DCS = tpdu.DCS(o.dcs)
 				expected[i].SetUDH(o.udh)
 				expected[i].UD = o.ud
 			}
@@ -176,7 +176,7 @@ func TestWith16BitMR(t *testing.T) {
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			tmpl := tpdu.Submit{}
-			tmpl.DCS = p.in.dcs
+			tmpl.DCS = tpdu.DCS(p.in.dcs)
 			tmpl.SetUDH(p.in.udh)
 			out := s.Segment(p.in.msg, &tmpl)
 			expected := make([]tpdu.Submit, len(p.out))
@@ -184,7 +184,7 @@ func TestWith16BitMR(t *testing.T) {
 				expected = nil
 			}
 			for i, o := range p.out {
-				expected[i].DCS = o.dcs
+				expected[i].DCS = tpdu.DCS(o.dcs)
 				expected[i].SetUDH(o.udh)
 				expected[i].UD = o.ud
 			}

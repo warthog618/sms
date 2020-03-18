@@ -13,6 +13,7 @@ import (
 	"os"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/warthog618/sms"
 	"github.com/warthog618/sms/encoding/tpdu"
 	"github.com/warthog618/sms/ms/pdumode"
 )
@@ -36,27 +37,14 @@ func main() {
 	}
 	tb := b
 	if *pm {
-		pd := pdumode.Decoder{}
-		smsc, ntb, err := pd.Decode(b)
+		smsc, ntb, err := pdumode.Decode(b)
 		if err != nil {
 			log.Fatal(err)
 		}
 		tb = ntb
 		spew.Dump(smsc)
 	}
-	td, err := tpdu.NewDecoder(
-		tpdu.RegisterCommandDecoder,
-		tpdu.RegisterDeliverDecoder,
-		tpdu.RegisterDeliverReportDecoder,
-		tpdu.RegisterReservedDecoder,
-		tpdu.RegisterSubmitDecoder,
-		tpdu.RegisterSubmitReportDecoder,
-		tpdu.RegisterStatusReportDecoder,
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	tp, err := td.Decode(tb, drn)
+	tp, err := sms.Decode(tb, drn)
 	if err != nil {
 		log.Fatal(err)
 	}

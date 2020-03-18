@@ -22,7 +22,7 @@ func NewSubmitReport() *SubmitReport {
 // SetDCS sets the SubmitReport dcs field and the corresponding bit of the pi.
 func (s *SubmitReport) SetDCS(dcs byte) {
 	s.PI = s.PI | 0x02
-	s.TPDU.DCS = dcs
+	s.TPDU.DCS = DCS(dcs)
 }
 
 // SetPID sets the SubmitReport pid field and the corresponding bit of the pi.
@@ -56,7 +56,7 @@ func (s *SubmitReport) MarshalBinary() ([]byte, error) {
 		b = append(b, s.PID)
 	}
 	if s.PI&0x02 == 0x02 {
-		b = append(b, s.DCS)
+		b = append(b, byte(s.DCS))
 	}
 	if s.PI&0x4 == 0x4 {
 		ud, err := s.encodeUserData()
@@ -104,7 +104,7 @@ func (s *SubmitReport) UnmarshalBinary(src []byte) error {
 		if len(src) <= ri {
 			return DecodeError("dcs", ri, ErrUnderflow)
 		}
-		s.DCS = src[ri]
+		s.DCS = DCS(src[ri])
 		ri++
 	}
 	if s.PI&0x04 == 0x04 {

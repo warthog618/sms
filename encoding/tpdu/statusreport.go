@@ -22,26 +22,26 @@ func NewStatusReport() *StatusReport {
 	return &StatusReport{TPDU: TPDU{FirstOctet: byte(MtCommand)}}
 }
 
-// SetDCS sets the StatusReport dcs field and the corresponding bit of the pi.
+// SetDCS sets the StatusReport dcs field and the corresponding bit of the PI.
 func (s *StatusReport) SetDCS(dcs byte) {
 	s.PI = s.PI | 0x02
-	s.TPDU.DCS = dcs
+	s.TPDU.DCS = DCS(dcs)
 }
 
-// SetPID sets the StatusReport pid field and the corresponding bit of the pi.
+// SetPID sets the StatusReport pid field and the corresponding bit of the PI.
 func (s *StatusReport) SetPID(pid byte) {
 	s.PI = s.PI | 0x01
 	s.TPDU.PID = pid
 }
 
-// SetUD sets the StatusReport ud field and the corresponding bit of the pi.
+// SetUD sets the StatusReport ud field and the corresponding bit of the PI.
 func (s *StatusReport) SetUD(ud UserData) {
 	s.PI = s.PI | 0x04
 	s.TPDU.UD = ud
 }
 
 // SetUDH sets the User Data Header of the StatusReport and the corresponding
-// bit of the pi.
+// bit of the PI.
 func (s *StatusReport) SetUDH(udh UserDataHeader) {
 	s.PI = s.PI | 0x04
 	s.TPDU.SetUDH(udh)
@@ -74,7 +74,7 @@ func (s *StatusReport) MarshalBinary() ([]byte, error) {
 		b = append(b, s.PID)
 	}
 	if s.PI&0x02 == 0x02 {
-		b = append(b, s.DCS)
+		b = append(b, byte(s.DCS))
 	}
 	if s.PI&0x4 == 0x4 {
 		ud, err := s.encodeUserData()
@@ -145,7 +145,7 @@ func (s *StatusReport) unmarshalOptionals(ri int, src []byte) error {
 		if len(src) <= ri {
 			return DecodeError("dcs", ri, ErrUnderflow)
 		}
-		s.DCS = src[ri]
+		s.DCS = DCS(src[ri])
 		ri++
 	}
 	if s.PI&0x04 == 0x04 {
