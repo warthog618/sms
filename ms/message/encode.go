@@ -22,6 +22,14 @@ type Encoder struct {
 	msgCount int
 }
 
+type EncoderConfig struct {
+	ude   UDEncoder
+	eopts []tpdu.UDEncoderOption
+	s     Segmenter
+	sopts []sar.SegmenterOption
+	sf    SubmitFactory
+}
+
 // UDEncoder converts a UTF-8 message into the corresponding TPDU user data.
 type UDEncoder interface {
 	Encode(msg string) (tpdu.UserData, tpdu.UserDataHeader, tpdu.Alphabet, error)
@@ -38,10 +46,10 @@ type SubmitFactory func(options ...tpdu.SubmitOption) *tpdu.Submit
 
 // EncoderOption is a construction option for the Encoder.
 type EncoderOption interface {
-	applyEncoderOption(*Encoder)
+	applyEncoderOption(*EncoderConfig)
 }
 
-func WithCharset(nli ...int) EncoderOption {
+func WithCharset(nli ...int) CharsetOption {
 	return CharsetOption{nli}
 }
 
@@ -49,11 +57,15 @@ type CharsetOption struct {
 	nli []int
 }
 
-func (o CharsetOption) applyEncoderOption(e *Encoder) {
-	e.ude = tpdu.NewUDEncoder(tpdu.WithCharset(o.nli...))
+func (o CharsetOption) applyEncoderOption(ec *EncoderConfig) {
+	ec.ude = tpdu.NewUDEncoder(tpdu.WithCharset(o.nli...))
 }
 
-func WithLockingCharset(nli ...int) EncoderOption {
+func (o CharsetOption) applyReassemblerOption(rc *ReassemblerConfig) {
+	rc.dopts = append(rc.dopts, tpdu.WithCharset(o.nli...))
+}
+
+func WithLockingCharset(nli ...int) LockingCharsetOption {
 	return LockingCharsetOption{nli}
 }
 
@@ -61,11 +73,15 @@ type LockingCharsetOption struct {
 	nli []int
 }
 
-func (o LockingCharsetOption) applyEncoderOption(e *Encoder) {
-	e.ude = tpdu.NewUDEncoder(tpdu.WithLockingCharset(o.nli...))
+func (o LockingCharsetOption) applyEncoderOption(ec *EncoderConfig) {
+	ec.ude = tpdu.NewUDEncoder(tpdu.WithLockingCharset(o.nli...))
 }
 
-func WithShiftCharset(nli ...int) EncoderOption {
+func (o LockingCharsetOption) applyReasemblerOption(rc *ReassemblerConfig) {
+	rc.dopts = append(rc.dopts, tpdu.WithLockingCharset(o.nli...))
+}
+
+func WithShiftCharset(nli ...int) ShiftCharsetOption {
 	return ShiftCharsetOption{nli}
 }
 
@@ -73,25 +89,30 @@ type ShiftCharsetOption struct {
 	nli []int
 }
 
-func (o ShiftCharsetOption) applyEncoderOption(e *Encoder) {
-	e.ude = tpdu.NewUDEncoder(tpdu.WithShiftCharset(o.nli...))
+func (o ShiftCharsetOption) applyEncoderOption(ec *EncoderConfig) {
+	ec.ude = tpdu.NewUDEncoder(tpdu.WithShiftCharset(o.nli...))
+}
+
+func (o ShiftCharsetOption) applyReasemblerOption(rc *ReassemblerConfig) {
+	rc.dopts = append(rc.dopts, tpdu.WithShiftCharset(o.nli...))
 }
 
 // NewEncoder creates an Encoder.
 func NewEncoder(options ...EncoderOption) *Encoder {
-	e := Encoder{}
+	ec := EncoderConfig{}
 	for _, option := range options {
-		option.applyEncoderOption(&e)
+		option.applyEncoderOption(&ec)
 	}
-	if e.ude == nil {
-		e.ude = tpdu.NewUDEncoder()
+	if ec.ude == nil {
+		ec.ude = tpdu.NewUDEncoder(ec.eopts...)
 	}
-	if e.s == nil {
-		e.s = sar.NewSegmenter()
+	if ec.s == nil {
+		ec.s = sar.NewSegmenter(ec.sopts...)
 	}
-	if e.sf == nil {
-		e.sf = tpdu.NewSubmit
+	if ec.sf == nil {
+		ec.sf = tpdu.NewSubmit
 	}
+	e := Encoder{ude: ec.ude, s: ec.s, sf: ec.sf}
 	return &e
 }
 
@@ -99,8 +120,8 @@ type UDEncoderOption struct {
 	ude UDEncoder
 }
 
-func (o UDEncoderOption) applyEncoderOption(e *Encoder) {
-	e.ude = o.ude
+func (o UDEncoderOption) applyEncoderOption(ec *EncoderConfig) {
+	ec.ude = o.ude
 }
 
 // WithUDEncoder specifies the user data encoder to be used when encoding messages.
@@ -112,8 +133,8 @@ type SegmenterOption struct {
 	s Segmenter
 }
 
-func (o SegmenterOption) applyEncoderOption(e *Encoder) {
-	e.s = o.s
+func (o SegmenterOption) applyEncoderOption(ec *EncoderConfig) {
+	ec.s = o.s
 }
 
 // WithSegmenter specifies the segmenter to be used when encoding messages.
@@ -125,8 +146,8 @@ type SubmitFactoryOption struct {
 	sf SubmitFactory
 }
 
-func (o SubmitFactoryOption) applyEncoderOption(e *Encoder) {
-	e.sf = o.sf
+func (o SubmitFactoryOption) applyEncoderOption(ec *EncoderConfig) {
+	ec.sf = o.sf
 }
 
 // WithSubmitFactory specifies the factory for the template Submit TPDU for

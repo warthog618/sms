@@ -10,6 +10,7 @@ import (
 
 	"github.com/warthog618/sms/encoding/tpdu"
 	"github.com/warthog618/sms/encoding/ucs2"
+	"github.com/warthog618/sms/ms/sar"
 )
 
 // Message represents a message received from an origination number.
@@ -25,12 +26,12 @@ type Message struct {
 // them using the DataDecoder (typically a tpdu.UDDecoder).
 type Reassembler struct {
 	c Collector
-	g Concatenator
+	d UDDecoder
 }
 
-// DataDecoder provides a Decode method to convert the user data from a TPDU
+// UDDecoder provides a Decode method to convert the user data from a TPDU
 // into the corresponding UTF-8 message.
-type DataDecoder interface {
+type UDDecoder interface {
 	Decode(ud tpdu.UserData, udh tpdu.UserDataHeader, alpha tpdu.Alphabet) ([]byte, error)
 }
 
@@ -42,9 +43,54 @@ type Collector interface {
 }
 
 // NewReassembler creates a Reassembler.
-func NewReassembler(d DataDecoder, c Collector) *Reassembler {
-	r := Reassembler{c: c, g: Concatenator{d}}
+func NewReassembler(options ...ReassemblerOption) *Reassembler {
+	rc := ReassemblerConfig{}
+	for _, option := range options {
+		option.applyReassemblerOption(&rc)
+	}
+	if rc.c == nil {
+		rc.c = sar.NewCollector()
+	}
+	if rc.d == nil {
+		rc.d = tpdu.NewUDDecoder(rc.dopts...)
+	}
+	r := Reassembler{rc.c, rc.d}
 	return &r
+}
+
+type ReassemblerConfig struct {
+	d     UDDecoder
+	dopts []tpdu.UDDecoderOption
+	c     Collector
+	//copts []sar.CollectorOption
+}
+
+type ReassemblerOption interface {
+	applyReassemblerOption(*ReassemblerConfig)
+}
+
+func WithCollector(c Collector) CollectorOption {
+	return CollectorOption{c}
+}
+
+type CollectorOption struct {
+	c Collector
+}
+
+func (o CollectorOption) applyReassemblerOption(r *ReassemblerConfig) {
+	r.c = o.c
+}
+
+func WithDataDecoder(d UDDecoder) DataDecoderOption {
+	return DataDecoderOption{d}
+}
+
+type DataDecoderOption struct {
+	d UDDecoder
+}
+
+func (o DataDecoderOption) applyReassemblerOption(r *ReassemblerConfig) {
+	r.d = o.d
 }
 
 // Close terminates the reassembler and all the reassembly pipes currently active.
@@ -66,24 +112,14 @@ func (r *Reassembler) Reassemble(b []byte) (*Message, error) {
 		return nil, err
 	}
 	if segments != nil {
-		return r.g.Concatenate(segments)
+		return r.concatenate(segments)
 	}
 	return nil, nil
 }
 
-// Concatenator converts a set of concatenated TPDUs into a Message.
-type Concatenator struct {
-	d DataDecoder
-}
-
-// NewConcatenator creates a new Concatenator.
-func NewConcatenator(d DataDecoder) *Concatenator {
-	return &Concatenator{d}
-}
-
 // Concatenate converts a set of concatenated TPDUs into a Message.
 // The User Data in each TPDU is converted to UTF-8 using the DataDecoder.
-func (c *Concatenator) Concatenate(segments []*tpdu.Deliver) (*Message, error) {
+func (r *Reassembler) concatenate(segments []*tpdu.Deliver) (*Message, error) {
 	bl := 0
 	ts := make([][]byte, len(segments))
 	var danglingSurrogate tpdu.UserData
@@ -94,7 +130,7 @@ func (c *Concatenator) Concatenate(segments []*tpdu.Deliver) (*Message, error) {
 			ud = append(danglingSurrogate, ud...)
 			danglingSurrogate = nil
 		}
-		d, err := c.d.Decode(ud, s.UDH, a)
+		d, err := r.d.Decode(ud, s.UDH, a)
 		if err != nil {
 			switch e := err.(type) {
 			case ucs2.ErrDanglingSurrogate:

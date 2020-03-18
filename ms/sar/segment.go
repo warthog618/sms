@@ -74,7 +74,7 @@ func (s *Segmenter) Segment(msg []byte, t *tpdu.Submit) []tpdu.Submit {
 	s.mutex.Unlock()
 	for i := 0; i < count; i++ {
 		sg := &pdus[i]
-		sg.Clone(t)
+		sg.Clone(t) // !!! create from TPDU options rather than template
 		ie := s.ief(msgCount, count, i+1)
 		sg.SetUDH(append(t.UDH, ie))
 		sg.UD = chunks[i]

@@ -52,6 +52,7 @@ func (c *Collector) Close() {
 }
 
 // Collect adds a TPDU to the collection.
+//
 // If all the components of a concatenated TPDU are available then they are
 // returned.
 func (c *Collector) Collect(pdu *tpdu.Deliver) (d []*tpdu.Deliver, err error) {
@@ -133,7 +134,7 @@ var (
 	// They may differ in other fields, particularly UD, but those fields
 	// cannot be used to determine which of the two may better fit the
 	// reassembly, so the first is kept and the second discarded.
-	ErrDuplicateSegment = errors.New("duplcate segment")
+	ErrDuplicateSegment = errors.New("duplicate segment")
 	// ErrReassemblyInconsistency indicates a segment has arrived for a
 	// reassembly that has a seqno greater than the number of segments in the
 	// reassembly.
