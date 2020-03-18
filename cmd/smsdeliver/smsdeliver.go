@@ -33,7 +33,7 @@ func main() {
 	// Or meta WithCollector(c), WithUDDecoder(udd)...
 	udd := tpdu.NewUDDecoder(tpdu.WithAllCharsets)
 	c := sar.NewCollector(time.Minute*5, func(arg1 error) {})
-	x := message.NewReassembler(udd, c)
+	x := message.NewReassembler(message.WithDataDecoder(udd), message.WithCollector(c))
 	defer x.Close()
 	for _, a := range flag.Args() {
 		b, err := hex.DecodeString(a)
