@@ -51,7 +51,7 @@ func Encode(src []rune) []byte {
 	return dst
 }
 
-// ErrDanglingSurrogate indicates only half of a suggorate pair is provided at
+// ErrDanglingSurrogate indicates only half of a surrogate pair is provided at
 // the end of the byte array being decoded.
 type ErrDanglingSurrogate uint16
 
