@@ -1,12 +1,8 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+/// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
+// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
 // Package ms provides functionality specific to the Mobile Station.
 //
-// The contained packages add layers of functionality above tpdu:
-// - sar provides segmentation and reassembly above tpdu
-// - message provides conversion to abstract messages above sar
-// - pdumode provides SMSC stuff...
+//  - pdumode provides encoding and decoding of PDU mode frames from SMS modems.
 package ms
