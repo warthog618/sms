@@ -1,7 +1,6 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
+// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
 package tpdu_test
 
@@ -93,12 +92,12 @@ func TestEncodeError(t *testing.T) {
 // TestErrUnsupportedMTI tests that the errors can be stringified.
 // It is fragile, as it compares the strings exactly, but its main purpose is
 // to confirm the Error function doesn't recurse, as that is bad.
-func TestErrUnsupportedMTI(t *testing.T) {
+func TestErrUnsupportedSmsType(t *testing.T) {
 	patterns := []byte{0x00, 0xa0, 0x0a, 0x9a, 0xa9, 0xff}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
-			err := tpdu.ErrUnsupportedMTI(p)
-			expected := fmt.Sprintf("unsupported MTI: 0x%x", uint(err))
+			err := tpdu.ErrUnsupportedSmsType(p)
+			expected := fmt.Sprintf("unsupported SMS type: 0x%x", uint(err))
 			s := err.Error()
 			if s != expected {
 				t.Errorf("failed to stringify %02x, expected '%s', got '%s'", p, expected, s)

@@ -1,7 +1,6 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
+// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
 package tpdu
 
@@ -228,5 +227,35 @@ func relativeToDuration(t byte) time.Duration {
 		return time.Hour * 24 * time.Duration(t-166)
 	default:
 		return time.Hour * 24 * 7 * time.Duration(t-192)
+	}
+}
+
+func (vpf ValidityPeriodFormat) String() string {
+	switch vpf {
+	default:
+		return "Unknown"
+	case VpfNotPresent:
+		return "NotPresent"
+	case VpfAbsolute:
+		return "Absolute"
+	case VpfRelative:
+		return "Relative"
+	case VpfEnhanced:
+		return "Enhanced"
+	}
+}
+
+func (evpf EnhancedValidityPeriodFormat) String() string {
+	switch evpf {
+	default:
+		return "Unknown"
+	case EvpfNotPresent:
+		return "NotPresent"
+	case EvpfRelative:
+		return "Relative"
+	case EvpfRelativeSeconds:
+		return "RelativeSeconds"
+	case EvpfRelativeHHMMSS:
+		return "RelativeHHMMSS"
 	}
 }

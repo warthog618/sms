@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/warthog618/sms/encoding/tpdu"
 )
 
@@ -58,12 +59,8 @@ func TestDCSAlphabet(t *testing.T) {
 		f := func(t *testing.T) {
 			d := tpdu.DCS(p.in)
 			a, err := d.Alphabet()
-			if err != p.err {
-				t.Errorf("error converting 0x%02x: %v", p.in, err)
-			}
-			if a != p.out {
-				t.Errorf("failed to convert 0x%02x: expected %d, got %d", p.in, p.out, a)
-			}
+			assert.Equal(t, p.err, err)
+			assert.Equal(t, p.out, a)
 		}
 		t.Run(fmt.Sprintf("%08b", p.in), f)
 	}
@@ -75,7 +72,7 @@ type dcsWithAlphabetIn struct {
 }
 
 type dcsWithAlphabetOut struct {
-	out byte
+	out tpdu.DCS
 	err error
 }
 
@@ -84,35 +81,35 @@ func TestDCSWithAlphabet(t *testing.T) {
 	patterns := make(map[dcsWithAlphabetIn]dcsWithAlphabetOut) // the good ones
 	for i := 0x00; i < 0x80; i++ {
 		for a := 0; a < 4; a++ {
-			patterns[dcsWithAlphabetIn{byte(i), tpdu.Alphabet(a)}] = dcsWithAlphabetOut{byte(i&^0x0c | a<<2), nil}
+			patterns[dcsWithAlphabetIn{byte(i), tpdu.Alphabet(a)}] =
+				dcsWithAlphabetOut{tpdu.DCS(i&^0x0c | a<<2), nil}
 		}
 	}
 	for i := 0xc0; i < 0xe0; i++ {
-		patterns[dcsWithAlphabetIn{byte(i), tpdu.Alpha7Bit}] = dcsWithAlphabetOut{byte(i), nil}
+		patterns[dcsWithAlphabetIn{byte(i), tpdu.Alpha7Bit}] =
+			dcsWithAlphabetOut{tpdu.DCS(i), nil}
 	}
 	for i := 0xe0; i < 0xf0; i++ {
-		patterns[dcsWithAlphabetIn{byte(i), tpdu.AlphaUCS2}] = dcsWithAlphabetOut{byte(i), nil}
+		patterns[dcsWithAlphabetIn{byte(i), tpdu.AlphaUCS2}] =
+			dcsWithAlphabetOut{tpdu.DCS(i), nil}
 	}
 	for i := 0xf0; i <= 0xff; i++ {
 		for a := 0; a < 2; a++ {
-			patterns[dcsWithAlphabetIn{byte(i), tpdu.Alphabet(a)}] = dcsWithAlphabetOut{byte(i&^0x0c | a<<2), nil}
+			patterns[dcsWithAlphabetIn{byte(i), tpdu.Alphabet(a)}] =
+				dcsWithAlphabetOut{tpdu.DCS(i&^0x0c | a<<2), nil}
 		}
 	}
 	for i := 0x00; i <= 0xff; i++ {
 		for a := 0; a < 4; a++ {
 			p, ok := patterns[dcsWithAlphabetIn{byte(i), tpdu.Alphabet(a)}]
 			if !ok {
-				p = dcsWithAlphabetOut{byte(i), tpdu.ErrInvalid} // the bad ones
+				p = dcsWithAlphabetOut{tpdu.DCS(i), tpdu.ErrInvalid} // the bad ones
 			}
 			f := func(t *testing.T) {
 				d := tpdu.DCS(i)
 				dcs, err := d.WithAlphabet(tpdu.Alphabet(a))
-				if err != p.err {
-					t.Errorf("error converting 0x%02x: %v", i, err)
-				}
-				if dcs != tpdu.DCS(p.out) {
-					t.Errorf("failed to convert 0x%02x: expected %x, got %x", i, p.out, dcs)
-				}
+				assert.Equal(t, p.err, err)
+				assert.Equal(t, p.out, dcs)
 			}
 			t.Run(fmt.Sprintf("%08b_%d", i, a), f)
 		}
@@ -165,12 +162,8 @@ func TestDCSClass(t *testing.T) {
 		f := func(t *testing.T) {
 			d := tpdu.DCS(p.in)
 			c, err := d.Class()
-			if err != p.err {
-				t.Errorf("error converting 0x%02x: %v", p.in, err)
-			}
-			if c != p.out {
-				t.Errorf("failed to convert 0x%02x: expected %d, got %d", p.in, p.out, c)
-			}
+			assert.Equal(t, p.err, err)
+			assert.Equal(t, p.out, c)
 		}
 		t.Run(fmt.Sprintf("%08b", p.in), f)
 	}
@@ -182,7 +175,7 @@ type dcsWithClassIn struct {
 }
 
 type dcsWithClassOut struct {
-	out byte
+	out tpdu.DCS
 	err error
 }
 
@@ -191,29 +184,27 @@ func TestDCSWithClass(t *testing.T) {
 	patterns := make(map[dcsWithClassIn]dcsWithClassOut) // the good ones
 	for i := 0x00; i < 0x80; i++ {
 		for a := 0; a < 4; a++ {
-			patterns[dcsWithClassIn{byte(i), tpdu.MessageClass(a)}] = dcsWithClassOut{byte(i&^0x03 | 0x10 | a), nil}
+			patterns[dcsWithClassIn{byte(i), tpdu.MessageClass(a)}] =
+				dcsWithClassOut{tpdu.DCS(i&^0x03 | 0x10 | a), nil}
 		}
 	}
 	for i := 0xf0; i <= 0xff; i++ {
 		for a := 0; a < 4; a++ {
-			patterns[dcsWithClassIn{byte(i), tpdu.MessageClass(a)}] = dcsWithClassOut{byte(i&^0x03 | a), nil}
+			patterns[dcsWithClassIn{byte(i), tpdu.MessageClass(a)}] =
+				dcsWithClassOut{tpdu.DCS(i&^0x03 | a), nil}
 		}
 	}
 	for i := 0x00; i <= 0xff; i++ {
 		for a := 0; a < 4; a++ {
 			p, ok := patterns[dcsWithClassIn{byte(i), tpdu.MessageClass(a)}]
 			if !ok {
-				p = dcsWithClassOut{byte(i), tpdu.ErrInvalid} // the bad ones
+				p = dcsWithClassOut{tpdu.DCS(i), tpdu.ErrInvalid} // the bad ones
 			}
 			f := func(t *testing.T) {
 				d := tpdu.DCS(i)
 				dcs, err := d.WithClass(tpdu.MessageClass(a))
-				if err != p.err {
-					t.Errorf("error converting 0x%02x: %v", i, err)
-				}
-				if dcs != tpdu.DCS(p.out) {
-					t.Errorf("failed to convert 0x%02x: expected %x, got %x", i, p.out, dcs)
-				}
+				assert.Equal(t, p.err, err)
+				assert.Equal(t, p.out, dcs)
 			}
 			t.Run(fmt.Sprintf("%08b_%d", i, a), f)
 		}
@@ -246,9 +237,7 @@ func TestDCSCompressed(t *testing.T) {
 		f := func(t *testing.T) {
 			d := tpdu.DCS(p.in)
 			c := d.Compressed()
-			if c != p.out {
-				t.Errorf("expected result %v, got %v", p.out, c)
-			}
+			assert.Equal(t, p.out, c)
 		}
 		t.Run(fmt.Sprintf("%02x", p.in), f)
 	}

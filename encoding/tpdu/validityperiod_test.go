@@ -1,7 +1,6 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
+// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
 package tpdu_test
 
@@ -297,5 +296,37 @@ func TestVPUnmarshalBinary(t *testing.T) {
 			assert.Equal(t, p.out, s)
 		}
 		t.Run(p.name, f)
+	}
+}
+
+func TestVPFString(t *testing.T) {
+	patterns := []struct {
+		vpf tpdu.ValidityPeriodFormat
+		out string
+	}{
+		{0, "NotPresent"},
+		{1, "Enhanced"},
+		{2, "Relative"},
+		{3, "Absolute"},
+		{4, "Unknown"},
+	}
+	for _, p := range patterns {
+		assert.Equal(t, p.out, p.vpf.String())
+	}
+}
+
+func TestEVPFString(t *testing.T) {
+	patterns := []struct {
+		evpf tpdu.EnhancedValidityPeriodFormat
+		out  string
+	}{
+		{0, "NotPresent"},
+		{1, "Relative"},
+		{2, "RelativeSeconds"},
+		{3, "RelativeHHMMSS"},
+		{4, "Unknown"},
+	}
+	for _, p := range patterns {
+		assert.Equal(t, p.out, p.evpf.String())
 	}
 }

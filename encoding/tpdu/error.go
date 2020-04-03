@@ -8,6 +8,7 @@ package tpdu
 import (
 	"errors"
 	"fmt"
+	"io"
 )
 
 type decodeError struct {
@@ -26,6 +27,9 @@ func DecodeError(f string, o int, e error) error {
 		s.Field = fmt.Sprintf("%s.%s", f, s.Field)
 		s.Offset = s.Offset + o
 		return s
+	}
+	if e == io.EOF {
+		e = ErrUnderflow
 	}
 	return decodeError{f, o, e}
 }
@@ -54,13 +58,12 @@ func (e decodeError) Error() string {
 	return fmt.Sprintf("tpdu: error decoding %s at octet %d: %v", e.Field, e.Offset, e.Err)
 }
 
-// ErrUnsupportedMTI indicates the MTI of the pdu being decoded is not
-// unsupported by the decoder.  This does not necessarily mean the MTI is
-// invalid, only that no decoder has been defined that MTI and direction.
-type ErrUnsupportedMTI byte
+// ErrUnsupportedSmsType indicates the type of TPDU being decoded is not
+// unsupported by the decoder.
+type ErrUnsupportedSmsType byte
 
-func (e ErrUnsupportedMTI) Error() string {
-	return fmt.Sprintf("unsupported MTI: 0x%x", uint(e))
+func (e ErrUnsupportedSmsType) Error() string {
+	return fmt.Sprintf("unsupported SMS type: 0x%x", uint(e))
 }
 
 var (

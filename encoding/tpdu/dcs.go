@@ -1,7 +1,6 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
+// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
 package tpdu
 
@@ -17,10 +16,13 @@ const (
 	// Alpha7Bit indicates that the UD is encoded using GSM 7 bit encoding.
 	// The character set used for the decoding is determined from the UDH.
 	Alpha7Bit Alphabet = iota
+
 	// Alpha8Bit indicates that the UD is encoded as raw 8bit data.
 	Alpha8Bit
+
 	// AlphaUCS2 indicates that the UD is encoded as UCS-2 (16bit) characters.
 	AlphaUCS2
+
 	// AlphaReserved indicates the alphabet is not defined.
 	AlphaReserved
 )
@@ -67,18 +69,31 @@ func (d DCS) WithAlphabet(a Alphabet) (DCS, error) {
 	}
 }
 
-// MessageClass indicates the
+const (
+	// Dcs8BitData is a DCS indicating 8 bit data
+	Dcs8BitData DCS = 0x04
+
+	// DcsUCS2Data is a DCS indicating UCS2 data
+	DcsUCS2Data DCS = 0x08
+)
+
+// MessageClass indicates the class of the message as specified in 3GPP TS
+// 23.038 Section 4.
 type MessageClass int
 
 const (
 	// MClass0 is a flash message which is not to be stored in memory.
 	MClass0 MessageClass = iota
+
 	// MClass1 is an ME specific message.
 	MClass1
+
 	// MClass2 is a SIM/USIM specific message.
 	MClass2
+
 	// MClass3 is a TE specific message.
 	MClass3
+
 	// MClassUnknown indicates no message class is set.
 	MClassUnknown
 )
