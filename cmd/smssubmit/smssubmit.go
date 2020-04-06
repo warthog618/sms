@@ -1,7 +1,6 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
+// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
 package main
 
@@ -13,7 +12,6 @@ import (
 	"os"
 
 	"github.com/warthog618/sms"
-	"github.com/warthog618/sms/ms/message"
 )
 
 func main() {
@@ -29,11 +27,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	options := []message.EncoderOption(nil)
+	options := []sms.EncoderOption{sms.AsSubmit, sms.To(number)}
 	if nli != 0 {
-		options = append(options, message.WithCharset(nli))
+		options = append(options, sms.WithCharset(nli))
 	}
-	pdus, err := sms.Encode(number, msg, options...)
+	pdus, err := sms.Encode([]byte(msg), options...)
 	if err != nil {
 		log.Println(err)
 		return

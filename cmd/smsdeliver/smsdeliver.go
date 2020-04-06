@@ -1,8 +1,6 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
-
+// Copyright © 2019 Kent Gibson <warthog618@gmail.com>.
 package main
 
 import (
@@ -11,12 +9,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
-	"github.com/warthog618/sms/encoding/tpdu"
-	"github.com/warthog618/sms/ms/message"
+	"github.com/warthog618/sms"
 	"github.com/warthog618/sms/ms/pdumode"
-	"github.com/warthog618/sms/ms/sar"
 )
 
 func main() {
@@ -28,13 +23,8 @@ func main() {
 		flag.Usage()
 		os.Exit(1)
 	}
-	// !!! want all of this to be defaulted or options to NewReassembler...
-	// e.g. WithTimeout(time.Minute*5), WithAllCharsets
-	// Or meta WithCollector(c), WithUDDecoder(udd)...
-	udd := tpdu.NewUDDecoder(tpdu.WithAllCharsets)
-	c := sar.NewCollector(time.Minute*5, func(arg1 error) {})
-	x := message.NewReassembler(message.WithDataDecoder(udd), message.WithCollector(c))
-	defer x.Close()
+	c := sms.NewCollector()
+	defer c.Close()
 	for _, a := range flag.Args() {
 		b, err := hex.DecodeString(a)
 		if err != nil {
@@ -48,13 +38,31 @@ func main() {
 			}
 			tb = ntb
 		}
-		msg, err := x.Reassemble(tb)
+		t, err := sms.Decode(tb)
 		if err != nil {
-			log.Printf("reassembly error: %v", err)
+			log.Printf("unmarshal error: %v", err)
+			continue
+		}
+		pdus, err := c.Collect(*t)
+		if err != nil {
+			log.Printf("collect error: %v", err)
+		}
+		if pdus == nil {
+			continue
+		}
+		msg, err := sms.Concatenate(pdus)
+		if err != nil {
+			log.Printf("concatenate error: %v", err)
 		}
 		if msg != nil {
-			fmt.Printf("%s: %s\n", msg.Number, msg.Msg)
+			fmt.Printf("%s: %s\n", pdus[0].OA.Number(), msg)
 		}
+	}
+	// report active collect pipes
+	pipes := c.Pipes()
+	for k, v := range pipes {
+		fmt.Println("incomplete reassembly: ", k)
+		fmt.Println(v)
 	}
 }
 

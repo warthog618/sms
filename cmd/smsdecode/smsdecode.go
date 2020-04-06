@@ -1,7 +1,6 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
+// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
 package main
 
@@ -14,18 +13,17 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/warthog618/sms"
-	"github.com/warthog618/sms/encoding/tpdu"
 	"github.com/warthog618/sms/ms/pdumode"
 )
 
 func main() {
 	pm := flag.Bool("p", false, "PDU is prefixed with SCA (PDU mode)")
 	orig := flag.Bool("o", false, "PDU is mobile originated")
-	drn := tpdu.MT
+	var dirOpt sms.DecodeOption
 	flag.Usage = usage
 	flag.Parse()
 	if *orig {
-		drn = tpdu.MO
+		dirOpt = sms.AsMO
 	}
 	if flag.NArg() != 1 {
 		flag.Usage()
@@ -44,7 +42,7 @@ func main() {
 		tb = ntb
 		spew.Dump(smsc)
 	}
-	tp, err := sms.Decode(tb, drn)
+	tp, err := sms.Decode(tb, dirOpt)
 	if err != nil {
 		log.Fatal(err)
 	}
