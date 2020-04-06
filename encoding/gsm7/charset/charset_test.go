@@ -1,7 +1,6 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
+// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
 package charset_test
 
@@ -9,6 +8,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/warthog618/sms/encoding/gsm7/charset"
 )
 
@@ -46,17 +46,12 @@ type language struct {
 func TestDecoder(t *testing.T) {
 	for _, l := range languageTests {
 		d := charset.NewDecoder(l.nli)
-		if len(d) != l.mapSize {
-			t.Errorf("expected %s map length of %d, got %d", charsetName[l.nli], l.mapSize, len(d))
-		}
+		assert.Equal(t, l.mapSize, len(d))
 		for _, p := range l.lockingPatterns {
 			f := func(t *testing.T) {
 				r, ok := d[p.b]
-				if !ok {
-					t.Errorf("failed to decode 0x%02x: expected '%c', got no match", p.b, p.r)
-				} else if r != p.r {
-					t.Errorf("failed to decode 0x%02x: expected '%c', got '%c'", p.b, p.r, r)
-				}
+				assert.True(t, ok)
+				assert.Equal(t, p.r, r)
 			}
 			t.Run(fmt.Sprintf("%s x%02x", charsetName[l.nli], p.b), f)
 		}
@@ -66,17 +61,12 @@ func TestDecoder(t *testing.T) {
 func TestExtDecoder(t *testing.T) {
 	for _, l := range languageTests {
 		d := charset.NewExtDecoder(l.nli)
-		if len(d) != l.extSize {
-			t.Errorf("expected %s map length of %d, got %d", charsetName[l.nli], l.extSize, len(d))
-		}
+		assert.Equal(t, l.extSize, len(d))
 		for _, p := range l.shiftPatterns {
 			f := func(t *testing.T) {
 				r, ok := d[p.b]
-				if !ok {
-					t.Errorf("failed to decode 0x%02x: expected '%c', got no match", p.b, p.r)
-				} else if r != p.r {
-					t.Errorf("failed to decode 0x%02x: expected '%c', got '%c'", p.b, p.r, r)
-				}
+				assert.True(t, ok)
+				assert.Equal(t, p.r, r)
 			}
 			t.Run(fmt.Sprintf("%s x%02x", charsetName[l.nli], p.b), f)
 		}
@@ -86,17 +76,12 @@ func TestExtDecoder(t *testing.T) {
 func TestEncoder(t *testing.T) {
 	for _, l := range languageTests {
 		e := charset.NewEncoder(l.nli)
-		if len(e) != l.mapSize {
-			t.Errorf("expected %s map length of %d, got %d", charsetName[l.nli], l.mapSize, len(e))
-		}
+		assert.Equal(t, l.mapSize, len(e))
 		for _, p := range l.lockingPatterns {
 			f := func(t *testing.T) {
 				b, ok := e[p.r]
-				if !ok {
-					t.Errorf("failed to encode '%c': expected 0x%02x, got no match", p.r, p.b)
-				} else if b != p.b {
-					t.Errorf("failed to encode '%c': expected 0x%02x, got 0x%02x", p.r, p.b, b)
-				}
+				assert.True(t, ok)
+				assert.Equal(t, p.b, b)
 			}
 			t.Run(fmt.Sprintf("%s x%02x", charsetName[l.nli], p.b), f)
 		}
@@ -106,17 +91,12 @@ func TestEncoder(t *testing.T) {
 func TestExtEncoder(t *testing.T) {
 	for _, l := range languageTests {
 		e := charset.NewExtEncoder(l.nli)
-		if len(e) != l.extSize-l.extDuplicates {
-			t.Errorf("expected %s map length of %d, got %d", charsetName[l.nli], l.extSize-l.extDuplicates, len(e))
-		}
+		assert.Equal(t, l.extSize-l.extDuplicates, len(e))
 		for _, p := range l.shiftPatterns {
 			f := func(t *testing.T) {
 				b, ok := e[p.r]
-				if !ok {
-					t.Errorf("failed to encode '%c': expected 0x%02x, got no match", p.r, p.b)
-				} else if b != p.b {
-					t.Errorf("failed to encode '%c': expected 0x%02x, got 0x%02x", p.r, p.b, b)
-				}
+				assert.True(t, ok)
+				assert.Equal(t, p.b, b)
 			}
 			t.Run(fmt.Sprintf("%s x%02x", charsetName[l.nli], p.b), f)
 		}
@@ -126,17 +106,12 @@ func TestExtEncoder(t *testing.T) {
 func TestDefaultDecoder(t *testing.T) {
 	d := charset.DefaultDecoder()
 	l := languageTests[0]
-	if len(d) != l.mapSize {
-		t.Errorf("expected map length of %d, got %d", l.mapSize, len(d))
-	}
+	assert.Equal(t, l.mapSize, len(d))
 	for _, p := range l.lockingPatterns {
 		f := func(t *testing.T) {
 			r, ok := d[p.b]
-			if !ok {
-				t.Errorf("failed to decode 0x%02x: expected '%c', got no match", p.b, p.r)
-			} else if r != p.r {
-				t.Errorf("failed to decode 0x%02x: expected '%c', got '%c'", p.b, p.r, r)
-			}
+			assert.True(t, ok)
+			assert.Equal(t, p.r, r)
 		}
 		t.Run(fmt.Sprintf("%s x%02x", charsetName[l.nli], p.b), f)
 	}
@@ -145,17 +120,12 @@ func TestDefaultDecoder(t *testing.T) {
 func TestDefaultExtDecoder(t *testing.T) {
 	d := charset.DefaultExtDecoder()
 	l := languageTests[0]
-	if len(d) != l.extSize {
-		t.Errorf("expected map length of %d, got %d", l.extSize, len(d))
-	}
+	assert.Equal(t, l.extSize, len(d))
 	for _, p := range l.shiftPatterns {
 		f := func(t *testing.T) {
 			r, ok := d[p.b]
-			if !ok {
-				t.Errorf("failed to decode 0x%02x: expected '%c', got no match", p.b, p.r)
-			} else if r != p.r {
-				t.Errorf("failed to decode 0x%02x: expected '%c', got '%c'", p.b, p.r, r)
-			}
+			assert.True(t, ok)
+			assert.Equal(t, p.r, r)
 		}
 		t.Run(fmt.Sprintf("%s x%02x", charsetName[l.nli], p.b), f)
 	}
@@ -164,17 +134,12 @@ func TestDefaultExtDecoder(t *testing.T) {
 func TestDefaultEncoder(t *testing.T) {
 	e := charset.DefaultEncoder()
 	l := languageTests[0]
-	if len(e) != l.mapSize {
-		t.Errorf("expected map length of %d, got %d", l.mapSize, len(e))
-	}
+	assert.Equal(t, l.mapSize, len(e))
 	for _, p := range l.lockingPatterns {
 		f := func(t *testing.T) {
 			b, ok := e[p.r]
-			if !ok {
-				t.Errorf("failed to encode '%c': expected 0x%02x, got no match", p.r, p.b)
-			} else if b != p.b {
-				t.Errorf("failed to encode '%c': expected 0x%02x, got 0x%02x", p.r, p.b, b)
-			}
+			assert.True(t, ok)
+			assert.Equal(t, p.b, b)
 		}
 		t.Run(fmt.Sprintf("x%02x", p.b), f)
 	}
@@ -183,17 +148,12 @@ func TestDefaultEncoder(t *testing.T) {
 func TestDefaultExtEncoder(t *testing.T) {
 	e := charset.DefaultExtEncoder()
 	l := languageTests[0]
-	if len(e) != l.extSize-l.extDuplicates {
-		t.Errorf("expected %s map length of %d, got %d", charsetName[l.nli], l.extSize-l.extDuplicates, len(e))
-	}
+	assert.Equal(t, l.extSize-l.extDuplicates, len(e))
 	for _, p := range l.shiftPatterns {
 		f := func(t *testing.T) {
 			b, ok := e[p.r]
-			if !ok {
-				t.Errorf("failed to encode '%c': expected 0x%02x, got no match", p.r, p.b)
-			} else if b != p.b {
-				t.Errorf("failed to encode '%c': expected 0x%02x, got 0x%02x", p.r, p.b, b)
-			}
+			assert.True(t, ok)
+			assert.Equal(t, p.b, b)
 		}
 		t.Run(fmt.Sprintf("x%02x", p.b), f)
 	}
