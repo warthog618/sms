@@ -1,7 +1,6 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
+// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
 package gsm7_test
 
@@ -138,7 +137,7 @@ func TestEncoderWithExtCharset(t *testing.T) {
 	testEncoder(t, e, p)
 }
 
-// TestErrInvalidUTF8 tests that the errors can be stringified.
+// TestErrInvalidSeptet tests that the errors can be stringified.
 // It is fragile, as it compares the strings exactly, but its main purpose is
 // to confirm the Error function doesn't recurse, as that is bad.
 func TestErrInvalidSeptet(t *testing.T) {
@@ -148,9 +147,7 @@ func TestErrInvalidSeptet(t *testing.T) {
 			err := gsm7.ErrInvalidSeptet(p)
 			expected := fmt.Sprintf("gsm7: invalid septet 0x%02x", int(err))
 			s := err.Error()
-			if s != expected {
-				t.Errorf("failed to stringify %02x, expected '%s', got '%s'", p, expected, s)
-			}
+			assert.Equal(t, expected, s)
 		}
 		t.Run(fmt.Sprintf("%x", p), f)
 	}
