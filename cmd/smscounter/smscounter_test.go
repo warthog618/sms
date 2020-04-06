@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: MIT
+//
+// Copyright © 2019 Kent Gibson <warthog618@gmail.com>.package main
+
 package main
 
 import (
