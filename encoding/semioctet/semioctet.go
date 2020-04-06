@@ -1,7 +1,6 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
+// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
 // Package semioctet provides conversions to and from semioctet format.
 package semioctet
@@ -17,6 +16,7 @@ var decodeDigits = "0123456789*#abcF"
 
 // Decode converts a semi-octet encoded field into the corresponding array of
 // UTF-8 digits, as per 3GPP TS 23.040 Section 9.1.2.3
+//
 // Conversion is terminated by the length of the src or dst.
 // The length of the dst indicates the maximum number of digits to return.
 // The return values are the decoded field (a slice of dst), the number of
@@ -51,10 +51,15 @@ var encodeDigits = map[byte]int{
 
 // Encode converts an array of UTF-8 digits into semi-octet format, as per 3GPP
 // TS 23.040 Section 9.1.2.3
+//
 // The return values are the encoded field, and any error detected during the
 // conversion.
 func Encode(src []byte) ([]byte, error) {
-	b := make([]byte, (len(src)+1)/2)
+	l := (len(src) + 1) / 2
+	if l == 0 {
+		return append(src[:0:0], src...), nil
+	}
+	b := make([]byte, l)
 	hi := false
 	p := 0
 	wi := 0
