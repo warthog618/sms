@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/warthog618/sms/encoding/tpdu"
 )
 
@@ -64,6 +65,12 @@ func TestDCSAlphabet(t *testing.T) {
 		}
 		t.Run(fmt.Sprintf("%08b", p.in), f)
 	}
+}
+
+func TestApplyTPDUOption(t *testing.T) {
+	s, err := tpdu.New(tpdu.DCS(0x34))
+	require.Nil(t, err)
+	assert.Equal(t, tpdu.DCS(0x34), s.DCS)
 }
 
 type dcsWithAlphabetIn struct {

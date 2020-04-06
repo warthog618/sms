@@ -51,6 +51,12 @@ func (d DCS) Alphabet() (Alphabet, error) {
 	return alpha, nil
 }
 
+// ApplyTPDUOption applies the DCS value to the TPDU DCS field.
+func (d DCS) ApplyTPDUOption(t *TPDU) error {
+	t.SetDCS(byte(d))
+	return nil
+}
+
 // WithAlphabet sets the Alphabet bits of the DCS, given the state of the other
 // bits.
 // An error is returned if the state is incompatible with setting the alphabet.
