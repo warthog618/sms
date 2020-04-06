@@ -29,10 +29,12 @@ type Encoder struct {
 	ext charset.Encoder
 }
 
+// DecoderOption applies an option to a Decoder.
 type DecoderOption interface {
 	applyDecoderOption(*Decoder)
 }
 
+// EncoderOption applies an option to an Encoder.
 type EncoderOption interface {
 	applyEncoderOption(*Encoder)
 }
@@ -123,6 +125,8 @@ func (d *Decoder) Decode(src []byte) ([]byte, error) {
 	return dst, nil
 }
 
+// CharsetOption specifies the character set to be used for encoding and
+// decoding.
 type CharsetOption struct {
 	nli int
 }
@@ -135,6 +139,8 @@ func (o CharsetOption) applyEncoderOption(e *Encoder) {
 	e.set = charset.NewEncoder(o.nli)
 }
 
+// ExtCharsetOption specifies the extension character set to be used for
+// encoding and decoding.
 type ExtCharsetOption struct {
 	nli int
 }
@@ -158,12 +164,15 @@ func WithExtCharset(nli int) ExtCharsetOption {
 	return ExtCharsetOption{nli}
 }
 
+// NullDecoder fails to decode any characters.
 type NullDecoder struct{}
 
 func (o NullDecoder) applyDecoderOption(d *Decoder) {
 	d.ext = make(charset.Decoder)
 }
 
+// WithoutExtCharset specifies that no extension character set will be
+// available to decode escaped characters.
 var WithoutExtCharset = NullDecoder{}
 
 // WithCharset replaces the character set map used by the Decoder.
