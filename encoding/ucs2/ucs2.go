@@ -9,8 +9,9 @@ import (
 )
 
 // Decode converts an array of UCS2 characters into an array of runes.
-// As the UCS2 characters are packed into a byte array, the length of the
-// byte array provided must be even.
+//
+// As the UCS2 characters are packed into a byte array, the length of the byte
+// array provided must be even.
 func Decode(src []byte) ([]rune, error) {
 	if len(src) == 0 {
 		return nil, nil
@@ -23,10 +24,10 @@ func Decode(src []byte) ([]rune, error) {
 	for ri := 0; ri < len(src)-1; ri = ri + 2 {
 		r := rune(binary.BigEndian.Uint16(src[ri:]))
 		if utf16.IsSurrogate(r) {
-			ri += 2
-			if ri >= len(src)-1 {
-				return dst, ErrDanglingSurrogate(uint16(r))
+			if ri >= len(src)-3 {
+				return dst, ErrDanglingSurrogate(src[ri:])
 			}
+			ri += 2
 			r2 := rune(binary.BigEndian.Uint16(src[ri:]))
 			r = utf16.DecodeRune(r, r2)
 		}
@@ -35,8 +36,8 @@ func Decode(src []byte) ([]rune, error) {
 	return dst, nil
 }
 
-// Encode converts an array of UCS2 runes into an array of bytes, where pairs of
-// bytes (in Big Endian) represent a UCS2 character.
+// Encode converts an array of UCS2 runes into an array of bytes, where pairs
+// of bytes (in Big Endian) represent a UCS2 character.
 func Encode(src []rune) []byte {
 	if len(src) == 0 {
 		return nil
@@ -53,15 +54,10 @@ func Encode(src []rune) []byte {
 
 // ErrDanglingSurrogate indicates only half of a surrogate pair is provided at
 // the end of the byte array being decoded.
-type ErrDanglingSurrogate uint16
+type ErrDanglingSurrogate []byte
 
 func (e ErrDanglingSurrogate) Error() string {
-	return fmt.Sprintf("ucs2: dangling surrogate: 0x%04x", uint16(e))
-}
-
-// Surrogate returns the dangling surrogate.
-func (e ErrDanglingSurrogate) Surrogate() uint16 {
-	return uint16(e)
+	return fmt.Sprintf("ucs2: dangling surrogate: %#v", []byte(e))
 }
 
 var (
