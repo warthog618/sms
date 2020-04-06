@@ -1,7 +1,6 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
+// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
 package pdumode_test
 
@@ -25,11 +24,20 @@ type testPattern struct {
 
 func TestDecode(t *testing.T) {
 	decodePatterns := []testPattern{
-		{"empty", "", nil, nil, tpdu.DecodeError("length", 0, tpdu.ErrUnderflow)},
-		{"valid", "0791361907002039010203040506070809",
+		{
+			"empty",
+			"",
+			nil,
+			nil,
+			tpdu.DecodeError("length", 0, tpdu.ErrUnderflow),
+		},
+		{
+			"valid",
+			"0791361907002039010203040506070809",
 			&pdumode.SMSCAddress{Addr: "639170000293", TOA: 0x91},
 			[]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09},
-			nil},
+			nil,
+		},
 	}
 	for _, p := range decodePatterns {
 		f := func(t *testing.T) {
@@ -49,12 +57,26 @@ func TestDecode(t *testing.T) {
 
 func TestDecodeString(t *testing.T) {
 	decodePatterns := []testPattern{
-		{"nothex", "nothex", nil, nil, hex.InvalidByteError('n')},
-		{"empty", "", nil, nil, tpdu.DecodeError("length", 0, tpdu.ErrUnderflow)},
-		{"valid", "0791361907002039010203040506070809",
+		{
+			"nothex",
+			"nothex",
+			nil,
+			nil,
+			hex.InvalidByteError('n'),
+		},
+		{
+			"empty",
+			"",
+			nil,
+			nil,
+			tpdu.DecodeError("length", 0, tpdu.ErrUnderflow),
+		},
+		{
+			"valid", "0791361907002039010203040506070809",
 			&pdumode.SMSCAddress{Addr: "639170000293", TOA: 0x91},
 			[]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09},
-			nil},
+			nil,
+		},
 	}
 	for _, p := range decodePatterns {
 		f := func(t *testing.T) {
@@ -70,13 +92,25 @@ func TestDecodeString(t *testing.T) {
 
 func TestEncode(t *testing.T) {
 	patterns := []testPattern{
-		{"empty", "00", &pdumode.SMSCAddress{}, nil, nil},
-		{"valid", "0791361907002039010203040506070809",
+		{
+			"empty",
+			"00",
+			&pdumode.SMSCAddress{},
+			nil,
+			nil,
+		},
+		{
+			"valid", "0791361907002039010203040506070809",
 			&pdumode.SMSCAddress{Addr: "639170000293", TOA: 0x91},
 			[]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09},
-			nil},
-		{"invalid addr", "", &pdumode.SMSCAddress{Addr: "banana"}, nil,
-			tpdu.EncodeError("addr", semioctet.ErrInvalidDigit(0x6e))},
+			nil,
+		},
+		{
+			"invalid addr", "",
+			&pdumode.SMSCAddress{Addr: "banana"},
+			nil,
+			tpdu.EncodeError("addr", semioctet.ErrInvalidDigit(0x6e)),
+		},
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
@@ -92,13 +126,25 @@ func TestEncode(t *testing.T) {
 
 func TestEncodeToString(t *testing.T) {
 	patterns := []testPattern{
-		{"empty", "00", &pdumode.SMSCAddress{}, nil, nil},
-		{"valid", "0791361907002039010203040506070809",
+		{
+			"empty",
+			"00",
+			&pdumode.SMSCAddress{},
+			nil,
+			nil,
+		},
+		{
+			"valid",
+			"0791361907002039010203040506070809",
 			&pdumode.SMSCAddress{Addr: "639170000293", TOA: 0x91},
 			[]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09},
-			nil},
-		{"invalid addr", "", &pdumode.SMSCAddress{Addr: "banana"}, nil,
-			tpdu.EncodeError("addr", semioctet.ErrInvalidDigit(0x6e))},
+			nil,
+		},
+		{
+			"invalid addr", "", &pdumode.SMSCAddress{Addr: "banana"},
+			nil,
+			tpdu.EncodeError("addr", semioctet.ErrInvalidDigit(0x6e)),
+		},
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {

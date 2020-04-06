@@ -1,7 +1,6 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
+// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
 package pdumode
 
@@ -11,6 +10,7 @@ import (
 )
 
 // SMSCAddress is the address of the SMSC.
+//
 // The SMCSAddress is similar to a TPDU Address, but the binary form is
 // marshalled differently, hence the subtype.
 // The Type-of-number should typically be TonNational or TonInternational, but
@@ -36,6 +36,7 @@ func (a *SMSCAddress) MarshalBinary() (dst []byte, err error) {
 }
 
 // UnmarshalBinary unmarshals an SMSC Address from a TPDU field.
+//
 // It returns the number of bytes read from the source, and any error detected
 // while decoding.
 func (a *SMSCAddress) UnmarshalBinary(src []byte) (int, error) {
