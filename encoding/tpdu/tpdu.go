@@ -29,7 +29,7 @@ type TPDU struct {
 
 	// FCS contains the TP-FCS Failure Cause field.
 	//
-	// Only applies to SMS-DELIVER-REPORT and MS-SUBMIT-REPORT
+	// Only applies to SMS-DELIVER-REPORT and SMS-SUBMIT-REPORT
 	FCS byte
 
 	// MR contains the TP-MP Message Reference field.
