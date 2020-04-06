@@ -368,10 +368,10 @@ const (
 // no benefit at all.
 //
 // Failing GSM7 conversion it falls back to UCS2/UTF16.
-func EncodeUserData(msg []byte, options ...UDEncodeOption) (UserData, UserDataHeader, Alphabet, error) {
+func EncodeUserData(msg []byte, options ...UDEncodeOption) (UserData, UserDataHeader, Alphabet) {
 	enc, err := gsm7.Encode([]byte(msg)) // default charset
 	if err == nil {
-		return enc, nil, Alpha7Bit, nil
+		return enc, nil, Alpha7Bit
 	}
 	cfg := udEncodeConfig{}
 	for _, option := range options {
@@ -382,8 +382,9 @@ func EncodeUserData(msg []byte, options ...UDEncodeOption) (UserData, UserDataHe
 		enc, err = gsm7.Encode(msg, gsm7.WithCharset(nli))
 		if err == nil {
 			return enc, UserDataHeader{
-					InformationElement{ID: lockingIEI, Data: []byte{byte(nli)}}},
-				Alpha7Bit, nil
+					InformationElement{ID: lockingIEI, Data: []byte{byte(nli)}},
+				},
+				Alpha7Bit
 		}
 	}
 	// try default with language shift tables
@@ -391,13 +392,30 @@ func EncodeUserData(msg []byte, options ...UDEncodeOption) (UserData, UserDataHe
 		enc, err = gsm7.Encode(msg, gsm7.WithExtCharset(nli))
 		if err == nil {
 			return enc, UserDataHeader{
-					InformationElement{ID: shiftIEI, Data: []byte{byte(nli)}}},
-				Alpha7Bit, nil
+					InformationElement{ID: shiftIEI, Data: []byte{byte(nli)}},
+				},
+				Alpha7Bit
 		}
 	}
-	// could also try combos of locking AND shift, but unlikely to help...
+	// try combination of locking AND shift for same charset
+	for _, nli := range cfg.locking {
+		for _, snli := range cfg.shift {
+			if nli != snli {
+				continue
+			}
+			enc, err = gsm7.Encode(msg, gsm7.WithCharset(nli), gsm7.WithExtCharset(nli))
+			if err == nil {
+				return enc, UserDataHeader{
+						InformationElement{ID: lockingIEI, Data: []byte{byte(nli)}},
+						InformationElement{ID: shiftIEI, Data: []byte{byte(nli)}},
+					},
+					Alpha7Bit
+			}
+		}
+	}
+	// could also try other combos of locking AND shift, but unlikely to help??...
 
 	// fallback to ucs-2
 	enc = ucs2.Encode([]rune(string(msg)))
-	return enc, nil, AlphaUCS2, nil
+	return enc, nil, AlphaUCS2
 }

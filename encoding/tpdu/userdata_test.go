@@ -528,7 +528,7 @@ func TestDecodeUserData(t *testing.T) {
 			nil,
 			tpdu.AlphaUCS2,
 			nil,
-			[]byte("😁"), ucs2.ErrDanglingSurrogate(0xd83d),
+			[]byte("😁"), ucs2.ErrDanglingSurrogate([]byte{0xd8, 0x3d}),
 		},
 	}
 	for _, p := range patterns {
@@ -651,13 +651,11 @@ func TestEncodeUserData(t *testing.T) {
 		alpha   tpdu.Alphabet
 		options []tpdu.UDEncodeOption
 		msg     []byte
-		err     error
 	}{
 		{"empty",
 			nil,
 			nil,
 			0,
-			nil,
 			nil,
 			nil,
 		},
@@ -667,7 +665,6 @@ func TestEncodeUserData(t *testing.T) {
 			tpdu.Alpha7Bit,
 			nil,
 			[]byte("messageΔ"),
-			nil,
 		},
 		{"message 7bit all cs",
 			[]byte("message\x10"),
@@ -677,7 +674,6 @@ func TestEncodeUserData(t *testing.T) {
 				tpdu.WithAllCharsets,
 			},
 			[]byte("messageΔ"),
-			nil,
 		},
 		{"message 7bit locking all cs",
 			[]byte("\x01\x02\x03"),
@@ -689,7 +685,6 @@ func TestEncodeUserData(t *testing.T) {
 				tpdu.WithAllCharsets,
 			},
 			[]byte("\u0c82\u0c83\u0c85"),
-			nil,
 		},
 		{"message 7bit shift all cs",
 			[]byte("\x1b\x1e\x1b\x1f\x1b\x20"),
@@ -701,7 +696,6 @@ func TestEncodeUserData(t *testing.T) {
 				tpdu.WithAllCharsets,
 			},
 			[]byte("\u0ce8\u0ce9\u0cea"),
-			nil,
 		},
 		{"message 7bit kannada",
 			[]byte("\x01\x02\x03"),
@@ -713,7 +707,6 @@ func TestEncodeUserData(t *testing.T) {
 				tpdu.WithCharset(charset.Kannada),
 			},
 			[]byte("\u0c82\u0c83\u0c85"),
-			nil,
 		},
 		{"message 7bit locking kannada",
 			[]byte("\x01\x02\x03"),
@@ -725,7 +718,6 @@ func TestEncodeUserData(t *testing.T) {
 				tpdu.WithLockingCharset(charset.Kannada),
 			},
 			[]byte("\u0c82\u0c83\u0c85"),
-			nil,
 		},
 		{"message 7bit shift kannada",
 			[]byte("\x1b\x1e\x1b\x1f\x1b\x20"),
@@ -737,7 +729,19 @@ func TestEncodeUserData(t *testing.T) {
 				tpdu.WithShiftCharset(charset.Kannada),
 			},
 			[]byte("\u0ce8\u0ce9\u0cea"),
-			nil,
+		},
+		{"message 7bit locking and shift urdu",
+			[]byte("hello \x07\x1b\x2a"),
+			tpdu.UserDataHeader{
+				tpdu.InformationElement{ID: 25, Data: []byte{byte(charset.Urdu)}},
+				tpdu.InformationElement{ID: 24, Data: []byte{byte(charset.Urdu)}},
+			},
+			tpdu.Alpha7Bit,
+			[]tpdu.UDEncodeOption{
+				tpdu.WithLockingCharset(charset.Urdu),
+				tpdu.WithShiftCharset(charset.Urdu),
+			},
+			[]byte("hello ت؎"),
 		},
 		{"euro",
 			[]byte("\x1be"),
@@ -745,7 +749,6 @@ func TestEncodeUserData(t *testing.T) {
 			tpdu.Alpha7Bit,
 			nil,
 			[]byte("€"),
-			nil,
 		},
 		{"grin",
 			[]byte{0xd8, 0x3d, 0xde, 0x01},
@@ -753,7 +756,6 @@ func TestEncodeUserData(t *testing.T) {
 			tpdu.AlphaUCS2,
 			nil,
 			[]byte("😁"),
-			nil,
 		},
 		{"grin all cs",
 			[]byte{0xd8, 0x3d, 0xde, 0x01},
@@ -763,7 +765,6 @@ func TestEncodeUserData(t *testing.T) {
 				tpdu.WithAllCharsets,
 			},
 			[]byte("😁"),
-			nil,
 		},
 		// repeat the GSM7 Kannada tests without charset to force encoding to UCS2
 		{"message ucs2 locking",
@@ -772,7 +773,6 @@ func TestEncodeUserData(t *testing.T) {
 			tpdu.AlphaUCS2,
 			nil,
 			[]byte("\u0c82\u0c83\u0c85"),
-			nil,
 		},
 		{"message ucs2 shift",
 			[]byte{0x0c, 0xe8, 0x0c, 0xe9, 0x0c, 0xea},
@@ -780,13 +780,11 @@ func TestEncodeUserData(t *testing.T) {
 			tpdu.AlphaUCS2,
 			nil,
 			[]byte("\u0ce8\u0ce9\u0cea"),
-			nil,
 		},
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
-			ud, udh, alpha, err := tpdu.EncodeUserData(p.msg, p.options...)
-			assert.Equal(t, p.err, err)
+			ud, udh, alpha := tpdu.EncodeUserData(p.msg, p.options...)
 			assert.Equal(t, p.ud, ud)
 			assert.Equal(t, p.udh, udh)
 			assert.Equal(t, p.alpha, alpha)
