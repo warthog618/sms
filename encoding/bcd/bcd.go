@@ -1,7 +1,6 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
+// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
 // Package bcd provides conversions to and from BCD format.
 package bcd
@@ -11,6 +10,7 @@ import (
 )
 
 // Decode decodes a BCD encoded octet into the equivalent integer.
+//
 // The lowest nibble is taken as being the most significant.
 func Decode(bcd byte) (int, error) {
 	msn := bcd & 0x0f
@@ -37,6 +37,7 @@ func DecodeSigned(bcd byte) (int, error) {
 }
 
 // Encode converts an integer in the range 0..99 into two BCD digits.
+//
 // The return value is the two BCD digits encoded into a byte in big endian,
 // and any error detected during conversion.
 func Encode(u int) (byte, error) {
@@ -50,6 +51,7 @@ func Encode(u int) (byte, error) {
 }
 
 // EncodeSigned converts an integer in the range -79..79 into two BCD digits.
+//
 // The return value is the two BCD digits encoded into a byte, with the most
 // significant digit stored in the lowest nibble, and any error detected during
 // conversion.  If the integer is negative then bit 3 of the byte is set to 1 .
@@ -70,6 +72,7 @@ func EncodeSigned(s int) (byte, error) {
 
 // ErrInvalidOctet indicates that at least one of the nibbles in the BCD octet
 // is invalid, i.e. greater than 9.
+//
 // For DecodeSigned only the upper (least significant) nibble can be invalid.
 type ErrInvalidOctet byte
 
