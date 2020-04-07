@@ -87,6 +87,7 @@ func (v *ValidityPeriod) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary unmarshals a ValidityPeriod stored in the given format.
+//
 // Returns the number of bytes read from the src, and any error detected during
 // the unmarshalling.
 func (v *ValidityPeriod) UnmarshalBinary(src []byte, vpf ValidityPeriodFormat) (int, error) {

@@ -28,6 +28,7 @@ const (
 )
 
 // Alphabet returns the alphabet used to encode the User Data according to the DCS.
+//
 // The DCS is assumed to be defined as per 3GPP TS 23.038 Section 4.
 func (d DCS) Alphabet() (Alphabet, error) {
 	alpha := Alpha7Bit
@@ -59,6 +60,7 @@ func (d DCS) ApplyTPDUOption(t *TPDU) error {
 
 // WithAlphabet sets the Alphabet bits of the DCS, given the state of the other
 // bits.
+//
 // An error is returned if the state is incompatible with setting the alphabet.
 func (d DCS) WithAlphabet(a Alphabet) (DCS, error) {
 	switch {
@@ -119,6 +121,7 @@ func (d DCS) Class() (MessageClass, error) {
 
 // WithClass sets the MessageClass bits of the DCS, given the state of the
 // other bits.
+//
 // An error is returned if the state is incompatible with setting the message
 // class.
 func (d DCS) WithClass(c MessageClass) (DCS, error) {
@@ -134,6 +137,7 @@ func (d DCS) WithClass(c MessageClass) (DCS, error) {
 
 // Compressed indicates whether the text is compressed using the algorithm
 // defined in 3GPP TS 23.024, as determined from the DCS.
+//
 // The DCS is assumed to be defined as per 3GPP TS 23.038 Section 4.
 func (d DCS) Compressed() bool {
 	// only true for 0x1xxxxx (binary)

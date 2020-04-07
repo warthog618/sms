@@ -58,6 +58,7 @@ func DecodeString(s string) (*SMSCAddress, []byte, error) {
 type Encoder struct{}
 
 // Encode marshals the PDU into binary form.
+//
 // The PDU is comprised of the SMSC address and the TPDU.
 // The TPDU has been marshalled into binary and is ready to be transmitted.
 func (Encoder) Encode(smsc SMSCAddress, tpdu []byte) ([]byte, error) {
@@ -70,6 +71,7 @@ func (Encoder) Encode(smsc SMSCAddress, tpdu []byte) ([]byte, error) {
 }
 
 // EncodeToString encodes the PDU into the hex string expected by the modem.
+//
 // The PDU is comprised of the SMSC address and the TPDU.
 // The TPDU is in binary ready to be transmitted.
 func (e Encoder) EncodeToString(smsc SMSCAddress, tpdu []byte) (string, error) {
@@ -81,6 +83,7 @@ func (e Encoder) EncodeToString(smsc SMSCAddress, tpdu []byte) (string, error) {
 }
 
 // Encode marshals the PDU into binary form.
+//
 // The PDU is comprised of the SMSC address and the TPDU.
 // The TPDU has been marshalled into binary and is ready to be transmitted.
 func Encode(smsc SMSCAddress, tpdu []byte) ([]byte, error) {
@@ -89,6 +92,7 @@ func Encode(smsc SMSCAddress, tpdu []byte) ([]byte, error) {
 }
 
 // EncodeToString encodes the PDU into the hex string expected by the modem.
+//
 // The PDU is comprised of the SMSC address and the TPDU.
 // The TPDU is in binary ready to be transmitted.
 func EncodeToString(smsc SMSCAddress, tpdu []byte) (string, error) {
