@@ -183,6 +183,126 @@ func TestConcatenate(t *testing.T) {
 	}
 }
 
+func TestIsSegmentedMessage(t *testing.T) {
+	patterns := []struct {
+		name string
+		in   []*tpdu.TPDU
+		out  bool
+	}{
+		{
+			"nil",
+			nil,
+			false,
+		},
+		{
+			"empty",
+			[]*tpdu.TPDU{},
+			false,
+		},
+		{
+			"no concat",
+			[]*tpdu.TPDU{
+				&tpdu.TPDU{},
+			},
+			false,
+		},
+		{
+			"segment count mismatch",
+			[]*tpdu.TPDU{
+				&tpdu.TPDU{
+					UDH: tpdu.UserDataHeader{
+						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}},
+					},
+				},
+			},
+			false,
+		},
+		{
+			"segments mismatch",
+			[]*tpdu.TPDU{
+				&tpdu.TPDU{
+					UDH: tpdu.UserDataHeader{
+						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}},
+					},
+				},
+				&tpdu.TPDU{
+					UDH: tpdu.UserDataHeader{
+						tpdu.InformationElement{ID: 0, Data: []byte{3, 3, 2}},
+					},
+				},
+			},
+			false,
+		},
+		{
+			"concatRef mismatch",
+			[]*tpdu.TPDU{
+				&tpdu.TPDU{
+					UDH: tpdu.UserDataHeader{
+						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}},
+					},
+				},
+				&tpdu.TPDU{
+					UDH: tpdu.UserDataHeader{
+						tpdu.InformationElement{ID: 0, Data: []byte{4, 2, 2}},
+					},
+				},
+			},
+			false,
+		},
+		{
+			"misordered segments",
+			[]*tpdu.TPDU{
+				&tpdu.TPDU{
+					UDH: tpdu.UserDataHeader{
+						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 2}},
+					},
+				},
+				&tpdu.TPDU{
+					UDH: tpdu.UserDataHeader{
+						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}},
+					},
+				},
+			},
+			false,
+		},
+		{
+			"missing concat",
+			[]*tpdu.TPDU{
+				&tpdu.TPDU{
+					UDH: tpdu.UserDataHeader{
+						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}},
+					},
+				},
+				&tpdu.TPDU{},
+			},
+			false,
+		},
+		{
+			"two segments",
+			[]*tpdu.TPDU{
+				&tpdu.TPDU{
+					UDH: tpdu.UserDataHeader{
+						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}},
+					},
+				},
+				&tpdu.TPDU{
+					UDH: tpdu.UserDataHeader{
+						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 2}},
+					},
+				},
+			},
+			true,
+		},
+	}
+	for _, p := range patterns {
+		f := func(t *testing.T) {
+			out := sms.IsSegmentedMessage(p.in)
+			assert.Equal(t, p.out, out)
+		}
+		t.Run(p.name, f)
+	}
+}
+
 func TestDecode(t *testing.T) {
 	tz1 := time.FixedZone("SCTS", 3600)
 	tz8 := time.FixedZone("SCTS", 28800)

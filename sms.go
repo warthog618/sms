@@ -16,6 +16,10 @@ type ConcatConfig struct {
 }
 
 // Concatenate converts a set of concatenated TPDUs into a UTF-8 message.
+//
+// Assumes segments are the component TPDUs of a segmented message, in correct order.
+// This is the case for segments returned by the Collector.
+// It can be tested using IsSegmentedMessage.
 func Concatenate(segments []*tpdu.TPDU, options ...ConcatOption) ([]byte, error) {
 	cfg := ConcatConfig{}
 	for _, option := range options {
@@ -54,6 +58,37 @@ func Concatenate(segments []*tpdu.TPDU, options ...ConcatOption) ([]byte, error)
 		m = append(m, t...)
 	}
 	return m, nil
+}
+
+// IsSegmentedMessage confirms that the segment TPDUs are suitable for being
+// concatenated into a message.
+func IsSegmentedMessage(segments []*tpdu.TPDU) bool {
+	if len(segments) == 0 {
+		return false
+	}
+	baseSegs, _, baseConcatRef, ok := segments[0].ConcatInfo()
+	if !ok {
+		return false
+	}
+	if baseSegs != len(segments) {
+		return false
+	}
+	for i, s := range segments {
+		segs, seqno, concatRef, ok := s.ConcatInfo()
+		if !ok {
+			return false
+		}
+		if segs != baseSegs {
+			return false
+		}
+		if concatRef != baseConcatRef {
+			return false
+		}
+		if seqno != i+1 {
+			return false
+		}
+	}
+	return true
 }
 
 // DecodeConfig contains configuration options for Decode.
