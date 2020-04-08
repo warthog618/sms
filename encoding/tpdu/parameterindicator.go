@@ -25,6 +25,9 @@ func (p PI) UDL() bool {
 }
 
 func (p PI) String() string {
+	if p == 0 {
+		return "0"
+	}
 	elems := []string{}
 	if p.PID() {
 		elems = append(elems, "PID")

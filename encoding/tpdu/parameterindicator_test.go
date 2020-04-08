@@ -31,7 +31,7 @@ func TestParameterIndicatorString(t *testing.T) {
 		in  tpdu.PI
 		out string
 	}{
-		{0, ""},
+		{0, "0"},
 		{tpdu.PiPID, "PID"},
 		{tpdu.PiDCS, "DCS"},
 		{tpdu.PiUDL, "UDL"},

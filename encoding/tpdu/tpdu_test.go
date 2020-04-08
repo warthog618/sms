@@ -1340,14 +1340,14 @@ func TestUnmarshalBinary(t *testing.T) {
 			[]byte{},
 			tpdu.MT,
 			tpdu.TPDU{},
-			tpdu.DecodeError("tpdu.firstOctet", 0, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("tpdu.firstOctet", 0, tpdu.ErrUnderflow),
 		},
 		{
 			"unsupported SMS type",
 			[]byte{0x03},
 			tpdu.MT,
 			tpdu.TPDU{},
-			tpdu.DecodeError("tpdu.firstOctet", 0, tpdu.ErrUnsupportedSmsType(6)),
+			tpdu.NewDecodeError("tpdu.firstOctet", 0, tpdu.ErrUnsupportedSmsType(6)),
 		},
 		{
 			"SmsCommand",
@@ -1376,7 +1376,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				Direction:  tpdu.MO,
 				FirstOctet: 0x02,
 			},
-			tpdu.DecodeError("SmsCommand.mr", 1, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsCommand.mr", 1, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsCommand underflow pid",
@@ -1387,7 +1387,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FirstOctet: 0x02,
 				MR:         0x42,
 			},
-			tpdu.DecodeError("SmsCommand.pid", 2, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsCommand.pid", 2, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsCommand underflow ct",
@@ -1399,7 +1399,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				PID:        0xab,
 				MR:         0x42,
 			},
-			tpdu.DecodeError("SmsCommand.ct", 3, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsCommand.ct", 3, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsCommand underflow mn",
@@ -1412,7 +1412,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				MR:         0x42,
 				CT:         0x89,
 			},
-			tpdu.DecodeError("SmsCommand.mn", 4, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsCommand.mn", 4, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsCommand underflow da",
@@ -1426,7 +1426,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				CT:         0x89,
 				MN:         0x34,
 			},
-			tpdu.DecodeError("SmsCommand.da.addr", 7, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsCommand.da.addr", 7, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsCommand underflow ud",
@@ -1442,7 +1442,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				MN:         0x34,
 				DA:         tpdu.Address{Addr: "6391", TOA: 0x91},
 			},
-			tpdu.DecodeError("SmsCommand.ud.udl", 9, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsCommand.ud.udl", 9, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsDeliver haha",
@@ -1471,7 +1471,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				Direction:  tpdu.MT,
 				FirstOctet: 0x04,
 			},
-			tpdu.DecodeError("SmsDeliver.oa.addr", 3, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsDeliver.oa.addr", 3, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsDeliver underflow pid",
@@ -1482,7 +1482,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FirstOctet: 0x04,
 				OA:         tpdu.Address{Addr: "6391", TOA: 0x91},
 			},
-			tpdu.DecodeError("SmsDeliver.pid", 5, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsDeliver.pid", 5, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsDeliver underflow dcs",
@@ -1493,7 +1493,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FirstOctet: 0x04,
 				OA:         tpdu.Address{Addr: "6391", TOA: 0x91},
 			},
-			tpdu.DecodeError("SmsDeliver.dcs", 6, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsDeliver.dcs", 6, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsDeliver underflow scts",
@@ -1504,7 +1504,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FirstOctet: 0x04,
 				OA:         tpdu.Address{Addr: "6391", TOA: 0x91},
 			},
-			tpdu.DecodeError("SmsDeliver.scts", 7, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsDeliver.scts", 7, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsDeliver bad scts",
@@ -1518,7 +1518,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FirstOctet: 0x04,
 				OA:         tpdu.Address{Addr: "6391", TOA: 0x91},
 			},
-			tpdu.DecodeError("SmsDeliver.scts", 7, bcd.ErrInvalidOctet(0xf1)),
+			tpdu.NewDecodeError("SmsDeliver.scts", 7, bcd.ErrInvalidOctet(0xf1)),
 		},
 		{
 			"SmsDeliver underflow ud",
@@ -1536,7 +1536,7 @@ func TestUnmarshalBinary(t *testing.T) {
 						time.FixedZone("SCTS", 8*3600)),
 				},
 			},
-			tpdu.DecodeError("SmsDeliver.ud.sm", 15, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsDeliver.ud.sm", 15, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsDeliverReport minimal",
@@ -1599,7 +1599,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				Direction:  tpdu.MO,
 				FirstOctet: 0x00,
 			},
-			tpdu.DecodeError("SmsDeliverReport.fcs", 1, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsDeliverReport.fcs", 1, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsDeliverReport underflow pi",
@@ -1610,7 +1610,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FirstOctet: 0x00,
 				FCS:        0x12,
 			},
-			tpdu.DecodeError("SmsDeliverReport.pi", 2, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsDeliverReport.pi", 2, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsDeliverReport underflow pid",
@@ -1622,7 +1622,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FCS:        0x12,
 				PI:         0x01,
 			},
-			tpdu.DecodeError("SmsDeliverReport.pid", 3, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsDeliverReport.pid", 3, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsDeliverReport underflow dcs",
@@ -1634,7 +1634,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FCS:        0x12,
 				PI:         0x02,
 			},
-			tpdu.DecodeError("SmsDeliverReport.dcs", 3, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsDeliverReport.dcs", 3, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsDeliverReport underflow ud",
@@ -1646,7 +1646,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FCS:        0x12,
 				PI:         0x04,
 			},
-			tpdu.DecodeError("SmsDeliverReport.ud.udl", 3, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsDeliverReport.ud.udl", 3, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsStatusReport minimal",
@@ -1761,7 +1761,7 @@ func TestUnmarshalBinary(t *testing.T) {
 			tpdu.TPDU{
 				FirstOctet: 0x02,
 			},
-			tpdu.DecodeError("SmsStatusReport.mr", 1, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsStatusReport.mr", 1, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsStatusReport underflow ra",
@@ -1772,7 +1772,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FirstOctet: 0x02,
 				MR:         0x42,
 			},
-			tpdu.DecodeError("SmsStatusReport.ra.addr", 2, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsStatusReport.ra.addr", 2, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsStatusReport underflow scts",
@@ -1784,7 +1784,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				MR:         0x42,
 				RA:         tpdu.Address{Addr: "6391", TOA: 0x91},
 			},
-			tpdu.DecodeError("SmsStatusReport.scts", 6, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsStatusReport.scts", 6, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsStatusReport underflow dt",
@@ -1803,7 +1803,7 @@ func TestUnmarshalBinary(t *testing.T) {
 						time.FixedZone("SCTS", 8*3600)),
 				},
 			},
-			tpdu.DecodeError("SmsStatusReport.dt", 13, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsStatusReport.dt", 13, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsStatusReport bad scts",
@@ -1818,7 +1818,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				MR:         0x42,
 				RA:         tpdu.Address{Addr: "6391", TOA: 0x91},
 			},
-			tpdu.DecodeError("SmsStatusReport.scts", 6, bcd.ErrInvalidOctet(0xf1)),
+			tpdu.NewDecodeError("SmsStatusReport.scts", 6, bcd.ErrInvalidOctet(0xf1)),
 		},
 		{
 			"SmsStatusReport bad dt",
@@ -1837,7 +1837,7 @@ func TestUnmarshalBinary(t *testing.T) {
 						time.FixedZone("SCTS", 8*3600)),
 				},
 			},
-			tpdu.DecodeError("SmsStatusReport.dt", 13, bcd.ErrInvalidOctet(0xc1)),
+			tpdu.NewDecodeError("SmsStatusReport.dt", 13, bcd.ErrInvalidOctet(0xc1)),
 		},
 		{
 			"SmsStatusReport underflow st",
@@ -1860,7 +1860,7 @@ func TestUnmarshalBinary(t *testing.T) {
 						time.FixedZone("SCTS", 6*3600)),
 				},
 			},
-			tpdu.DecodeError("SmsStatusReport.st", 20, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsStatusReport.st", 20, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsStatusReport underflow pid",
@@ -1881,7 +1881,7 @@ func TestUnmarshalBinary(t *testing.T) {
 					time.FixedZone("SCTS", 6*3600))},
 				ST: 0xab,
 			},
-			tpdu.DecodeError("SmsStatusReport.pid", 22, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsStatusReport.pid", 22, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsStatusReport underflow dcs",
@@ -1906,7 +1906,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				},
 				ST: 0xab,
 			},
-			tpdu.DecodeError("SmsStatusReport.dcs", 22, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsStatusReport.dcs", 22, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsStatusReport underflow ud",
@@ -1931,7 +1931,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				},
 				ST: 0xab,
 			},
-			tpdu.DecodeError("SmsStatusReport.ud.udl", 22, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsStatusReport.ud.udl", 22, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsSubmit haha",
@@ -1978,7 +1978,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				Direction:  tpdu.MO,
 				FirstOctet: 0x01,
 			},
-			tpdu.DecodeError("SmsSubmit.mr", 1, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsSubmit.mr", 1, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsSubmit underflow da",
@@ -1989,7 +1989,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FirstOctet: 0x01,
 				MR:         0x23,
 			},
-			tpdu.DecodeError("SmsSubmit.da.addr", 2, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsSubmit.da.addr", 2, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsSubmit bad da",
@@ -2000,7 +2000,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FirstOctet: 0x01,
 				MR:         0x23,
 			},
-			tpdu.DecodeError("SmsSubmit.da.addr", 4, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsSubmit.da.addr", 4, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsSubmit underflow pid",
@@ -2012,7 +2012,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				MR:         0x23,
 				DA:         tpdu.Address{Addr: "6391", TOA: 0x91},
 			},
-			tpdu.DecodeError("SmsSubmit.pid", 6, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsSubmit.pid", 6, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsSubmit underflow dcs",
@@ -2024,7 +2024,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				MR:         0x23,
 				DA:         tpdu.Address{Addr: "6391", TOA: 0x91},
 			},
-			tpdu.DecodeError("SmsSubmit.dcs", 7, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsSubmit.dcs", 7, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsSubmit underflow vp",
@@ -2037,7 +2037,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				MR:         0x23,
 				DA:         tpdu.Address{Addr: "6391", TOA: 0x91},
 			},
-			tpdu.DecodeError("SmsSubmit.vp", 8, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsSubmit.vp", 8, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsSubmit bad vp",
@@ -2053,7 +2053,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				MR:         0x23,
 				DA:         tpdu.Address{Addr: "6391", TOA: 0x91},
 			},
-			tpdu.DecodeError("SmsSubmit.vp", 8, bcd.ErrInvalidOctet(0xc8)),
+			tpdu.NewDecodeError("SmsSubmit.vp", 8, bcd.ErrInvalidOctet(0xc8)),
 		},
 		{
 			"SmsSubmit underflow ud",
@@ -2068,7 +2068,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				MR:         0x23,
 				DA:         tpdu.Address{Addr: "6391", TOA: 0x91},
 			},
-			tpdu.DecodeError("SmsSubmit.ud.sm", 9, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsSubmit.ud.sm", 9, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsSubmitReport minimal",
@@ -2148,7 +2148,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				Direction:  tpdu.MT,
 				FirstOctet: 0x01,
 			},
-			tpdu.DecodeError("SmsSubmitReport.fcs", 1, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsSubmitReport.fcs", 1, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsSubmitReport underflow pi",
@@ -2159,7 +2159,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FirstOctet: 0x01,
 				FCS:        0x12,
 			},
-			tpdu.DecodeError("SmsSubmitReport.pi", 2, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsSubmitReport.pi", 2, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsSubmitReport underflow scts",
@@ -2170,7 +2170,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FirstOctet: 0x01,
 				FCS:        0x12,
 			},
-			tpdu.DecodeError("SmsSubmitReport.scts", 3, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsSubmitReport.scts", 3, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsSubmitReport bad scts",
@@ -2181,7 +2181,7 @@ func TestUnmarshalBinary(t *testing.T) {
 				FirstOctet: 0x01,
 				FCS:        0x12,
 			},
-			tpdu.DecodeError("SmsSubmitReport.scts", 3, bcd.ErrInvalidOctet(0xf1)),
+			tpdu.NewDecodeError("SmsSubmitReport.scts", 3, bcd.ErrInvalidOctet(0xf1)),
 		},
 		{
 			"SmsSubmitReport underflow pid",
@@ -2196,7 +2196,7 @@ func TestUnmarshalBinary(t *testing.T) {
 					Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 						time.FixedZone("SCTS", 8*3600))},
 			},
-			tpdu.DecodeError("SmsSubmitReport.pid", 10, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsSubmitReport.pid", 10, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsSubmitReport underflow dcs",
@@ -2211,7 +2211,7 @@ func TestUnmarshalBinary(t *testing.T) {
 					Time: time.Date(2015, time.May, 17, 23, 02, 50, 0,
 						time.FixedZone("SCTS", 8*3600))},
 			},
-			tpdu.DecodeError("SmsSubmitReport.dcs", 10, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsSubmitReport.dcs", 10, tpdu.ErrUnderflow),
 		},
 		{
 			"SmsSubmitReport underflow ud",
@@ -2228,7 +2228,7 @@ func TestUnmarshalBinary(t *testing.T) {
 						time.FixedZone("SCTS", 8*3600)),
 				},
 			},
-			tpdu.DecodeError("SmsSubmitReport.ud.udl", 11, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("SmsSubmitReport.ud.udl", 11, tpdu.ErrUnderflow),
 		},
 	}
 	for _, p := range patterns {

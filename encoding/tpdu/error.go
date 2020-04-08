@@ -11,19 +11,21 @@ import (
 	"io"
 )
 
-type decodeError struct {
+// DecodeError contains the details of an error detected whilew decoding a TPDU.
+type DecodeError struct {
 	Field  string
 	Offset int
 	Err    error
 }
 
-// DecodeError creates a decodeError which identifies the field being decoded,
-// and the offset into the byte array where the field starts.
+// NewDecodeError creates a decodeError which identifies the field being
+// decoded, and the offset into the byte array where the field starts.
+//
 // If the provided error is a nested decodeError then the offset is updated to
 // provide the offset from the beginning of the enclosing field, and the field
 // names are combined in outer.inner format.
-func DecodeError(f string, o int, e error) error {
-	if s, ok := e.(decodeError); ok {
+func NewDecodeError(f string, o int, e error) DecodeError {
+	if s, ok := e.(DecodeError); ok {
 		s.Field = fmt.Sprintf("%s.%s", f, s.Field)
 		s.Offset = s.Offset + o
 		return s
@@ -31,7 +33,7 @@ func DecodeError(f string, o int, e error) error {
 	if e == io.EOF {
 		e = ErrUnderflow
 	}
-	return decodeError{f, o, e}
+	return DecodeError{f, o, e}
 }
 
 type encodeError struct {
@@ -54,7 +56,7 @@ func (e encodeError) Error() string {
 	return fmt.Sprintf("tpdu: error encoding %s: %v", e.Field, e.Err)
 }
 
-func (e decodeError) Error() string {
+func (e DecodeError) Error() string {
 	return fmt.Sprintf("tpdu: error decoding %s at octet %d: %v", e.Field, e.Offset, e.Err)
 }
 

@@ -67,18 +67,18 @@ func (udh UserDataHeader) MarshalBinary() ([]byte, error) {
 // detected while unmarshalling.
 func (udh *UserDataHeader) UnmarshalBinary(src []byte) (int, error) {
 	if len(src) < 1 {
-		return 0, DecodeError("udhl", 0, ErrUnderflow)
+		return 0, NewDecodeError("udhl", 0, ErrUnderflow)
 	}
 	udhl := int(src[0])
 	udhl++ // so it includes itself
 	ri := 1
 	if len(src) < udhl {
-		return ri, DecodeError("ie", ri, ErrUnderflow)
+		return ri, NewDecodeError("ie", ri, ErrUnderflow)
 	}
 	ies := []InformationElement(nil)
 	for ri < udhl {
 		if udhl < ri+2 {
-			return ri, DecodeError("ie", ri, ErrUnderflow)
+			return ri, NewDecodeError("ie", ri, ErrUnderflow)
 		}
 		var ie InformationElement
 		ie.ID = src[ri]
@@ -86,7 +86,7 @@ func (udh *UserDataHeader) UnmarshalBinary(src []byte) (int, error) {
 		iedl := int(src[ri])
 		ri++
 		if len(src) < ri+iedl {
-			return ri, DecodeError("ied", ri, ErrUnderflow)
+			return ri, NewDecodeError("ied", ri, ErrUnderflow)
 		}
 		ie.Data = append([]byte(nil), src[ri:ri+iedl]...)
 		ri += iedl

@@ -29,7 +29,7 @@ func TestDecode(t *testing.T) {
 			"",
 			nil,
 			nil,
-			tpdu.DecodeError("length", 0, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("length", 0, tpdu.ErrUnderflow),
 		},
 		{
 			"valid",
@@ -69,7 +69,7 @@ func TestDecodeString(t *testing.T) {
 			"",
 			nil,
 			nil,
-			tpdu.DecodeError("length", 0, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("length", 0, tpdu.ErrUnderflow),
 		},
 		{
 			"valid", "0791361907002039010203040506070809",

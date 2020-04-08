@@ -37,7 +37,7 @@ func TestDecodeError(t *testing.T) {
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
-			err := tpdu.DecodeError(p.Field, p.Offset, p.Err)
+			err := tpdu.NewDecodeError(p.Field, p.Offset, p.Err)
 			expected := fmt.Sprintf("tpdu: error decoding %s at octet %d: %v", p.Field, p.Offset, p.Err)
 			s := err.Error()
 			if s != expected {
@@ -48,7 +48,7 @@ func TestDecodeError(t *testing.T) {
 	}
 	// nested
 	f := func(t *testing.T) {
-		err := tpdu.DecodeError("nested", 40, tpdu.DecodeError("inner", 2, nil))
+		err := tpdu.NewDecodeError("nested", 40, tpdu.NewDecodeError("inner", 2, nil))
 		expected := fmt.Sprintf("tpdu: error decoding nested.inner at octet 42: %v", nil)
 		s := err.Error()
 		if s != expected {

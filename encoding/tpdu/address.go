@@ -76,7 +76,7 @@ func (a *Address) MarshalBinary() (dst []byte, err error) {
 // while unmarshalling.
 func (a *Address) UnmarshalBinary(src []byte) (int, error) {
 	if len(src) < 2 {
-		return 0, DecodeError("addr", 0, ErrUnderflow)
+		return 0, NewDecodeError("addr", 0, ErrUnderflow)
 	}
 	l := int(src[0])  // len is semi-octets and ignores toa
 	ol := (l + 1) / 2 // octet length
@@ -84,7 +84,7 @@ func (a *Address) UnmarshalBinary(src []byte) (int, error) {
 	ton := TypeOfNumber((toa >> 4) & 0x07)
 	ri := 2
 	if len(src) < ri+ol {
-		return len(src), DecodeError("addr", ri, ErrUnderflow)
+		return len(src), NewDecodeError("addr", ri, ErrUnderflow)
 	}
 	switch ton {
 	case TonAlphanumeric:
@@ -96,7 +96,7 @@ func (a *Address) UnmarshalBinary(src []byte) (int, error) {
 		d := gsm7.NewDecoder().WithExtCharset(nil).Strict() // without escapes
 		baddr, err := d.Decode(u)
 		if err != nil {
-			return ri, DecodeError("addr", ri, err)
+			return ri, NewDecodeError("addr", ri, err)
 		}
 		ri += ol
 		a.Addr = string(baddr)
@@ -104,10 +104,10 @@ func (a *Address) UnmarshalBinary(src []byte) (int, error) {
 		baddr, n, err := semioctet.Decode(make([]byte, l), src[ri:ri+ol])
 		ri += n
 		if err != nil {
-			return ri, DecodeError("addr", ri-n, err)
+			return ri, NewDecodeError("addr", ri-n, err)
 		}
 		if n != ol || len(baddr) < l {
-			return ri, DecodeError("addr", ri-n, ErrUnderflow)
+			return ri, NewDecodeError("addr", ri-n, ErrUnderflow)
 		}
 		a.Addr = string(baddr)
 	}

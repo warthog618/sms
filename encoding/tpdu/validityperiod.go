@@ -117,7 +117,7 @@ func (v *ValidityPeriod) UnmarshalBinary(src []byte, vpf ValidityPeriodFormat) (
 	case VpfNotPresent:
 		return 0, nil
 	}
-	return 0, DecodeError("vpf", 0, ErrInvalid)
+	return 0, NewDecodeError("vpf", 0, ErrInvalid)
 }
 
 func (v *ValidityPeriod) unmarshalVPEnhanced(src []byte) (int, error) {
@@ -142,17 +142,17 @@ func (v *ValidityPeriod) unmarshalVPEnhanced(src []byte) (int, error) {
 		for idx := 0; idx < 3; idx++ {
 			i[idx], err = bcd.Decode(src[idx+1])
 			if err != nil {
-				return 4, DecodeError("enhanced", 1, err)
+				return 4, NewDecodeError("enhanced", 1, err)
 			}
 		}
 		d = time.Duration(i[0])*time.Hour + time.Duration(i[1])*time.Minute + time.Duration(i[2])*time.Second
 		used = 3
 	default:
-		return 7, DecodeError("enhanced", 0, ErrInvalid)
+		return 7, NewDecodeError("enhanced", 0, ErrInvalid)
 	}
 	for i := used + 1; i < 7; i++ {
 		if src[i] != 0 {
-			return used + 1, DecodeError("enhanced", i, ErrNonZero)
+			return used + 1, NewDecodeError("enhanced", i, ErrNonZero)
 		}
 	}
 	v.EFI = efi

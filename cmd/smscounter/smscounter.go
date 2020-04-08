@@ -34,43 +34,47 @@ func main() {
 		flag.Usage()
 		os.Exit(1)
 	}
+	c, err := NewCount(msg, nli)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Print(c)
+}
 
+// NewCount creates the SMS count statistics for a message.
+func NewCount(msg string, nli int) (Count, error) {
 	options := []sms.EncoderOption(nil)
 	if nli != 0 {
 		options = append(options, sms.WithCharset(nli))
 	}
+	c := Count{}
 	pdus, err := sms.Encode([]byte(msg), options...)
 	if err != nil {
-		log.Println(err)
-		return
+		return c, err
 	}
 	alpha, _ := pdus[0].Alphabet()
 	lastLen := len(pdus[len(pdus)-1].UD) // valid for 7bit as it is unpacked into octets.
 	pm := pdus[0].UDBlockSize()
-	var encoding string
 	switch alpha {
 	case tpdu.Alpha7Bit:
 		if hasEscapes(pdus) {
-			encoding = "7BIT_EX"
+			c.Encoding = "7BIT_EX"
 		} else {
-			encoding = "7BIT"
+			c.Encoding = "7BIT"
 		}
 	case tpdu.Alpha8Bit:
-		encoding = "8BIT"
+		c.Encoding = "8BIT"
 	case tpdu.AlphaUCS2:
-		encoding = "UCS-2"
+		c.Encoding = "UCS-2"
 		lastLen /= 2 // UCS-2 code points
 		pm /= 2      // UCS-2 code points
 	}
-	rem := pm - lastLen
-	count := len(pdus)
-	totalLen := (pm * (count - 1)) + lastLen
-	fmt.Printf("encoding: %s\n", encoding)
-	fmt.Printf("messages: %d\n", count)
-	fmt.Printf("total length: %d\n", totalLen)
-	fmt.Printf("last PDU length: %d\n", lastLen)
-	fmt.Printf("per_message: %d\n", pm)
-	fmt.Printf("remaining: %d\n", rem)
+	c.Pdulen = pm
+	c.Llen = lastLen
+	c.Remaining = c.Pdulen - c.Llen
+	c.Messages = len(pdus)
+	c.Tlen = (pm * (c.Messages - 1)) + lastLen
+	return c, nil
 }
 
 func hasEscapes(pdus []tpdu.TPDU) bool {
@@ -92,4 +96,23 @@ func usage() {
 		"If the message is too long for a single PDU then it is split into several.\n\n"+
 		"Usage: smscounter -message <message>\n")
 	flag.PrintDefaults()
+}
+
+// Count contains the statistics related to encoding a message in SMS-SUBMIT TPDUs.
+type Count struct {
+	Encoding  string
+	Messages  int
+	Tlen      int
+	Llen      int
+	Pdulen    int
+	Remaining int
+}
+
+func (c Count) String() string {
+	return fmt.Sprintf("encoding: %s\n", c.Encoding) +
+		fmt.Sprintf("messages: %d\n", c.Messages) +
+		fmt.Sprintf("total length: %d\n", c.Tlen) +
+		fmt.Sprintf("last PDU length: %d\n", c.Llen) +
+		fmt.Sprintf("per_message: %d\n", c.Pdulen) +
+		fmt.Sprintf("remaining: %d\n", c.Remaining)
 }

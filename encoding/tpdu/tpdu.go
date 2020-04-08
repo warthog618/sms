@@ -560,7 +560,7 @@ func (t *TPDU) marshalSubmitReport() ([]byte, error) {
 // point that the decoding error was detected.
 func (t *TPDU) UnmarshalBinary(src []byte) (err error) {
 	if len(src) < 1 {
-		return DecodeError("tpdu.firstOctet", 0, ErrUnderflow)
+		return NewDecodeError("tpdu.firstOctet", 0, ErrUnderflow)
 	}
 	t.FirstOctet = FirstOctet(src[0])
 	st := smsType(t.FirstOctet.MTI(), t.Direction)
@@ -579,10 +579,10 @@ func (t *TPDU) UnmarshalBinary(src []byte) (err error) {
 		err = t.unmarshalCommand(src[1:])
 	default:
 		t.FirstOctet = 0
-		return DecodeError("tpdu.firstOctet", 0, ErrUnsupportedSmsType(st))
+		return NewDecodeError("tpdu.firstOctet", 0, ErrUnsupportedSmsType(st))
 	}
 	if err != nil {
-		return DecodeError(st.String(), 1, err)
+		return NewDecodeError(st.String(), 1, err)
 	}
 	return nil
 }
@@ -591,29 +591,29 @@ func (t *TPDU) unmarshalCommand(src []byte) (err error) {
 	b := bytes.NewBuffer(src)
 	t.MR, err = b.ReadByte()
 	if err != nil {
-		return DecodeError("mr", len(src)-b.Len(), err)
+		return NewDecodeError("mr", len(src)-b.Len(), err)
 	}
 	t.PID, err = b.ReadByte()
 	if err != nil {
-		return DecodeError("pid", len(src)-b.Len(), err)
+		return NewDecodeError("pid", len(src)-b.Len(), err)
 	}
 	t.CT, err = b.ReadByte()
 	if err != nil {
-		return DecodeError("ct", len(src)-b.Len(), err)
+		return NewDecodeError("ct", len(src)-b.Len(), err)
 	}
 	t.MN, err = b.ReadByte()
 	if err != nil {
-		return DecodeError("mn", len(src)-b.Len(), err)
+		return NewDecodeError("mn", len(src)-b.Len(), err)
 	}
 	n, err := t.DA.UnmarshalBinary(b.Bytes())
 	if err != nil {
-		return DecodeError("da", len(src)-b.Len(), err)
+		return NewDecodeError("da", len(src)-b.Len(), err)
 	}
 	b.Next(n)
 	t.DCS = Dcs8BitData // force TPDU to interpret UD as 8bit, if not set already
 	err = t.decodeUserData(b.Bytes())
 	if err != nil {
-		return DecodeError("ud", len(src)-b.Len(), err)
+		return NewDecodeError("ud", len(src)-b.Len(), err)
 	}
 	return nil
 }
@@ -621,26 +621,26 @@ func (t *TPDU) unmarshalCommand(src []byte) (err error) {
 func (t *TPDU) unmarshalDeliver(src []byte) (err error) {
 	n, err := t.OA.UnmarshalBinary(src)
 	if err != nil {
-		return DecodeError("oa", 0, err)
+		return NewDecodeError("oa", 0, err)
 	}
 	b := bytes.NewBuffer(src[n:])
 	t.PID, err = b.ReadByte()
 	if err != nil {
-		return DecodeError("pid", len(src)-b.Len(), err)
+		return NewDecodeError("pid", len(src)-b.Len(), err)
 	}
 	dcs, err := b.ReadByte()
 	if err != nil {
-		return DecodeError("dcs", len(src)-b.Len(), err)
+		return NewDecodeError("dcs", len(src)-b.Len(), err)
 	}
 	t.DCS = DCS(dcs)
 	err = t.SCTS.UnmarshalBinary(b.Bytes())
 	if err != nil {
-		return DecodeError("scts", len(src)-b.Len(), err)
+		return NewDecodeError("scts", len(src)-b.Len(), err)
 	}
 	b.Next(7)
 	err = t.decodeUserData(b.Bytes())
 	if err != nil {
-		return DecodeError("ud", len(src)-b.Len(), err)
+		return NewDecodeError("ud", len(src)-b.Len(), err)
 	}
 	return nil
 }
@@ -648,25 +648,25 @@ func (t *TPDU) unmarshalDeliver(src []byte) (err error) {
 func (t *TPDU) unmarshalDeliverReport(src []byte) error {
 	ri := 0
 	if len(src) <= ri {
-		return DecodeError("fcs", ri, ErrUnderflow)
+		return NewDecodeError("fcs", ri, ErrUnderflow)
 	}
 	t.FCS = src[ri]
 	ri++
 	if len(src) <= ri {
-		return DecodeError("pi", ri, ErrUnderflow)
+		return NewDecodeError("pi", ri, ErrUnderflow)
 	}
 	t.PI = PI(src[ri])
 	ri++
 	if t.PI.PID() {
 		if len(src) <= ri {
-			return DecodeError("pid", ri, ErrUnderflow)
+			return NewDecodeError("pid", ri, ErrUnderflow)
 		}
 		t.PID = src[ri]
 		ri++
 	}
 	if t.PI.DCS() {
 		if len(src) <= ri {
-			return DecodeError("dcs", ri, ErrUnderflow)
+			return NewDecodeError("dcs", ri, ErrUnderflow)
 		}
 		t.DCS = DCS(src[ri])
 		ri++
@@ -674,7 +674,7 @@ func (t *TPDU) unmarshalDeliverReport(src []byte) error {
 	if t.PI.UDL() {
 		err := t.decodeUserData(src[ri:])
 		if err != nil {
-			return DecodeError("ud", ri, err)
+			return NewDecodeError("ud", ri, err)
 		}
 	}
 	return nil
@@ -683,33 +683,33 @@ func (t *TPDU) unmarshalDeliverReport(src []byte) error {
 func (t *TPDU) unmarshalStatusReport(src []byte) error {
 	ri := 0
 	if len(src) <= ri {
-		return DecodeError("mr", ri, ErrUnderflow)
+		return NewDecodeError("mr", ri, ErrUnderflow)
 	}
 	t.MR = src[ri]
 	ri++
 	n, err := t.RA.UnmarshalBinary(src[ri:])
 	if err != nil {
-		return DecodeError("ra", ri, err)
+		return NewDecodeError("ra", ri, err)
 	}
 	ri += n
 	if len(src) < ri+7 {
-		return DecodeError("scts", ri, ErrUnderflow)
+		return NewDecodeError("scts", ri, ErrUnderflow)
 	}
 	err = t.SCTS.UnmarshalBinary(src[ri : ri+7])
 	if err != nil {
-		return DecodeError("scts", ri, err)
+		return NewDecodeError("scts", ri, err)
 	}
 	ri += 7
 	if len(src) < ri+7 {
-		return DecodeError("dt", ri, ErrUnderflow)
+		return NewDecodeError("dt", ri, ErrUnderflow)
 	}
 	err = t.DT.UnmarshalBinary(src[ri : ri+7])
 	if err != nil {
-		return DecodeError("dt", ri, err)
+		return NewDecodeError("dt", ri, err)
 	}
 	ri += 7
 	if len(src) <= ri {
-		return DecodeError("st", ri, ErrUnderflow)
+		return NewDecodeError("st", ri, ErrUnderflow)
 	}
 	t.ST = src[ri]
 	ri++
@@ -725,14 +725,14 @@ func (t *TPDU) unmarshalSROptionals(ri int, src []byte) error {
 	ri++
 	if t.PI.PID() {
 		if len(src) <= ri {
-			return DecodeError("pid", ri, ErrUnderflow)
+			return NewDecodeError("pid", ri, ErrUnderflow)
 		}
 		t.PID = src[ri]
 		ri++
 	}
 	if t.PI.DCS() {
 		if len(src) <= ri {
-			return DecodeError("dcs", ri, ErrUnderflow)
+			return NewDecodeError("dcs", ri, ErrUnderflow)
 		}
 		t.DCS = DCS(src[ri])
 		ri++
@@ -740,7 +740,7 @@ func (t *TPDU) unmarshalSROptionals(ri int, src []byte) error {
 	if t.PI.UDL() {
 		err := t.decodeUserData(src[ri:])
 		if err != nil {
-			return DecodeError("ud", ri, err)
+			return NewDecodeError("ud", ri, err)
 		}
 	}
 	return nil
@@ -748,33 +748,33 @@ func (t *TPDU) unmarshalSROptionals(ri int, src []byte) error {
 
 func (t *TPDU) unmarshalSubmit(src []byte) error {
 	if len(src) < 1 {
-		return DecodeError("mr", 0, ErrUnderflow)
+		return NewDecodeError("mr", 0, ErrUnderflow)
 	}
 	t.MR = src[0]
 	ri := 1
 	n, err := t.DA.UnmarshalBinary(src[ri:])
 	if err != nil {
-		return DecodeError("da", ri, err)
+		return NewDecodeError("da", ri, err)
 	}
 	ri += n
 	if len(src) <= ri {
-		return DecodeError("pid", ri, ErrUnderflow)
+		return NewDecodeError("pid", ri, ErrUnderflow)
 	}
 	t.PID = src[ri]
 	ri++
 	if len(src) <= ri {
-		return DecodeError("dcs", ri, ErrUnderflow)
+		return NewDecodeError("dcs", ri, ErrUnderflow)
 	}
 	t.DCS = DCS(src[ri])
 	ri++
 	n, err = t.VP.UnmarshalBinary(src[ri:], t.FirstOctet.VPF())
 	if err != nil {
-		return DecodeError("vp", ri, err)
+		return NewDecodeError("vp", ri, err)
 	}
 	ri += n
 	err = t.decodeUserData(src[ri:])
 	if err != nil {
-		return DecodeError("ud", ri, err)
+		return NewDecodeError("ud", ri, err)
 	}
 	return nil
 }
@@ -782,33 +782,33 @@ func (t *TPDU) unmarshalSubmit(src []byte) error {
 func (t *TPDU) unmarshalSubmitReport(src []byte) error {
 	ri := 0
 	if len(src) < 1 {
-		return DecodeError("fcs", ri, ErrUnderflow)
+		return NewDecodeError("fcs", ri, ErrUnderflow)
 	}
 	t.FCS = src[ri]
 	ri++
 	if len(src) <= ri {
-		return DecodeError("pi", ri, ErrUnderflow)
+		return NewDecodeError("pi", ri, ErrUnderflow)
 	}
 	t.PI = PI(src[ri])
 	ri++
 	if len(src) < ri+7 {
-		return DecodeError("scts", ri, ErrUnderflow)
+		return NewDecodeError("scts", ri, ErrUnderflow)
 	}
 	err := t.SCTS.UnmarshalBinary(src[ri : ri+7])
 	if err != nil {
-		return DecodeError("scts", ri, err)
+		return NewDecodeError("scts", ri, err)
 	}
 	ri += 7
 	if t.PI.PID() {
 		if len(src) <= ri {
-			return DecodeError("pid", ri, ErrUnderflow)
+			return NewDecodeError("pid", ri, ErrUnderflow)
 		}
 		t.PID = src[ri]
 		ri++
 	}
 	if t.PI.DCS() {
 		if len(src) <= ri {
-			return DecodeError("dcs", ri, ErrUnderflow)
+			return NewDecodeError("dcs", ri, ErrUnderflow)
 		}
 		t.DCS = DCS(src[ri])
 		ri++
@@ -816,7 +816,7 @@ func (t *TPDU) unmarshalSubmitReport(src []byte) error {
 	if t.PI.UDL() {
 		err := t.decodeUserData(src[ri:])
 		if err != nil {
-			return DecodeError("ud", ri, err)
+			return NewDecodeError("ud", ri, err)
 		}
 	}
 	return nil
@@ -825,7 +825,7 @@ func (t *TPDU) unmarshalSubmitReport(src []byte) error {
 // decodeUserData unmarshals the User Data field from the binary src.
 func (t *TPDU) decodeUserData(src []byte) error {
 	if len(src) < 1 {
-		return DecodeError("udl", 0, ErrUnderflow)
+		return NewDecodeError("udl", 0, ErrUnderflow)
 	}
 	udl := int(src[0])
 	if udl == 0 {
@@ -836,7 +836,7 @@ func (t *TPDU) decodeUserData(src []byte) error {
 	ri := 1
 	alphabet, err := t.Alphabet()
 	if err != nil {
-		return DecodeError("alphabet", ri, err)
+		return NewDecodeError("alphabet", ri, err)
 	}
 	if alphabet == Alpha7Bit {
 		sml7 = udl
@@ -844,10 +844,10 @@ func (t *TPDU) decodeUserData(src []byte) error {
 		udl = (sml7*7 + 7) / 8
 	}
 	if len(src) < ri+udl {
-		return DecodeError("sm", ri, ErrUnderflow)
+		return NewDecodeError("sm", ri, ErrUnderflow)
 	}
 	if len(src) > ri+udl {
-		return DecodeError("ud", ri, ErrOverlength)
+		return NewDecodeError("ud", ri, ErrOverlength)
 	}
 	var udhl int // Note that in this context udhl includes itself.
 	udhi := t.UDHI()
@@ -855,7 +855,7 @@ func (t *TPDU) decodeUserData(src []byte) error {
 		udh = make(UserDataHeader, 0)
 		l, err := udh.UnmarshalBinary(src[ri:])
 		if err != nil {
-			return DecodeError("udh", ri, err)
+			return NewDecodeError("udh", ri, err)
 		}
 		udhl = l
 		ri += udhl
@@ -868,12 +868,12 @@ func (t *TPDU) decodeUserData(src []byte) error {
 	case Alpha7Bit:
 		sm, err := decode7Bit(sml7, udhl, src[ri:])
 		if err != nil {
-			return DecodeError("sm", ri, err)
+			return NewDecodeError("sm", ri, err)
 		}
 		t.UD = sm
 	case AlphaUCS2:
 		if len(src[ri:])&0x01 == 0x01 {
-			return DecodeError("sm", ri, ErrOddUCS2Length)
+			return NewDecodeError("sm", ri, ErrOddUCS2Length)
 		}
 		fallthrough
 	case Alpha8Bit:

@@ -5,75 +5,62 @@
 package main
 
 import (
-	"bytes"
-	"html/template"
-	"os"
-	"os/exec"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMain(m *testing.M) {
-	switch os.Getenv("TEST_ENTRY") {
-	case "main":
-		main()
-	default:
-		os.Exit(m.Run())
+func TestNewCount(t *testing.T) {
+	patterns := []struct {
+		name string
+		msg  string
+		nli  int
+		out  Count
+		err  error
+	}{
+		{
+			"std",
+			"content of the SMS",
+			0,
+			Count{"7BIT", 1, 18, 18, 160, 142},
+			nil,
+		},
+		{
+			"grin",
+			"hello 😁",
+			0,
+			Count{"UCS-2", 1, 8, 8, 70, 62},
+			nil,
+		},
+		{
+			"urdu locking",
+			"hi ت",
+			13,
+			Count{"7BIT", 1, 4, 4, 155, 151},
+			nil,
+		},
+		{
+			"urdu extended",
+			"hi ؎",
+			13,
+			Count{"7BIT_EX", 1, 5, 5, 155, 150},
+			nil,
+		},
+		{
+			"urdu locking and extended",
+			"hi ت؎",
+			13,
+			Count{"7BIT_EX", 1, 6, 6, 152, 146},
+			nil,
+		},
 	}
-}
 
-type count struct {
-	Encoding  string
-	Messages  int
-	Tlen      int
-	Llen      int
-	Pdulen    int
-	Remaining int
-}
-
-type testPattern struct {
-	name    string
-	msg     string
-	success bool
-	out     count
-}
-
-var outTemplate = `encoding: {{.Encoding}}
-messages: {{.Messages}}
-total length: {{.Tlen}}
-last PDU length: {{.Llen}}
-per_message: {{.Pdulen}}
-remaining: {{.Remaining}}
-`
-
-func TestExec(t *testing.T) {
-	env := []string{}
-	tmpl, err := template.New("test").Parse(outTemplate)
-	if err != nil {
-		panic(err)
-	}
-	for _, p := range tests {
+	for _, p := range patterns {
 		f := func(t *testing.T) {
-			cmd := exec.Command(os.Args[0])
-			cmd.Args = append([]string{"smscounter", "-message"}, p.msg)
-			cmd.Env = append(env, "TEST_ENTRY=main")
-			stdout, err := cmd.Output()
-			if e, ok := err.(*exec.ExitError); ok {
-				assert.Equal(t, p.success, e.Success())
-			} else {
-				var out bytes.Buffer
-				err := tmpl.Execute(&out, p.out)
-				if err != nil {
-					t.Fatal(err)
-				}
-				assert.Equal(t, out.String(), string(stdout))
-			}
+			out, err := NewCount(p.msg, p.nli)
+			assert.Equal(t, p.err, err)
+			assert.Equal(t, p.out, out)
 		}
 		t.Run(p.name, f)
 	}
-}
-
-var tests = []testPattern{
-	{"std", "content of the SMS", true, count{"7BIT", 1, 18, 18, 160, 142}},
 }

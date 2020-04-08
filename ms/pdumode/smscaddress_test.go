@@ -74,7 +74,7 @@ func TestSMSCAddressUnmarshalBinary(t *testing.T) {
 			nil,
 			pdumode.SMSCAddress{},
 			0,
-			tpdu.DecodeError("length", 0, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("length", 0, tpdu.ErrUnderflow),
 		},
 		{
 			"only toa",
@@ -116,27 +116,27 @@ func TestSMSCAddressUnmarshalBinary(t *testing.T) {
 			[]byte{11, 0x91, 0x16, 0x04, 0x89, 0x56},
 			pdumode.SMSCAddress{},
 			6,
-			tpdu.DecodeError("addr", 2, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("addr", 2, tpdu.ErrUnderflow),
 		},
 		{
 			"short number pad",
 			[]byte{12, 0x91, 0x16, 0x04, 0x89, 0x56, 0x97, 0xf7},
 			pdumode.SMSCAddress{},
 			8,
-			tpdu.DecodeError("addr", 2, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("addr", 2, tpdu.ErrUnderflow),
 		},
 		{
 			"underflow alpha",
 			[]byte{5, 0xd1, 0xCF, 0xE5, 0x39},
 			pdumode.SMSCAddress{},
 			5,
-			tpdu.DecodeError("addr", 2, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("addr", 2, tpdu.ErrUnderflow),
 		},
 		{
 			"underflow toa",
 			[]byte{1}, pdumode.SMSCAddress{},
 			1,
-			tpdu.DecodeError("toa", 1, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("toa", 1, tpdu.ErrUnderflow),
 		},
 	}
 	for _, p := range patterns {

@@ -318,7 +318,7 @@ func TestDecode(t *testing.T) {
 			nil,
 			nil,
 			nil,
-			tpdu.DecodeError("tpdu.firstOctet", 0, tpdu.ErrUnderflow),
+			tpdu.NewDecodeError("tpdu.firstOctet", 0, tpdu.ErrUnderflow),
 		},
 		{
 			"deliver single segment",
