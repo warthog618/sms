@@ -1,7 +1,6 @@
-// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
+// SPDX-License-Identifier: MIT
 //
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
+// Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
 package tpdu
 
@@ -11,9 +10,14 @@ import (
 	"github.com/warthog618/sms/encoding/bcd"
 )
 
-// Timestamp represents a SCTS timestamp, as defined in 3GPP TS 23.040 Section 9.2.3.11.
+// Timestamp represents a SCTS timestamp, as defined in 3GPP TS 23.040 Section
+// 9.2.3.11.
 type Timestamp struct {
 	time.Time
+}
+
+func (t Timestamp) String() string {
+	return t.Format("2006-01-02 15:04:05 -0700")
 }
 
 // MarshalBinary encodes the SCTS timestamp into binary.
@@ -37,7 +41,7 @@ func (t *Timestamp) MarshalBinary() (dst []byte, err error) {
 	return dst, nil
 }
 
-// UnmarshalBinary decodes the SCTS timestamp.
+// UnmarshalBinary decodes the SCTS timestamp from binary.
 func (t *Timestamp) UnmarshalBinary(src []byte) error {
 	if len(src) < 7 {
 		return ErrUnderflow
