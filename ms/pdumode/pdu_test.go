@@ -34,7 +34,9 @@ func TestDecode(t *testing.T) {
 		{
 			"valid",
 			"0791361907002039010203040506070809",
-			&pdumode.SMSCAddress{Addr: "639170000293", TOA: 0x91},
+			&pdumode.SMSCAddress{
+				tpdu.Address{Addr: "639170000293", TOA: 0x91},
+			},
 			[]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09},
 			nil,
 		},
@@ -73,7 +75,9 @@ func TestDecodeString(t *testing.T) {
 		},
 		{
 			"valid", "0791361907002039010203040506070809",
-			&pdumode.SMSCAddress{Addr: "639170000293", TOA: 0x91},
+			&pdumode.SMSCAddress{
+				tpdu.Address{Addr: "639170000293", TOA: 0x91},
+			},
 			[]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09},
 			nil,
 		},
@@ -101,13 +105,17 @@ func TestEncode(t *testing.T) {
 		},
 		{
 			"valid", "0791361907002039010203040506070809",
-			&pdumode.SMSCAddress{Addr: "639170000293", TOA: 0x91},
+			&pdumode.SMSCAddress{
+				tpdu.Address{Addr: "639170000293", TOA: 0x91},
+			},
 			[]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09},
 			nil,
 		},
 		{
 			"invalid addr", "",
-			&pdumode.SMSCAddress{Addr: "banana"},
+			&pdumode.SMSCAddress{
+				tpdu.Address{Addr: "banana"},
+			},
 			nil,
 			tpdu.EncodeError("addr", semioctet.ErrInvalidDigit(0x6e)),
 		},
@@ -136,12 +144,18 @@ func TestEncodeToString(t *testing.T) {
 		{
 			"valid",
 			"0791361907002039010203040506070809",
-			&pdumode.SMSCAddress{Addr: "639170000293", TOA: 0x91},
+			&pdumode.SMSCAddress{
+				tpdu.Address{Addr: "639170000293", TOA: 0x91},
+			},
 			[]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09},
 			nil,
 		},
 		{
-			"invalid addr", "", &pdumode.SMSCAddress{Addr: "banana"},
+			"invalid addr",
+			"",
+			&pdumode.SMSCAddress{
+				tpdu.Address{Addr: "banana"},
+			},
 			nil,
 			tpdu.EncodeError("addr", semioctet.ErrInvalidDigit(0x6e)),
 		},

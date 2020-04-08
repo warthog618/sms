@@ -16,7 +16,9 @@ import (
 // The Type-of-number should typically be TonNational or TonInternational, but
 // that is not enforced.
 // The NumberingPlan should typically be NpISDN, but that is not enforced either.
-type SMSCAddress tpdu.Address
+type SMSCAddress struct {
+	tpdu.Address
+}
 
 // MarshalBinary marshals the SMSC Address into binary.
 func (a *SMSCAddress) MarshalBinary() (dst []byte, err error) {
