@@ -4,6 +4,8 @@
 
 package tpdu
 
+import "fmt"
+
 // DCS represents the SMS Data Coding Scheme field as defined in 3GPP TS 23.040
 // Section 4.
 type DCS byte
@@ -39,7 +41,7 @@ func (d DCS) Alphabet() (Alphabet, error) {
 			alpha = Alpha7Bit
 		}
 	case d&0xe0 == 0xc0: // 110x
-	// is 7bit
+		// is 7bit
 	case d&0xf0 == 0xe0: // 1110
 		alpha = AlphaUCS2
 	case d&0xf0 == 0xf0: // 1111
@@ -56,6 +58,23 @@ func (d DCS) Alphabet() (Alphabet, error) {
 func (d DCS) ApplyTPDUOption(t *TPDU) error {
 	t.SetDCS(byte(d))
 	return nil
+}
+
+func (d DCS) String() string {
+	str := fmt.Sprintf("0x%02x", int(d))
+	alpha, err := d.Alphabet()
+	if err != nil {
+		return str
+	}
+	switch alpha {
+	case Alpha7Bit:
+		str += " 7bit"
+	case Alpha8Bit:
+		str += " 8bit"
+	case AlphaUCS2:
+		str += " UCS-2"
+	}
+	return str
 }
 
 // WithAlphabet sets the Alphabet bits of the DCS, given the state of the other

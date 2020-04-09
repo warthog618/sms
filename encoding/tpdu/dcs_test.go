@@ -249,3 +249,22 @@ func TestDCSCompressed(t *testing.T) {
 		t.Run(fmt.Sprintf("%02x", p.in), f)
 	}
 }
+
+func TestDCSString(t *testing.T) {
+	patterns := []struct {
+		in  int
+		out string
+	}{
+		{0x00, "0x00 7bit"},
+		{0xf4, "0xf4 8bit"},
+		{0xe0, "0xe0 UCS-2"},
+		{0x80, "0x80"},
+	}
+	for _, p := range patterns {
+		f := func(t *testing.T) {
+			out := tpdu.DCS(p.in).String()
+			assert.Equal(t, p.out, out)
+		}
+		t.Run(fmt.Sprintf("%02x", p.in), f)
+	}
+}
