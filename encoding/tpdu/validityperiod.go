@@ -19,6 +19,11 @@ type ValidityPeriod struct {
 	EFI      byte          // enhanced functionality indicator - first octet of enhanced format
 }
 
+// EnhancedFormat extracts the format field from the EFI.
+func EnhancedFormat(efi byte) EnhancedValidityPeriodFormat {
+	return EnhancedValidityPeriodFormat(efi & 0x07)
+}
+
 // SetAbsolute sets the validity period to an absolute time.
 func (v *ValidityPeriod) SetAbsolute(t Timestamp) {
 	v.Format = VpfAbsolute
@@ -166,12 +171,15 @@ type ValidityPeriodFormat byte
 const (
 	// VpfNotPresent indicates no VP is present.
 	VpfNotPresent ValidityPeriodFormat = iota
+
 	// VpfEnhanced indicates the VP is stored in enhanced format as per 3GPP TS
 	// 23.038 Section 9.2.3.12.3.
 	VpfEnhanced
+
 	// VpfRelative indicates the VP is stored in relative format as per 3GPP TS
 	// 23.038 Section 9.2.3.12.1.
 	VpfRelative
+
 	// VpfAbsolute indicates the VP is stored in absolute format as per 3GPP TS
 	// 23.038 Section 9.2.3.12.2. The absolute format is the same format as the
 	// SCTS.
@@ -186,16 +194,20 @@ type EnhancedValidityPeriodFormat byte
 const (
 	// EvpfNotPresent indicates no VP is present.
 	EvpfNotPresent EnhancedValidityPeriodFormat = iota
+
 	// EvpfRelative indicates the VP is stored in relative format as per 3GPP
 	// TS 23.038 Section 9.2.3.12.1.
 	EvpfRelative
+
 	// EvpfRelativeSeconds indicates the VP is stored in relative format as an
 	// integer number of seconds, from 0 to 255.
 	EvpfRelativeSeconds
+
 	// EvpfRelativeHHMMSS indicates the VP is stored in relative format as a
 	// period of hours, minutes and seconds in semioctet format as per SCTS
 	// time.
 	EvpfRelativeHHMMSS
+
 	// All other values currently reserved.
 )
 
