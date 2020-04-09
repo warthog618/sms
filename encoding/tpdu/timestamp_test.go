@@ -5,6 +5,7 @@
 package tpdu_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -163,5 +164,32 @@ func TestUnmarhalBinary(t *testing.T) {
 			assert.Equal(t, ozo, szo)
 		}
 		t.Run(p.name, f)
+	}
+}
+
+func TestTimestampString(t *testing.T) {
+	patterns := []struct {
+		in  time.Time
+		out string
+	}{
+		{
+			time.Date(2000, 11, 2, 3, 4, 5, 65, time.FixedZone("ABC", 22800)),
+			"2000-11-02 03:04:05 +0620",
+		},
+		{
+			time.Date(2000, 11, 2, 3, 4, 5, 0, time.FixedZone("ABC", 22800)),
+			"2000-11-02 03:04:05 +0620",
+		},
+		{
+			time.Date(2000, 11, 2, 3, 4, 5, 0, time.FixedZone("TEST", 0)),
+			"2000-11-02 03:04:05 +0000",
+		},
+	}
+	for _, p := range patterns {
+		f := func(t *testing.T) {
+			out := tpdu.Timestamp{p.in}.String()
+			assert.Equal(t, p.out, out)
+		}
+		t.Run(fmt.Sprintf("%02x", p.in), f)
 	}
 }
