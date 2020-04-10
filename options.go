@@ -11,14 +11,14 @@ type EncoderOption interface {
 	ApplyEncoderOption(*Encoder)
 }
 
-// ConcatOption defines options for Concatenate.
-type ConcatOption interface {
-	ApplyConcatOption(*ConcatConfig)
-}
-
-// DecodeOption defines options for Concatenate.
+// DecodeOption defines options for Decode.
 type DecodeOption interface {
 	ApplyDecodeOption(*DecodeConfig)
+}
+
+// UnmarshalOption defines options for Unmarhsal.
+type UnmarshalOption interface {
+	ApplyUnmarshalOption(*UnmarshalConfig)
 }
 
 // WithTemplate specifies the TPDU to be used as the template for encoding.
@@ -59,7 +59,7 @@ var (
 	// AsDeliver indicates that generated PDUs will be of type SmsDeliver.
 	AsDeliver = TemplateOption{tpdu.SmsDeliver}
 
-	// As8Bit indicates that generated PDUs encide user data as 8bit.
+	// As8Bit indicates that generated PDUs encode user data as 8bit.
 	As8Bit = TemplateOption{tpdu.Dcs8BitData}
 
 	// AsUCS2 indicates that generated PDUs encode user data as UCS2.
@@ -110,9 +110,8 @@ func (o CharsetOption) ApplyEncoderOption(e *Encoder) {
 	e.eopts = append(e.eopts, tpdu.WithCharset(o.nli...))
 }
 
-// ApplyConcatOption applies the CharsetOption to a decoding during
-// Contatenate.
-func (o CharsetOption) ApplyConcatOption(cc *ConcatConfig) {
+// ApplyDecodeOption applies the CharsetOption to decoding.
+func (o CharsetOption) ApplyDecodeOption(cc *DecodeConfig) {
 	cc.dopts = append(cc.dopts, tpdu.WithCharset(o.nli...))
 }
 
@@ -132,9 +131,8 @@ func (o LockingCharsetOption) ApplyEncoderOption(e *Encoder) {
 	e.eopts = append(e.eopts, tpdu.WithLockingCharset(o.nli...))
 }
 
-// ApplyConcatOption applies the LockingCharsetOption to a decoding during
-// Contatenate.
-func (o LockingCharsetOption) ApplyConcatOption(cc *ConcatConfig) {
+// ApplyDecodeOption applies the LockingCharsetOption to decoding.
+func (o LockingCharsetOption) ApplyDecodeOption(cc *DecodeConfig) {
 	cc.dopts = append(cc.dopts, tpdu.WithLockingCharset(o.nli...))
 }
 
@@ -154,9 +152,8 @@ func (o ShiftCharsetOption) ApplyEncoderOption(e *Encoder) {
 	e.eopts = append(e.eopts, tpdu.WithShiftCharset(o.nli...))
 }
 
-// ApplyConcatOption applies the ShiftCharsetOption to a decoding during
-// Contatenate.
-func (o ShiftCharsetOption) ApplyConcatOption(cc *ConcatConfig) {
+// ApplyDecodeOption applies the ShiftCharsetOption to decoding.
+func (o ShiftCharsetOption) ApplyDecodeOption(cc *DecodeConfig) {
 	cc.dopts = append(cc.dopts, tpdu.WithShiftCharset(o.nli...))
 }
 
@@ -165,7 +162,7 @@ type DirectionOption struct {
 	d tpdu.Direction
 }
 
-// ApplyDecodeOption applies the ShiftCharsetOption to an Encoder.
-func (o DirectionOption) ApplyDecodeOption(d *DecodeConfig) {
+// ApplyUnmarshalOption applies the Direction to unmarshalling.
+func (o DirectionOption) ApplyUnmarshalOption(d *UnmarshalConfig) {
 	d.dirn = o.d
 }

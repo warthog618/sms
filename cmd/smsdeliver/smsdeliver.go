@@ -38,7 +38,7 @@ func main() {
 			}
 			tb = ntb
 		}
-		t, err := sms.Decode(tb)
+		t, err := sms.Unmarshal(tb)
 		if err != nil {
 			log.Printf("unmarshal error: %v", err)
 			continue
@@ -50,9 +50,9 @@ func main() {
 		if pdus == nil {
 			continue
 		}
-		msg, err := sms.Concatenate(pdus)
+		msg, err := sms.Decode(pdus)
 		if err != nil {
-			log.Printf("concatenate error: %v", err)
+			log.Printf("decode error: %v", err)
 		}
 		if msg != nil {
 			fmt.Printf("%s: %s\n", pdus[0].OA.Number(), msg)

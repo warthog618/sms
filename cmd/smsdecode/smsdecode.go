@@ -49,10 +49,10 @@ func decode(pdu string, pm, mo bool) (p *tpdu.TPDU, a *pdumode.SMSCAddress, err 
 		}
 	}
 	if mo {
-		p, err = sms.Decode(b, sms.AsMO)
+		p, err = sms.Unmarshal(b, sms.AsMO)
 		return
 	}
-	p, err = sms.Decode(b)
+	p, err = sms.Unmarshal(b)
 	return
 }
 

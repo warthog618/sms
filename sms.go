@@ -10,20 +10,20 @@ import (
 	"github.com/warthog618/sms/encoding/ucs2"
 )
 
-// ConcatConfig contains configuration option for Concatenate.
-type ConcatConfig struct {
+// DecodeConfig contains configuration option for Decode.
+type DecodeConfig struct {
 	dopts []tpdu.UDDecodeOption
 }
 
-// Concatenate converts a set of concatenated TPDUs into a UTF-8 message.
+// Decode returns the UTF-8 message contained in a set of TPDUs.
 //
-// Assumes segments are the component TPDUs of a segmented message, in correct order.
-// This is the case for segments returned by the Collector.
-// It can be tested using IsCompleteMessage.
-func Concatenate(segments []*tpdu.TPDU, options ...ConcatOption) ([]byte, error) {
-	cfg := ConcatConfig{}
+// For concatenated messages the segments assumed to be the component TPDUs, in
+// correct order. This is the case for segments returned by the Collector. It
+// can be tested using IsCompleteMessage.
+func Decode(segments []*tpdu.TPDU, options ...DecodeOption) ([]byte, error) {
+	cfg := DecodeConfig{}
 	for _, option := range options {
-		option.ApplyConcatOption(&cfg)
+		option.ApplyDecodeOption(&cfg)
 	}
 	if len(cfg.dopts) == 0 {
 		cfg.dopts = []tpdu.UDDecodeOption{tpdu.WithAllCharsets}
@@ -94,16 +94,16 @@ func IsCompleteMessage(segments []*tpdu.TPDU) bool {
 	return true
 }
 
-// DecodeConfig contains configuration options for Decode.
-type DecodeConfig struct {
+// UnmarshalConfig contains configuration options for Unmarshal.
+type UnmarshalConfig struct {
 	dirn tpdu.Direction
 }
 
-// Decode converts a binary SMS TPDU into the corresponding TPDU object.
-func Decode(src []byte, options ...DecodeOption) (*tpdu.TPDU, error) {
-	cfg := DecodeConfig{}
+// Unmarshal converts a binary SMS TPDU into the corresponding TPDU object.
+func Unmarshal(src []byte, options ...UnmarshalOption) (*tpdu.TPDU, error) {
+	cfg := UnmarshalConfig{}
 	for _, option := range options {
-		option.ApplyDecodeOption(&cfg)
+		option.ApplyUnmarshalOption(&cfg)
 	}
 	t := tpdu.TPDU{Direction: cfg.dirn}
 	err := t.UnmarshalBinary(src)

@@ -15,11 +15,11 @@ import (
 	"github.com/warthog618/sms/encoding/ucs2"
 )
 
-func TestConcatenate(t *testing.T) {
+func TestDecode(t *testing.T) {
 	patterns := []struct {
 		name    string
 		in      []*tpdu.TPDU
-		options []sms.ConcatOption
+		options []sms.DecodeOption
 		out     []byte
 		err     error
 	}{
@@ -86,7 +86,7 @@ func TestConcatenate(t *testing.T) {
 					UD: []byte("hello \x03"),
 				},
 			},
-			[]sms.ConcatOption{sms.WithCharset(charset.Urdu)},
+			[]sms.DecodeOption{sms.WithCharset(charset.Urdu)},
 			[]byte("hello ٻ"),
 			nil,
 		},
@@ -100,7 +100,7 @@ func TestConcatenate(t *testing.T) {
 					UD: []byte("hello \x03"),
 				},
 			},
-			[]sms.ConcatOption{sms.WithLockingCharset(charset.Urdu)},
+			[]sms.DecodeOption{sms.WithLockingCharset(charset.Urdu)},
 			[]byte("hello ٻ"),
 			nil,
 		},
@@ -114,7 +114,7 @@ func TestConcatenate(t *testing.T) {
 					UD: []byte("hello \x1b\x2b"),
 				},
 			},
-			[]sms.ConcatOption{sms.WithShiftCharset(charset.Urdu)},
+			[]sms.DecodeOption{sms.WithShiftCharset(charset.Urdu)},
 			[]byte("hello ؏"),
 			nil,
 		},
@@ -128,7 +128,7 @@ func TestConcatenate(t *testing.T) {
 					UD: []byte("hello \x03"),
 				},
 			},
-			[]sms.ConcatOption{sms.WithCharset(charset.Kannada)},
+			[]sms.DecodeOption{sms.WithCharset(charset.Kannada)},
 			[]byte("hello ¥"),
 			nil,
 		},
@@ -175,7 +175,7 @@ func TestConcatenate(t *testing.T) {
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
-			out, err := sms.Concatenate(p.in, p.options...)
+			out, err := sms.Decode(p.in, p.options...)
 			assert.Equal(t, p.err, err)
 			assert.Equal(t, p.out, out)
 		}
@@ -315,13 +315,13 @@ func TestIsCompleteMessage(t *testing.T) {
 	}
 }
 
-func TestDecode(t *testing.T) {
+func TestUnmarshal(t *testing.T) {
 	tz1 := time.FixedZone("SCTS", 3600)
 	tz8 := time.FixedZone("SCTS", 28800)
 	patterns := []struct {
 		name    string
 		in      []byte
-		options []sms.DecodeOption
+		options []sms.UnmarshalOption
 		out     *tpdu.TPDU
 		err     error
 	}{
@@ -356,7 +356,7 @@ func TestDecode(t *testing.T) {
 				0x31, 0x07, 0x04, 0x91, 0x36, 0x19, 0x00, 0x00, 0xA9, 0x08,
 				0xC8, 0x30, 0x3A, 0x8C, 0x0E, 0xA3, 0xC3,
 			},
-			[]sms.DecodeOption{sms.AsMO},
+			[]sms.UnmarshalOption{sms.AsMO},
 			&tpdu.TPDU{
 				Direction:  1,
 				FirstOctet: 0x31,
@@ -394,7 +394,7 @@ func TestDecode(t *testing.T) {
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
-			out, err := sms.Decode(p.in, p.options...)
+			out, err := sms.Unmarshal(p.in, p.options...)
 			assert.Equal(t, p.err, err)
 			assert.Equal(t, p.out, out)
 		}
