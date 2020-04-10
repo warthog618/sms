@@ -68,10 +68,7 @@ func IsCompleteMessage(segments []*tpdu.TPDU) bool {
 	}
 	baseSegs, _, baseConcatRef, ok := segments[0].ConcatInfo()
 	if !ok {
-		if len(segments) == 1 {
-			return true
-		}
-		return false
+		return len(segments) == 1
 	}
 	if baseSegs != len(segments) {
 		return false
