@@ -226,7 +226,7 @@ func dumpUDH(w io.Writer, udh tpdu.UserDataHeader) {
 }
 
 func dumpUD(w io.Writer, ud []byte) {
-	lines := strings.Split(hex.Dump(ud), "\n")
+	lines := strings.Split(strings.TrimSpace(hex.Dump(ud)), "\n")
 	fmt.Fprintf(w, "TP-UD: %s\n", lines[0])
 	for _, l := range lines[1:] {
 		fmt.Fprintf(w, "       %s\n", l)
