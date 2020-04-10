@@ -1142,6 +1142,21 @@ func TestSetValidityPeriod(t *testing.T) {
 	}
 }
 
+func TestMessageTypeString(t *testing.T) {
+	patterns := []struct {
+		mti tpdu.MessageType
+		out string
+	}{
+		{0, "Deliver"},
+		{1, "Submit"},
+		{2, "Command"},
+		{3, "Unknown"},
+	}
+	for _, p := range patterns {
+		assert.Equal(t, p.out, p.mti.String())
+	}
+}
+
 func TestSmsType(t *testing.T) {
 	patterns := []struct {
 		dirn tpdu.Direction

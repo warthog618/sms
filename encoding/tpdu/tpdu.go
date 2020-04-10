@@ -999,6 +999,19 @@ func (mti MessageType) ApplyTPDUOption(t *TPDU) error {
 	return nil
 }
 
+func (mti MessageType) String() string {
+	switch mti {
+	case MtDeliver:
+		return "Deliver"
+	case MtSubmit:
+		return "Submit"
+	case MtCommand:
+		return "Command"
+	default:
+		return "Unknown"
+	}
+}
+
 // Direction indicates the direction that the SMS TPDU is carried.
 type Direction int
 
