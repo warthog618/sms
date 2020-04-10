@@ -320,7 +320,7 @@ func TestVPFString(t *testing.T) {
 		vpf tpdu.ValidityPeriodFormat
 		out string
 	}{
-		{0, "NotPresent"},
+		{0, "Not Present"},
 		{1, "Enhanced"},
 		{2, "Relative"},
 		{3, "Absolute"},
@@ -336,10 +336,10 @@ func TestEVPFString(t *testing.T) {
 		evpf tpdu.EnhancedValidityPeriodFormat
 		out  string
 	}{
-		{0, "NotPresent"},
+		{0, "Not Present"},
 		{1, "Relative"},
-		{2, "RelativeSeconds"},
-		{3, "RelativeHHMMSS"},
+		{2, "Relative Seconds"},
+		{3, "Relative HHMMSS"},
 		{4, "Unknown"},
 	}
 	for _, p := range patterns {

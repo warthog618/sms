@@ -248,7 +248,7 @@ func (vpf ValidityPeriodFormat) String() string {
 	default:
 		return "Unknown"
 	case VpfNotPresent:
-		return "NotPresent"
+		return "Not Present"
 	case VpfAbsolute:
 		return "Absolute"
 	case VpfRelative:
@@ -263,12 +263,12 @@ func (evpf EnhancedValidityPeriodFormat) String() string {
 	default:
 		return "Unknown"
 	case EvpfNotPresent:
-		return "NotPresent"
+		return "Not Present"
 	case EvpfRelative:
 		return "Relative"
 	case EvpfRelativeSeconds:
-		return "RelativeSeconds"
+		return "Relative Seconds"
 	case EvpfRelativeHHMMSS:
-		return "RelativeHHMMSS"
+		return "Relative HHMMSS"
 	}
 }
