@@ -19,7 +19,7 @@ type ConcatConfig struct {
 //
 // Assumes segments are the component TPDUs of a segmented message, in correct order.
 // This is the case for segments returned by the Collector.
-// It can be tested using IsSegmentedMessage.
+// It can be tested using IsCompleteMessage.
 func Concatenate(segments []*tpdu.TPDU, options ...ConcatOption) ([]byte, error) {
 	cfg := ConcatConfig{}
 	for _, option := range options {
@@ -60,14 +60,17 @@ func Concatenate(segments []*tpdu.TPDU, options ...ConcatOption) ([]byte, error)
 	return m, nil
 }
 
-// IsSegmentedMessage confirms that the segment TPDUs are suitable for being
-// concatenated into a message.
-func IsSegmentedMessage(segments []*tpdu.TPDU) bool {
+// IsCompleteMessage confirms that the TPDUs contain all the sgements required
+// to reassemble a complete message and are in the correct order.
+func IsCompleteMessage(segments []*tpdu.TPDU) bool {
 	if len(segments) == 0 {
 		return false
 	}
 	baseSegs, _, baseConcatRef, ok := segments[0].ConcatInfo()
 	if !ok {
+		if len(segments) == 1 {
+			return true
+		}
 		return false
 	}
 	if baseSegs != len(segments) {

@@ -183,7 +183,7 @@ func TestConcatenate(t *testing.T) {
 	}
 }
 
-func TestIsSegmentedMessage(t *testing.T) {
+func TestIsCompleteMessage(t *testing.T) {
 	patterns := []struct {
 		name string
 		in   []*tpdu.TPDU
@@ -200,11 +200,11 @@ func TestIsSegmentedMessage(t *testing.T) {
 			false,
 		},
 		{
-			"no concat",
+			"single segment",
 			[]*tpdu.TPDU{
 				&tpdu.TPDU{},
 			},
-			false,
+			true,
 		},
 		{
 			"segment count mismatch",
@@ -278,6 +278,18 @@ func TestIsSegmentedMessage(t *testing.T) {
 			false,
 		},
 		{
+			"no concat",
+			[]*tpdu.TPDU{
+				&tpdu.TPDU{},
+				&tpdu.TPDU{
+					UDH: tpdu.UserDataHeader{
+						tpdu.InformationElement{ID: 3, Data: []byte{3, 2, 2}},
+					},
+				},
+			},
+			false,
+		},
+		{
 			"two segments",
 			[]*tpdu.TPDU{
 				&tpdu.TPDU{
@@ -296,7 +308,7 @@ func TestIsSegmentedMessage(t *testing.T) {
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
-			out := sms.IsSegmentedMessage(p.in)
+			out := sms.IsCompleteMessage(p.in)
 			assert.Equal(t, p.out, out)
 		}
 		t.Run(p.name, f)
