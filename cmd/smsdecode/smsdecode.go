@@ -89,7 +89,7 @@ func dumpTPDU(w io.Writer, t *tpdu.TPDU) {
 }
 
 func dumpCommand(w io.Writer, t *tpdu.TPDU) {
-	fmt.Fprintf(w, "TP-MTI: %d\n", t.SmsType().MTI())
+	fmt.Fprintf(w, "TP-MTI: 0x%02x %s\n", int(t.SmsType().MTI()), t.SmsType().MTI())
 	fmt.Fprintf(w, "TP-UDHI: %t\n", t.FirstOctet.UDHI())
 	fmt.Fprintf(w, "TP-SRR: %t\n", t.FirstOctet.SRR())
 	fmt.Fprintf(w, "TP-MR: %d\n", t.MR)
@@ -103,7 +103,7 @@ func dumpCommand(w io.Writer, t *tpdu.TPDU) {
 }
 
 func dumpDeliver(w io.Writer, t *tpdu.TPDU) {
-	fmt.Fprintf(w, "TP-MTI: %d\n", t.SmsType().MTI())
+	fmt.Fprintf(w, "TP-MTI: 0x%02x %s\n", int(t.SmsType().MTI()), t.SmsType().MTI())
 	fmt.Fprintf(w, "TP-MMS: %t\n", t.FirstOctet.MMS())
 	fmt.Fprintf(w, "TP-LP: %t\n", t.FirstOctet.LP())
 	fmt.Fprintf(w, "TP-RP: %t\n", t.FirstOctet.RP())
@@ -120,7 +120,7 @@ func dumpDeliver(w io.Writer, t *tpdu.TPDU) {
 }
 
 func dumpDeliverReport(w io.Writer, t *tpdu.TPDU) {
-	fmt.Fprintf(w, "TP-MTI: %d\n", t.SmsType().MTI())
+	fmt.Fprintf(w, "TP-MTI: 0x%02x %s\n", int(t.SmsType().MTI()), t.SmsType().MTI())
 	fmt.Fprintf(w, "TP-UDHI: %t\n", t.FirstOctet.UDHI())
 	fmt.Fprintf(w, "TP-FCS: 0x%02x\n", t.FCS)
 	fmt.Fprintf(w, "TP-PI: %s\n", t.PI)
@@ -137,7 +137,7 @@ func dumpDeliverReport(w io.Writer, t *tpdu.TPDU) {
 }
 
 func dumpStatusReport(w io.Writer, t *tpdu.TPDU) {
-	fmt.Fprintf(w, "TP-MTI: %d\n", t.SmsType().MTI())
+	fmt.Fprintf(w, "TP-MTI: 0x%02x %s\n", int(t.SmsType().MTI()), t.SmsType().MTI())
 	fmt.Fprintf(w, "TP-UDHI: %t\n", t.FirstOctet.UDHI())
 	fmt.Fprintf(w, "TP-MMS: %t\n", t.FirstOctet.MMS())
 	fmt.Fprintf(w, "TP-LP: %t\n", t.FirstOctet.LP())
@@ -161,8 +161,9 @@ func dumpStatusReport(w io.Writer, t *tpdu.TPDU) {
 }
 
 func dumpSubmit(w io.Writer, t *tpdu.TPDU) {
-	fmt.Fprintf(w, "TP-MTI: %d\n", t.SmsType().MTI())
+	fmt.Fprintf(w, "TP-MTI: 0x%02x %s\n", int(t.SmsType().MTI()), t.SmsType().MTI())
 	fmt.Fprintf(w, "TP-RD: %t\n", t.FirstOctet.RD())
+	fmt.Fprintf(w, "TP-VPF: 0x%02x %s\n", int(t.FirstOctet.VPF()), t.FirstOctet.VPF())
 	fmt.Fprintf(w, "TP-RP: %t\n", t.FirstOctet.RP())
 	fmt.Fprintf(w, "TP-UDHI: %t\n", t.FirstOctet.UDHI())
 	fmt.Fprintf(w, "TP-SRR: %t\n", t.FirstOctet.SRR())
@@ -178,7 +179,7 @@ func dumpSubmit(w io.Writer, t *tpdu.TPDU) {
 }
 
 func dumpSubmitReport(w io.Writer, t *tpdu.TPDU) {
-	fmt.Fprintf(w, "TP-MTI: %d\n", t.SmsType().MTI())
+	fmt.Fprintf(w, "TP-MTI: 0x%02x %s\n", int(t.SmsType().MTI()), t.SmsType().MTI())
 	fmt.Fprintf(w, "TP-UDHI: %t\n", t.FirstOctet.UDHI())
 	fmt.Fprintf(w, "TP-FCS: 0x%02x\n", t.FCS)
 	fmt.Fprintf(w, "TP-PI: %s\n", t.PI)
@@ -206,7 +207,7 @@ func dumpCD(w io.Writer, ud []byte) {
 func dumpVP(w io.Writer, vp tpdu.ValidityPeriod) {
 	switch vp.Format {
 	case tpdu.VpfNotPresent:
-		fmt.Fprintf(w, "TP-VP: Not present\n")
+		fmt.Fprintf(w, "TP-VP: Not Present\n")
 	case tpdu.VpfAbsolute:
 		fmt.Fprintf(w, "TP-VP: Absolute - %s\n", vp.Time)
 	case tpdu.VpfEnhanced:
