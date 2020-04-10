@@ -147,6 +147,13 @@ func (t *TPDU) ConcatInfo() (segments, seqno, mref int, ok bool) {
 	return t.UDH.ConcatInfo()
 }
 
+// IsSingleSegment returns true unless the TPDU is part of a multi-part
+// message.
+func (t *TPDU) IsSingleSegment() bool {
+	_, _, _, ok := t.ConcatInfo()
+	return !ok
+}
+
 // MTI returns the MessageType from the first octet of the SMS TPDU.
 func (t *TPDU) MTI() MessageType {
 	return t.FirstOctet.MTI()

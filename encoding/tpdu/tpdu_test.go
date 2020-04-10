@@ -763,6 +763,63 @@ func TestMarshalBinary(t *testing.T) {
 	}
 }
 
+func TestIsSingleSegment(t *testing.T) {
+	patterns := []struct {
+		name string
+		in   tpdu.TPDU
+		out  bool
+	}{
+		{
+			"single segment",
+			tpdu.TPDU{},
+			true,
+		},
+		{
+			"concat8",
+			tpdu.TPDU{
+				UDH: []tpdu.InformationElement{
+					tpdu.InformationElement{
+						ID:   0,
+						Data: []byte{1, 2, 1},
+					},
+				},
+			},
+			false,
+		},
+		{
+			"concat16",
+			tpdu.TPDU{
+				UDH: []tpdu.InformationElement{
+					tpdu.InformationElement{
+						ID:   8,
+						Data: []byte{0, 1, 2, 1},
+					},
+				},
+			},
+			false,
+		},
+		{
+			"no concat",
+			tpdu.TPDU{
+				UDH: []tpdu.InformationElement{
+					tpdu.InformationElement{
+						ID:   3,
+						Data: []byte{1, 2, 1},
+					},
+				},
+			},
+			true,
+		},
+	}
+	for _, p := range patterns {
+		f := func(t *testing.T) {
+			out := p.in.IsSingleSegment()
+			assert.Equal(t, p.out, out)
+		}
+		t.Run(p.name, f)
+	}
+}
+
 func TestMTI(t *testing.T) {
 	b := tpdu.TPDU{}
 	m := b.MTI()
