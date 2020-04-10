@@ -55,7 +55,7 @@ func (v *ValidityPeriod) MarshalBinary() ([]byte, error) {
 	case VpfAbsolute:
 		return v.Time.MarshalBinary()
 	case VpfEnhanced:
-		evpf := EnhancedValidityPeriodFormat(v.EFI & 0x7)
+		evpf := EnhancedFormat(v.EFI)
 		if evpf > EvpfRelativeHHMMSS {
 			return nil, EncodeError("fi", ErrInvalid)
 		}
