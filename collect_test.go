@@ -47,7 +47,7 @@ func TestCollectorCollect(t *testing.T) {
 			"deliver single segment",
 			tpdu.TPDU{OA: tpdu.Address{Addr: "1234", TOA: 0x91}},
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 				},
 			},
@@ -63,7 +63,7 @@ func TestCollectorCollect(t *testing.T) {
 				},
 			},
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{1, 1, 1}},
@@ -92,13 +92,13 @@ func TestCollectorCollect(t *testing.T) {
 				},
 			},
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{2, 2, 1}},
 					},
 				},
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{2, 2, 2}},
@@ -138,19 +138,19 @@ func TestCollectorCollect(t *testing.T) {
 				},
 			},
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{3, 3, 1}},
 					},
 				},
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{3, 3, 2}},
 					},
 				},
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{3, 3, 3}},
@@ -201,19 +201,19 @@ func TestCollectorCollect(t *testing.T) {
 				},
 			},
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{4, 3, 1}},
 					},
 				},
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{4, 3, 2}},
 					},
 				},
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{4, 3, 3}},
@@ -253,13 +253,13 @@ func TestCollectorCollect(t *testing.T) {
 				},
 			},
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{5, 2, 1}},
 					},
 				},
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{5, 2, 2}},
@@ -277,13 +277,13 @@ func TestCollectorCollect(t *testing.T) {
 				},
 			},
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{6, 2, 1}},
 					},
 				},
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{6, 2, 2}},
@@ -312,13 +312,13 @@ func TestCollectorCollect(t *testing.T) {
 				},
 			},
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 8, Data: []byte{4, 4, 2, 1}},
 					},
 				},
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 8, Data: []byte{4, 4, 2, 2}},
@@ -351,7 +351,7 @@ func TestCollectorCollect(t *testing.T) {
 				},
 			},
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					Direction:  tpdu.MO,
 					FirstOctet: tpdu.FirstOctet(tpdu.MtSubmit),
 					DA:         tpdu.Address{Addr: "1234", TOA: 0x91},
@@ -359,7 +359,7 @@ func TestCollectorCollect(t *testing.T) {
 						tpdu.InformationElement{ID: 0, Data: []byte{2, 2, 1}},
 					},
 				},
-				&tpdu.TPDU{
+				{
 					Direction:  tpdu.MO,
 					FirstOctet: tpdu.FirstOctet(tpdu.MtSubmit),
 					DA:         tpdu.Address{Addr: "1234", TOA: 0x91},
@@ -464,7 +464,7 @@ func TestCollectorReasemmblyTimeout(t *testing.T) {
 		{
 			"one",
 			[]tpdu.TPDU{
-				tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 1}},
 					},
@@ -474,12 +474,12 @@ func TestCollectorReasemmblyTimeout(t *testing.T) {
 		{
 			"two",
 			[]tpdu.TPDU{
-				tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 2}},
 					},
 				},
-				tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{1, 3, 1}},
 					},
@@ -536,8 +536,8 @@ func TestCollectorPipes(t *testing.T) {
 			},
 			nil,
 			map[string][]*tpdu.TPDU{
-				"0:91:1234:1:2": []*tpdu.TPDU{
-					&tpdu.TPDU{
+				"0:91:1234:1:2": {
+					{
 						OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 						UDH: tpdu.UserDataHeader{
 							tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 1}},
@@ -557,8 +557,8 @@ func TestCollectorPipes(t *testing.T) {
 			},
 			nil,
 			map[string][]*tpdu.TPDU{
-				"0:91:1234:1:2": []*tpdu.TPDU{
-					&tpdu.TPDU{
+				"0:91:1234:1:2": {
+					{
 						OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 						UDH: tpdu.UserDataHeader{
 							tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 1}},
@@ -566,9 +566,9 @@ func TestCollectorPipes(t *testing.T) {
 					},
 					nil,
 				},
-				"0:91:1234:2:2": []*tpdu.TPDU{
+				"0:91:1234:2:2": {
 					nil,
-					&tpdu.TPDU{
+					{
 						OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 						UDH: tpdu.UserDataHeader{
 							tpdu.InformationElement{ID: 0, Data: []byte{2, 2, 2}},
@@ -586,13 +586,13 @@ func TestCollectorPipes(t *testing.T) {
 				},
 			},
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 1}},
 					},
 				},
-				&tpdu.TPDU{
+				{
 					OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{1, 2, 2}},
@@ -600,9 +600,9 @@ func TestCollectorPipes(t *testing.T) {
 				},
 			},
 			map[string][]*tpdu.TPDU{
-				"0:91:1234:2:2": []*tpdu.TPDU{
+				"0:91:1234:2:2": {
 					nil,
-					&tpdu.TPDU{
+					{
 						OA: tpdu.Address{Addr: "1234", TOA: 0x91},
 						UDH: tpdu.UserDataHeader{
 							tpdu.InformationElement{ID: 0, Data: []byte{2, 2, 2}},

@@ -46,7 +46,7 @@ var patterns = []struct {
 		[]byte("hello"),
 		nil,
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: tpdu.FirstOctet(tpdu.MtSubmit),
 				MR:         1,
@@ -60,7 +60,7 @@ var patterns = []struct {
 		[]byte("hello 😁"),
 		nil,
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: tpdu.FirstOctet(tpdu.MtSubmit),
 				PI:         tpdu.PiDCS, // not relevant for Submit, but set as side-effect
@@ -79,7 +79,7 @@ var patterns = []struct {
 		[]byte("😁😁😁"),
 		nil,
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: tpdu.FirstOctet(tpdu.MtSubmit),
 				PI:         tpdu.PiDCS, // not relevant for Submit, but set as side-effect
@@ -98,7 +98,7 @@ var patterns = []struct {
 		[]byte("hello"),
 		[]sms.EncoderOption{sms.WithCharset(charset.Urdu)},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: tpdu.FirstOctet(tpdu.MtSubmit),
 				MR:         1,
@@ -112,7 +112,7 @@ var patterns = []struct {
 		[]byte("hello ت"),
 		[]sms.EncoderOption{sms.WithCharset(charset.Urdu)},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: 0x41, // UDHI | Submit
 				MR:         1,
@@ -130,7 +130,7 @@ var patterns = []struct {
 		[]byte("hello ت"),
 		[]sms.EncoderOption{sms.WithLockingCharset(charset.Urdu)},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: 0x41, // UDHI | Submit
 				MR:         1,
@@ -148,7 +148,7 @@ var patterns = []struct {
 		[]byte("hello ؎"),
 		[]sms.EncoderOption{sms.WithShiftCharset(charset.Urdu)},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: 0x41, // UDHI | Submit
 				MR:         1,
@@ -166,7 +166,7 @@ var patterns = []struct {
 		[]byte("hello ت؎"),
 		[]sms.EncoderOption{sms.WithAllCharsets},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: 0x41, // UDHI | Submit
 				MR:         1,
@@ -185,7 +185,7 @@ var patterns = []struct {
 		[]byte("hello!"), // this isn't UCS2, but demonstrates it is passed raw, not re-encoded.
 		[]sms.EncoderOption{sms.AsUCS2},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: tpdu.FirstOctet(tpdu.MtSubmit),
 				PI:         tpdu.PiDCS, // not relevant for Submit, but set as side-effect
@@ -208,7 +208,7 @@ var patterns = []struct {
 		[]byte("hello"),
 		[]sms.EncoderOption{sms.AsDeliver},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				MR: 1,
 				UD: []byte("hello"),
 			},
@@ -220,7 +220,7 @@ var patterns = []struct {
 		[]byte("hello"),
 		[]sms.EncoderOption{sms.To("1234")},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: tpdu.FirstOctet(tpdu.MtSubmit),
 				MR:         1,
@@ -235,7 +235,7 @@ var patterns = []struct {
 		[]byte("hello"),
 		[]sms.EncoderOption{sms.AsDeliver, sms.From("1234")},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				MR: 1,
 				OA: tpdu.Address{TOA: 0x91, Addr: "1234"},
 				UD: []byte("hello"),
@@ -248,7 +248,7 @@ var patterns = []struct {
 		[]byte("hello"),
 		[]sms.EncoderOption{sms.To("+1234")},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: tpdu.FirstOctet(tpdu.MtSubmit),
 				MR:         1,
@@ -263,7 +263,7 @@ var patterns = []struct {
 		twoSegmentMsg,
 		[]sms.EncoderOption{sms.To("1234")},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: 0x41, // Submit | UDHI
 				MR:         1,
@@ -274,7 +274,7 @@ var patterns = []struct {
 				},
 				UD: []byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you mi"),
 			},
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: 0x41,
 				MR:         2,
@@ -301,7 +301,7 @@ var patterns = []struct {
 				)),
 		},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: 0x41, // Submit | UDHI
 				MR:         1,
@@ -313,7 +313,7 @@ var patterns = []struct {
 				},
 				UD: []byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than "),
 			},
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: 0x41,
 				MR:         2,
@@ -344,7 +344,7 @@ var patterns = []struct {
 			sms.AsSubmit,
 		},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: 0x41, // Submit | UDHI
 				MR:         1,
@@ -357,7 +357,7 @@ var patterns = []struct {
 				},
 				UD: []byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 charac"),
 			},
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: 0x41,
 				MR:         2,
@@ -378,7 +378,7 @@ var patterns = []struct {
 		twoSegmentMsg,
 		[]sms.EncoderOption{sms.To("1234"), sms.As8Bit},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: 0x41, // Submit | UDHI
 				MR:         1,
@@ -390,7 +390,7 @@ var patterns = []struct {
 				},
 				UD: []byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters "),
 			},
-			tpdu.TPDU{
+			{
 				Direction:  tpdu.MO,
 				FirstOctet: 0x41,
 				MR:         2,
@@ -410,7 +410,7 @@ var patterns = []struct {
 		twoSegmentMsg,
 		[]sms.EncoderOption{sms.AsDeliver, sms.From("1234")},
 		[]tpdu.TPDU{
-			tpdu.TPDU{
+			{
 				FirstOctet: 0x40, // UDHI
 				MR:         1,
 				PI:         tpdu.PiUDL, // not relevant for Deliver, but set as side-effect
@@ -420,7 +420,7 @@ var patterns = []struct {
 				},
 				UD: []byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you mi"),
 			},
-			tpdu.TPDU{
+			{
 				FirstOctet: 0x40,
 				MR:         2,
 				PI:         tpdu.PiUDL, // not relevant for Deliver, but set as side-effect

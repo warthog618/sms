@@ -26,10 +26,10 @@ func TestDecode(t *testing.T) {
 		{
 			"two segment 7bit",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					UD: []byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you mi"),
 				},
-				&tpdu.TPDU{
+				{
 					UD: []byte("ght think"),
 				},
 			},
@@ -40,11 +40,11 @@ func TestDecode(t *testing.T) {
 		{
 			"two segment 8bit",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					DCS: tpdu.Dcs8BitData,
 					UD:  []byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you mi"),
 				},
-				&tpdu.TPDU{
+				{
 					DCS: tpdu.Dcs8BitData,
 					UD:  []byte("ght think"),
 				},
@@ -56,7 +56,7 @@ func TestDecode(t *testing.T) {
 		{
 			"single segment 8bit",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					DCS: tpdu.Dcs8BitData,
 					UD:  []byte("this is not a very long message"),
 				},
@@ -68,7 +68,7 @@ func TestDecode(t *testing.T) {
 		{
 			"single segment 7bit",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					UD: []byte("hello \x03"),
 				},
 			},
@@ -79,7 +79,7 @@ func TestDecode(t *testing.T) {
 		{
 			"single segment 7bit urdu",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 25, Data: []byte{0x0d}},
 					},
@@ -93,7 +93,7 @@ func TestDecode(t *testing.T) {
 		{
 			"single segment 7bit locking urdu",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 25, Data: []byte{0x0d}},
 					},
@@ -107,7 +107,7 @@ func TestDecode(t *testing.T) {
 		{
 			"single segment 7bit shift urdu",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 24, Data: []byte{0x0d}},
 					},
@@ -121,7 +121,7 @@ func TestDecode(t *testing.T) {
 		{
 			"single segment 7bit urdu unsupported",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 25, Data: []byte{0x0d}},
 					},
@@ -135,11 +135,11 @@ func TestDecode(t *testing.T) {
 		{
 			"ucs2 split surrogate",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					DCS: tpdu.DcsUCS2Data,
 					UD:  []byte{0xd8, 0x3d, 0xde, 0x01, 0xd8, 0x3d},
 				},
-				&tpdu.TPDU{
+				{
 					DCS: tpdu.DcsUCS2Data,
 					UD:  []byte{0xde, 0x01, 0xd8, 0x3d, 0xde, 0x01},
 				},
@@ -151,7 +151,7 @@ func TestDecode(t *testing.T) {
 		{
 			"ucs2 dangling surrogate",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					DCS: tpdu.DcsUCS2Data,
 					UD:  []byte{0xd8, 0x3d, 0xde, 0x01, 0xd8, 0x3d},
 				},
@@ -163,7 +163,7 @@ func TestDecode(t *testing.T) {
 		{
 			"ucs2 odd length",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					DCS: tpdu.DcsUCS2Data,
 					UD:  []byte{0xd8, 0x3d, 0xde, 0x01, 0xd8},
 				},
@@ -202,14 +202,14 @@ func TestIsCompleteMessage(t *testing.T) {
 		{
 			"single segment",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{},
+				{},
 			},
 			true,
 		},
 		{
 			"segment count mismatch",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}},
 					},
@@ -220,12 +220,12 @@ func TestIsCompleteMessage(t *testing.T) {
 		{
 			"segments mismatch",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}},
 					},
 				},
-				&tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{3, 3, 2}},
 					},
@@ -236,12 +236,12 @@ func TestIsCompleteMessage(t *testing.T) {
 		{
 			"concatRef mismatch",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}},
 					},
 				},
-				&tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{4, 2, 2}},
 					},
@@ -252,12 +252,12 @@ func TestIsCompleteMessage(t *testing.T) {
 		{
 			"misordered segments",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 2}},
 					},
 				},
-				&tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}},
 					},
@@ -268,20 +268,20 @@ func TestIsCompleteMessage(t *testing.T) {
 		{
 			"missing concat",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}},
 					},
 				},
-				&tpdu.TPDU{},
+				{},
 			},
 			false,
 		},
 		{
 			"no concat",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{},
-				&tpdu.TPDU{
+				{},
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 3, Data: []byte{3, 2, 2}},
 					},
@@ -292,12 +292,12 @@ func TestIsCompleteMessage(t *testing.T) {
 		{
 			"two segments",
 			[]*tpdu.TPDU{
-				&tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 1}},
 					},
 				},
-				&tpdu.TPDU{
+				{
 					UDH: tpdu.UserDataHeader{
 						tpdu.InformationElement{ID: 0, Data: []byte{3, 2, 2}},
 					},
