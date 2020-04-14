@@ -10,13 +10,24 @@ import (
 	"github.com/warthog618/sms/encoding/tpdu"
 )
 
-// Encode generates the set of TPDUs to contain a message.
+// Encode builds a set of TPDUs containing the message.
 //
-// msg is the message to be sent. Returns the set of TPDUs, or any error
-// detected during encoding.
+// Long messages are split into multiple concatenated TPDUs, while short
+// messages may fit in one.
 //
-// By default messages are encoded into SMS-SUBMIT TPDUs.  This behaviour can
+// By default messages are encoded into SMS-SUBMIT TPDUs.  This behaviour may
 // be overridden via options.
+//
+// For 8-bit encoding the message is encoded as is.
+//
+// For 7-bit encoding the message is assumed to contain UTF-8.
+//
+// For explicit UCS-2 encoding the message is assumed to contain UTF-16,
+// encoded as an array of bytes.  This can be created from an array of UTF-16
+// runes using ucs2.Encode.
+//
+// For implicit UCS-2 encoding (the fallback with 7-bit fails) the message is
+// assumed to contain UTF-8.
 func Encode(msg []byte, options ...EncoderOption) ([]tpdu.TPDU, error) {
 	options = append([]EncoderOption{AsSubmit}, options...)
 	e := NewEncoder(options...)
@@ -65,15 +76,15 @@ func NewEncoder(options ...EncoderOption) *Encoder {
 // By default messages are encoded into SMS-DELIVER TPDUs.  This behaviour may
 // be overridden via options, either to NewEncoder or Encode.
 //
-// For 8bit encoding the message is encoded as is.
+// For 8-bit encoding the message is encoded as is.
 //
-// For 7bit encoding the message is assumed to contain UTF-8.
+// For 7-bit encoding the message is assumed to contain UTF-8.
 //
 // For explicit UCS-2 encoding the message is assumed to contain UTF-16,
 // encoded as an array of bytes.  This can be created from an array of UTF-16
 // runes using ucs2.Encode.
 //
-// For implicit UCS-2 encoding (the fallback with 7bit fails) the message is
+// For implicit UCS-2 encoding (the fallback with 7-bit fails) the message is
 // assumed to contain UTF-8.
 func (e Encoder) Encode(msg []byte, options ...EncoderOption) ([]tpdu.TPDU, error) {
 	for _, option := range options {
