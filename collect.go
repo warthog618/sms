@@ -23,7 +23,21 @@ type Collector struct {
 }
 
 // CollectorOption alters the behaviour of a Collector.
-type CollectorOption func(*Collector)
+type CollectorOption interface {
+	ApplyCollectorOption(*Collector)
+}
+
+// ReassemblyTimeoutOption limits the time allowed to complete a reassembly.
+type ReassemblyTimeoutOption struct {
+	d  time.Duration
+	eh func([]*tpdu.TPDU)
+}
+
+// ApplyCollectorOption applies the template option to the Encoder template PDU.
+func (o ReassemblyTimeoutOption) ApplyCollectorOption(c *Collector) {
+	c.duration = o.d
+	c.expiryHandler = o.eh
+}
 
 // WithReassemblyTimeout limits the time allowed for a collection of TPDUs to
 // be collected.
@@ -31,10 +45,7 @@ type CollectorOption func(*Collector)
 // If the timer expires before the collection is complete then the collected
 // TPDUs are passed to the expiryHandler.
 func WithReassemblyTimeout(d time.Duration, eh func([]*tpdu.TPDU)) CollectorOption {
-	return func(c *Collector) {
-		c.duration = d
-		c.expiryHandler = eh
-	}
+	return ReassemblyTimeoutOption{d, eh}
 }
 
 // NewCollector creates a Collector.
@@ -43,7 +54,7 @@ func NewCollector(options ...CollectorOption) *Collector {
 		pipes: make(map[string]*pipe),
 	}
 	for _, o := range options {
-		o(&c)
+		o.ApplyCollectorOption(&c)
 	}
 	return &c
 }
