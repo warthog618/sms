@@ -77,7 +77,21 @@ func TestDecode(t *testing.T) {
 			nil,
 		},
 		{
-			"single segment 7bit urdu",
+			"single segment 7bit implicit urdu",
+			[]*tpdu.TPDU{
+				{
+					UDH: tpdu.UserDataHeader{
+						tpdu.InformationElement{ID: 25, Data: []byte{0x0d}},
+					},
+					UD: []byte("hello \x03"),
+				},
+			},
+			nil, // decode uses all charsets by default
+			[]byte("hello ٻ"),
+			nil,
+		},
+		{
+			"single segment 7bit explicit urdu",
 			[]*tpdu.TPDU{
 				{
 					UDH: tpdu.UserDataHeader{
@@ -128,7 +142,7 @@ func TestDecode(t *testing.T) {
 					UD: []byte("hello \x03"),
 				},
 			},
-			[]sms.DecodeOption{sms.WithCharset(charset.Kannada)},
+			[]sms.DecodeOption{sms.WithDefaultCharset},
 			[]byte("hello ¥"),
 			nil,
 		},

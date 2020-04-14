@@ -92,8 +92,19 @@ func (o AllCharsetsOption) ApplyEncoderOption(e *Encoder) {
 	e.eopts = append(e.eopts, tpdu.WithAllCharsets)
 }
 
-// WithAllCharsets specifies that all charactersets are available for encoding.
-var WithAllCharsets = AllCharsetsOption{}
+var (
+	// WithAllCharsets specifies that all character sets are available for
+	// encoding or decoding.
+	//
+	// This is the default policy for decoding.
+	WithAllCharsets = AllCharsetsOption{}
+
+	// WithDefaultCharset specifies that only the default character set is
+	// available for encoding or decoding.
+	//
+	// This is the default policy for encoding.
+	WithDefaultCharset = CharsetOption{}
+)
 
 // WithCharset creates an CharsetOption.
 func WithCharset(nli ...int) CharsetOption {
