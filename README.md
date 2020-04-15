@@ -42,8 +42,8 @@ A one-off message can be encoded using *sms.Encode*:
 
 ```go
 tpdus, _ := sms.Encode([]byte("hello world"))
-for _,p := range tpdus {
-    b,_ := p.MarshalBinary()
+for _, p := range tpdus {
+    b, _ := p.MarshalBinary()
     // send binary TPDU...
 }
 ```
@@ -56,8 +56,8 @@ e := sms.NewEncoder()
 for {
     msg := <- msgChan
     tpdus, _ := e.Encode(msg)
-    for _,p := range tpdus {
-        b,_ := p.MarshalBinary()
+    for _, p := range tpdus {
+        b, _ := p.MarshalBinary()
         // send binary TPDU...
     }
 }
