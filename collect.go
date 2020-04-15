@@ -105,26 +105,7 @@ func (c *Collector) Collect(pdu tpdu.TPDU) (d []*tpdu.TPDU, err error) {
 	if seqno < 1 || seqno > segments {
 		return nil, ErrReassemblyInconsistency
 	}
-	st := pdu.SmsType()
-	var key string
-	switch st {
-	case tpdu.SmsSubmit:
-		key = fmt.Sprintf("%d:%02x:%s:%d:%d",
-			st,
-			pdu.DA.TOA,
-			pdu.DA.Addr,
-			concatRef,
-			segments)
-	case tpdu.SmsDeliver:
-		key = fmt.Sprintf("%d:%02x:%s:%d:%d",
-			st,
-			pdu.OA.TOA,
-			pdu.OA.Addr,
-			concatRef,
-			segments)
-	default:
-		return nil, tpdu.ErrUnsupportedSmsType(st)
-	}
+	key, err := pduKey(pdu, segments, concatRef)
 	p, ok := c.pipes[key]
 	if ok {
 		if p.segments[seqno-1] != nil {
@@ -160,6 +141,30 @@ func (c *Collector) Collect(pdu tpdu.TPDU) (d []*tpdu.TPDU, err error) {
 		})
 	}
 	return nil, err
+}
+
+func pduKey(pdu tpdu.TPDU, segments, concatRef int) (string, error) {
+	st := pdu.SmsType()
+	var key string
+	switch st {
+	case tpdu.SmsSubmit:
+		key = fmt.Sprintf("%d:%02x:%s:%d:%d",
+			st,
+			pdu.DA.TOA,
+			pdu.DA.Addr,
+			concatRef,
+			segments)
+	case tpdu.SmsDeliver:
+		key = fmt.Sprintf("%d:%02x:%s:%d:%d",
+			st,
+			pdu.OA.TOA,
+			pdu.OA.Addr,
+			concatRef,
+			segments)
+	default:
+		return "", tpdu.ErrUnsupportedSmsType(st)
+	}
+	return key, nil
 }
 
 // pipe is a buffer that contains the individual TPDUs in a concatenation set
