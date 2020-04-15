@@ -60,7 +60,7 @@ func (a *SMSCAddress) UnmarshalBinary(src []byte) (int, error) {
 	}
 	baddr, n, err := semioctet.Decode(make([]byte, l*2), src[ri:ri+l])
 	ri += n
-	// should never trip - semioctet.Decode can only fail if dst lenght is odd.
+	// should never trip - semioctet.Decode can only fail if dst length is odd.
 	if err != nil {
 		return ri, tpdu.NewDecodeError("addr", ri-n, err)
 	}
