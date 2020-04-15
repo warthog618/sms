@@ -49,7 +49,7 @@ type Encoder struct {
 	// MsgCount is the number of TPDUs encoded.
 	MsgCount tpdu.Counter
 
-	// ConcatRef is tghe number of multi-segment messages encoded.
+	// ConcatRef is the number of multi-segment messages encoded.
 	ConcatRef tpdu.Counter
 }
 
