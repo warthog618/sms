@@ -171,9 +171,23 @@ func (o NullDecoder) applyDecoderOption(d *Decoder) {
 	d.ext = make(charset.Decoder)
 }
 
-// WithoutExtCharset specifies that no extension character set will be
-// available to decode escaped characters.
-var WithoutExtCharset = NullDecoder{}
+// StrictOption specifies that the decoder should return an error rather than
+// ignoring undecodable septets.
+type StrictOption struct{}
+
+func (o StrictOption) applyDecoderOption(d *Decoder) {
+	d.strict = true
+}
+
+var (
+	// Strict specifies that the decoder should return an error rather than
+	// ignoring undecodable septets.
+	Strict = StrictOption{}
+
+	// WithoutExtCharset specifies that no extension character set will be
+	// available to decode escaped characters.
+	WithoutExtCharset = NullDecoder{}
+)
 
 // WithCharset replaces the character set map used by the Decoder.
 func (d Decoder) WithCharset(set charset.Decoder) Decoder {
