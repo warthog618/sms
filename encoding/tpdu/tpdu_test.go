@@ -778,7 +778,7 @@ func TestIsSingleSegment(t *testing.T) {
 			"concat8",
 			tpdu.TPDU{
 				UDH: []tpdu.InformationElement{
-					tpdu.InformationElement{
+					{
 						ID:   0,
 						Data: []byte{1, 2, 1},
 					},
@@ -790,7 +790,7 @@ func TestIsSingleSegment(t *testing.T) {
 			"concat16",
 			tpdu.TPDU{
 				UDH: []tpdu.InformationElement{
-					tpdu.InformationElement{
+					{
 						ID:   8,
 						Data: []byte{0, 1, 2, 1},
 					},
@@ -802,7 +802,7 @@ func TestIsSingleSegment(t *testing.T) {
 			"no concat",
 			tpdu.TPDU{
 				UDH: []tpdu.InformationElement{
-					tpdu.InformationElement{
+					{
 						ID:   3,
 						Data: []byte{1, 2, 1},
 					},
@@ -869,7 +869,7 @@ func TestSegment(t *testing.T) {
 			[]byte("hello"),
 			nil,
 			[]tpdu.TPDU{
-				tpdu.TPDU{
+				{
 					UD: []byte("hello"),
 				},
 			},
@@ -880,22 +880,22 @@ func TestSegment(t *testing.T) {
 			[]byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you might think"),
 			nil,
 			[]tpdu.TPDU{
-				tpdu.TPDU{
+				{
 					FirstOctet: tpdu.FoUDHI,
 					PI:         tpdu.PiUDL,
 					UDH: []tpdu.InformationElement{
-						tpdu.InformationElement{
+						{
 							ID:   0,
 							Data: []byte{1, 2, 1},
 						},
 					},
 					UD: []byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you mi"),
 				},
-				tpdu.TPDU{
+				{
 					FirstOctet: tpdu.FoUDHI,
 					PI:         tpdu.PiUDL,
 					UDH: []tpdu.InformationElement{
-						tpdu.InformationElement{
+						{
 							ID:   0,
 							Data: []byte{1, 2, 2},
 						},
@@ -913,36 +913,36 @@ func TestSegment(t *testing.T) {
 				tpdu.WithConcatRef(&counter{6}),
 			},
 			[]tpdu.TPDU{
-				tpdu.TPDU{
+				{
 					FirstOctet: tpdu.FoUDHI,
 					PI:         tpdu.PiUDL,
 					MR:         11,
 					UDH: []tpdu.InformationElement{
-						tpdu.InformationElement{
+						{
 							ID:   0,
 							Data: []byte{7, 3, 1},
 						},
 					},
 					UD: []byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you mi"),
 				},
-				tpdu.TPDU{
+				{
 					FirstOctet: tpdu.FoUDHI,
 					PI:         tpdu.PiUDL,
 					MR:         12,
 					UDH: []tpdu.InformationElement{
-						tpdu.InformationElement{
+						{
 							ID:   0,
 							Data: []byte{7, 3, 2},
 						},
 					},
 					UD: []byte("ght think, but wait, then we also need a really really long message to trigger a three segment concatenation which requires even more characters than I c"),
 				},
-				tpdu.TPDU{
+				{
 					FirstOctet: tpdu.FoUDHI,
 					PI:         tpdu.PiUDL,
 					MR:         13,
 					UDH: []tpdu.InformationElement{
-						tpdu.InformationElement{
+						{
 							ID:   0,
 							Data: []byte{7, 3, 3},
 						},
@@ -961,36 +961,36 @@ func TestSegment(t *testing.T) {
 				tpdu.With16BitConcatRef,
 			},
 			[]tpdu.TPDU{
-				tpdu.TPDU{
+				{
 					FirstOctet: tpdu.FoUDHI,
 					PI:         tpdu.PiUDL,
 					MR:         21,
 					UDH: []tpdu.InformationElement{
-						tpdu.InformationElement{
+						{
 							ID:   8,
 							Data: []byte{5, 8, 3, 1},
 						},
 					},
 					UD: []byte("this is a very long message that does not fit in a single SMS message, at least it will if I keep adding more to it as 160 characters is more than you m"),
 				},
-				tpdu.TPDU{
+				{
 					FirstOctet: tpdu.FoUDHI,
 					PI:         tpdu.PiUDL,
 					MR:         22,
 					UDH: []tpdu.InformationElement{
-						tpdu.InformationElement{
+						{
 							ID:   8,
 							Data: []byte{5, 8, 3, 2},
 						},
 					},
 					UD: []byte("ight think, but wait, then we also need a really really long message to trigger a three segment concatenation which requires even more characters than I"),
 				},
-				tpdu.TPDU{
+				{
 					FirstOctet: tpdu.FoUDHI,
 					PI:         tpdu.PiUDL,
 					MR:         23,
 					UDH: []tpdu.InformationElement{
-						tpdu.InformationElement{
+						{
 							ID:   8,
 							Data: []byte{5, 8, 3, 3},
 						},
@@ -1007,7 +1007,7 @@ func TestSegment(t *testing.T) {
 			[]byte("hello"),
 			nil,
 			[]tpdu.TPDU{
-				tpdu.TPDU{
+				{
 					DCS: tpdu.Dcs8BitData,
 					UD:  []byte("hello"),
 				},
@@ -1021,7 +1021,7 @@ func TestSegment(t *testing.T) {
 			[]byte("hello"),
 			nil,
 			[]tpdu.TPDU{
-				tpdu.TPDU{
+				{
 					DCS: tpdu.DcsUCS2Data,
 					UD:  []byte("hello"),
 				},
@@ -1035,7 +1035,7 @@ func TestSegment(t *testing.T) {
 				tpdu.WithMR(&counter{42}),
 			},
 			[]tpdu.TPDU{
-				tpdu.TPDU{
+				{
 					MR: 43,
 					UD: []byte("hello"),
 				},
