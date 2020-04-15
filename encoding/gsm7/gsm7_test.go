@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/warthog618/sms/encoding/gsm7"
+	"github.com/warthog618/sms/encoding/gsm7/charset"
 )
 
 type decoderPattern struct {
@@ -30,13 +31,8 @@ func testDecoder(t *testing.T, d gsm7.Decoder, patterns []decoderPattern) {
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			out, err := d.Decode(p.in)
-			if err != p.err {
-				t.Errorf("error decoding %v: %v", p.in, err)
-			}
-			if p.out == nil && out != nil {
-				t.Errorf("failed to decode: %v expected nil, got %v", p.in, out)
-			}
-			assert.Equal(t, out, p.out)
+			assert.Equal(t, p.err, err)
+			assert.Equal(t, p.out, out)
 		}
 		t.Run(p.name, f)
 	}
@@ -46,10 +42,8 @@ func testEncoder(t *testing.T, e gsm7.Encoder, patterns []encoderPattern) {
 	for _, p := range patterns {
 		f := func(t *testing.T) {
 			out, err := e.Encode(p.in)
-			if err != p.err {
-				t.Errorf("error encoding %v: %v", p.in, err)
-			}
-			assert.Equal(t, out, p.out)
+			assert.Equal(t, p.err, err)
+			assert.Equal(t, p.out, out)
 		}
 		t.Run(p.name, f)
 	}
@@ -169,4 +163,31 @@ func TestErrInvalidUTF8(t *testing.T) {
 		}
 		t.Run(fmt.Sprintf("%x", p), f)
 	}
+}
+
+func TestWithCharset(t *testing.T) {
+	out, err := gsm7.Encode([]byte("ıĞ"), gsm7.WithCharset(charset.Turkish))
+	assert.Nil(t, err)
+	assert.Equal(t, []byte{0x07, 0x0b}, out)
+	out, err = gsm7.Decode(out, gsm7.WithCharset(charset.Turkish))
+	assert.Nil(t, err)
+	assert.Equal(t, []byte("ıĞ"), out)
+}
+
+func TestWithExtCharset(t *testing.T) {
+	out, err := gsm7.Encode([]byte("ıĞ"), gsm7.WithExtCharset(charset.Turkish))
+	assert.Nil(t, err)
+	assert.Equal(t, []byte{0x1b, 0x69, 0x1b, 0x47}, out)
+	out, err = gsm7.Decode(out, gsm7.WithExtCharset(charset.Turkish))
+	assert.Nil(t, err)
+	assert.Equal(t, []byte("ıĞ"), out)
+}
+
+func TestWithoutExtCharset(t *testing.T) {
+	out, err := gsm7.Decode([]byte{0x1b, 0x69, 0x1b, 0x47}, gsm7.WithoutExtCharset)
+	assert.Nil(t, err)
+	assert.Equal(t, []byte("iG"), out)
+	out, err = gsm7.Decode([]byte{0x1b, 0x69, 0x1b, 0x47}, gsm7.WithoutExtCharset, gsm7.Strict)
+	assert.Equal(t, gsm7.ErrInvalidSeptet(0x69), err)
+	assert.Nil(t, out)
 }
