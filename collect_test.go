@@ -456,7 +456,7 @@ func TestCollectorCollect(t *testing.T) {
 	}
 }
 
-func TestCollectorReasemmblyTimeout(t *testing.T) {
+func TestCollectorReassemblyTimeout(t *testing.T) {
 	patterns := []struct {
 		name string
 		in   []tpdu.TPDU
@@ -506,7 +506,7 @@ func TestCollectorReasemmblyTimeout(t *testing.T) {
 			}
 			select {
 			case <-done:
-			case <-time.After(5 * time.Millisecond):
+			case <-time.After(50 * time.Millisecond):
 				t.Fatalf("didn't expire")
 			}
 			pipes := c.Pipes()
