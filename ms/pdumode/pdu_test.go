@@ -43,12 +43,11 @@ func TestDecode(t *testing.T) {
 	}
 	for _, p := range decodePatterns {
 		f := func(t *testing.T) {
-			d := pdumode.Decoder{}
 			b, err := hex.DecodeString(p.pdu)
 			if err != nil {
 				t.Fatalf("error converting in: %v", err)
 			}
-			smsc, tpdu, err := d.Decode(b)
+			smsc, tpdu, err := pdumode.Decode(b)
 			assert.Equal(t, p.smsc, smsc)
 			assert.Equal(t, p.tpdu, tpdu)
 			assert.Equal(t, p.err, err)
@@ -84,8 +83,7 @@ func TestDecodeString(t *testing.T) {
 	}
 	for _, p := range decodePatterns {
 		f := func(t *testing.T) {
-			d := pdumode.Decoder{}
-			smsc, tpdu, err := d.DecodeString(p.pdu)
+			smsc, tpdu, err := pdumode.DecodeString(p.pdu)
 			assert.Equal(t, p.smsc, smsc)
 			assert.Equal(t, p.tpdu, tpdu)
 			assert.Equal(t, p.err, err)
@@ -122,8 +120,7 @@ func TestEncode(t *testing.T) {
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
-			e := pdumode.Encoder{}
-			pdu, err := e.Encode(*p.smsc, p.tpdu)
+			pdu, err := pdumode.Encode(*p.smsc, p.tpdu)
 			s := hex.EncodeToString(pdu)
 			assert.Equal(t, p.pdu, s)
 			assert.Equal(t, p.err, err)
@@ -162,8 +159,7 @@ func TestEncodeToString(t *testing.T) {
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
-			e := pdumode.Encoder{}
-			pdu, err := e.EncodeToString(*p.smsc, p.tpdu)
+			pdu, err := pdumode.EncodeToString(*p.smsc, p.tpdu)
 			assert.Equal(t, p.pdu, pdu)
 			assert.Equal(t, p.err, err)
 		}

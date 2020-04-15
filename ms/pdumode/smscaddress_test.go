@@ -148,7 +148,8 @@ func TestSMSCAddressUnmarshalBinary(t *testing.T) {
 		},
 		{
 			"underflow toa",
-			[]byte{1}, pdumode.SMSCAddress{},
+			[]byte{1},
+			pdumode.SMSCAddress{},
 			1,
 			tpdu.NewDecodeError("toa", 1, tpdu.ErrUnderflow),
 		},
