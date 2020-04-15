@@ -13,9 +13,12 @@ import (
 //
 // The SMCSAddress is similar to a TPDU Address, but the binary form is
 // marshalled differently, hence the subtype.
+//
 // The Type-of-number should typically be TonNational or TonInternational, but
 // that is not enforced.
-// The NumberingPlan should typically be NpISDN, but that is not enforced either.
+//
+// The NumberingPlan should typically be NpISDN, but that is not enforced
+// either.
 type SMSCAddress struct {
 	tpdu.Address
 }
