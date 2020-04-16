@@ -37,16 +37,19 @@ func main() {
 	dumpTPDU(os.Stdout, tp)
 }
 
-func decode(pdu string, pm, mo bool) (p *tpdu.TPDU, a *pdumode.SMSCAddress, err error) {
-	b, err := hex.DecodeString(pdu)
+func decode(s string, pm, mo bool) (p *tpdu.TPDU, a *pdumode.SMSCAddress, err error) {
+	b, err := hex.DecodeString(s)
 	if err != nil {
 		return
 	}
 	if pm {
-		a, b, err = pdumode.Decode(b)
+		var pdu *pdumode.PDU
+		pdu, err = pdumode.UnmarshalHexString(s)
 		if err != nil {
 			return
 		}
+		a = &pdu.SMSC
+		b = pdu.TPDU
 	}
 	if mo {
 		p, err = sms.Unmarshal(b, sms.AsMO)

@@ -32,11 +32,11 @@ func main() {
 		}
 		tb := b
 		if pm {
-			_, ntb, err := pdumode.Decode(b)
+			pdu, err := pdumode.UnmarshalBinary(b)
 			if err != nil {
 				log.Fatal(err)
 			}
-			tb = ntb
+			tb = pdu.TPDU
 		}
 		t, err := sms.Unmarshal(tb)
 		if err != nil {

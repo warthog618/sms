@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/warthog618/sms/encoding/semioctet"
 	"github.com/warthog618/sms/encoding/tpdu"
 	"github.com/warthog618/sms/ms/pdumode"
@@ -22,7 +23,7 @@ type testPattern struct {
 	err  error
 }
 
-func TestDecode(t *testing.T) {
+func TestUnmarshalBinary(t *testing.T) {
 	decodePatterns := []testPattern{
 		{
 			"empty",
@@ -47,16 +48,21 @@ func TestDecode(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error converting in: %v", err)
 			}
-			smsc, tpdu, err := pdumode.Decode(b)
-			assert.Equal(t, p.smsc, smsc)
-			assert.Equal(t, p.tpdu, tpdu)
+			pdu, err := pdumode.UnmarshalBinary(b)
 			assert.Equal(t, p.err, err)
+			if err == nil {
+				require.NotNil(t, pdu)
+				assert.Equal(t, *p.smsc, pdu.SMSC)
+				assert.Equal(t, p.tpdu, pdu.TPDU)
+			} else {
+				assert.Nil(t, pdu)
+			}
 		}
 		t.Run(p.name, f)
 	}
 }
 
-func TestDecodeString(t *testing.T) {
+func TestUnmarshalHexString(t *testing.T) {
 	decodePatterns := []testPattern{
 		{
 			"nothex",
@@ -83,16 +89,21 @@ func TestDecodeString(t *testing.T) {
 	}
 	for _, p := range decodePatterns {
 		f := func(t *testing.T) {
-			smsc, tpdu, err := pdumode.DecodeString(p.pdu)
-			assert.Equal(t, p.smsc, smsc)
-			assert.Equal(t, p.tpdu, tpdu)
+			pdu, err := pdumode.UnmarshalHexString(p.pdu)
 			assert.Equal(t, p.err, err)
+			if err == nil {
+				require.NotNil(t, pdu)
+				assert.Equal(t, *p.smsc, pdu.SMSC)
+				assert.Equal(t, p.tpdu, pdu.TPDU)
+			} else {
+				assert.Nil(t, pdu)
+			}
 		}
 		t.Run(p.name, f)
 	}
 }
 
-func TestEncode(t *testing.T) {
+func TestMarshalBinary(t *testing.T) {
 	patterns := []testPattern{
 		{
 			"empty",
@@ -120,8 +131,9 @@ func TestEncode(t *testing.T) {
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
-			pdu, err := pdumode.Encode(*p.smsc, p.tpdu)
-			s := hex.EncodeToString(pdu)
+			pdu := pdumode.PDU{SMSC: *p.smsc, TPDU: p.tpdu}
+			b, err := pdu.MarshalBinary()
+			s := hex.EncodeToString(b)
 			assert.Equal(t, p.pdu, s)
 			assert.Equal(t, p.err, err)
 		}
@@ -129,7 +141,7 @@ func TestEncode(t *testing.T) {
 	}
 }
 
-func TestEncodeToString(t *testing.T) {
+func TestMarshalHexString(t *testing.T) {
 	patterns := []testPattern{
 		{
 			"empty",
@@ -159,8 +171,9 @@ func TestEncodeToString(t *testing.T) {
 	}
 	for _, p := range patterns {
 		f := func(t *testing.T) {
-			pdu, err := pdumode.EncodeToString(*p.smsc, p.tpdu)
-			assert.Equal(t, p.pdu, pdu)
+			pdu := pdumode.PDU{SMSC: *p.smsc, TPDU: p.tpdu}
+			b, err := pdu.MarshalHexString()
+			assert.Equal(t, p.pdu, b)
 			assert.Equal(t, p.err, err)
 		}
 		t.Run(p.name, f)
