@@ -42,6 +42,7 @@ type encodeError struct {
 }
 
 // EncodeError creates an encodeError which identifies the field being encoded.
+//
 // If the provided error is a nested encodeError then the error is returned as
 // is rather than wrapping it.
 func EncodeError(f string, e error) error {
@@ -71,17 +72,22 @@ func (e ErrUnsupportedSmsType) Error() string {
 var (
 	// ErrInvalid indicates the value of a field provided to an encoder is not valid.
 	ErrInvalid = errors.New("invalid")
+
 	// ErrOddUCS2Length indicates the length of a binary array containing UCS2
 	// characters has an uneven length, and so has split a UCS2 character.
 	ErrOddUCS2Length = errors.New("odd UCS2 length")
+
 	// ErrOverlength indicates the binary provided contains more bytes than
 	// expected by the TPDU decoder.
 	ErrOverlength = errors.New("overlength")
+
 	// ErrMissing indicates a field requiored to marshal an object is missing.
 	ErrMissing = errors.New("missing")
+
 	// ErrNonZero indicates a field which is expected to be zeroed, but contains
 	// non-zero data.
 	ErrNonZero = errors.New("non-zero fill")
+
 	// ErrUnderflow indicates the binary provided does not contain
 	// sufficient bytes to correctly decode the TPDU.
 	ErrUnderflow = errors.New("underflow")
