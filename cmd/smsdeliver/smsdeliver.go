@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 //
 // Copyright © 2019 Kent Gibson <warthog618@gmail.com>.
+
+// smsdeliver provides an example of extracting a message from a set of
+// SMS-DELIVER TPDUs.
 package main
 
 import (

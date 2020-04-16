@@ -2,6 +2,7 @@
 //
 // Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
+// smsdecode provides an example of unmarshalling and displaying a SMS TPDU.
 package main
 
 import (
