@@ -1029,7 +1029,7 @@ func (d Direction) ApplyTPDUOption(t *TPDU) error {
 	return nil
 }
 
-// SmsType indicatges the type of SMS TPDU type represented by the TPDU.
+// SmsType indicates the type of SMS TPDU type represented by the TPDU.
 type SmsType int
 
 const (
