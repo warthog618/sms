@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/warthog618/sms/encoding/pdumode"
 	"github.com/warthog618/sms/encoding/semioctet"
 	"github.com/warthog618/sms/encoding/tpdu"
-	"github.com/warthog618/sms/ms/pdumode"
 )
 
 func TestSMSCAddressMarshalBinary(t *testing.T) {

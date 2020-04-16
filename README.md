@@ -313,7 +313,7 @@ TP-UD: 00000000  00 67 00 65 00 2c 00 20  00 61 00 74 00 20 00 6c  |.g.e.,. .a.t
 
 The [tpdu](encoding/tpdu) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/warthog618/sms/encoding/tpdu) provides the core TPDU types and conversions to and from their binary form.
 
-The [pdumode](ms/pdumode) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/warthog618/sms/ms/pdumode) provides encoding and decoding of PDUs exchanged with GSM modems in PDU mode.
+The [pdumode](encoding/pdumode) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/warthog618/sms/encoding/pdumode) provides encoding and decoding of PDUs exchanged with GSM modems in PDU mode.
 
 A number of packages provide functionality to encode and decode TPDU fields:
 

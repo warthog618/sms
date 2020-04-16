@@ -11,7 +11,7 @@ import (
 	"os"
 
 	"github.com/warthog618/sms"
-	"github.com/warthog618/sms/ms/pdumode"
+	"github.com/warthog618/sms/encoding/pdumode"
 )
 
 func main() {
