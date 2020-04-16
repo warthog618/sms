@@ -2,7 +2,7 @@
 
 A Go library for encoding and decoding SMSs.
 
-[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=for-the-badge)](https://pkg.go.dev/github.com/warthog618/sms)
+[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/warthog618/sms)
 [![Build Status](https://travis-ci.org/warthog618/sms.svg)](https://travis-ci.org/warthog618/sms)
 [![Coverage Status](https://coveralls.io/repos/github/warthog618/sms/badge.svg?branch=master)](https://coveralls.io/github/warthog618/sms?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/warthog618/sms)](https://goreportcard.com/report/github.com/warthog618/sms)
@@ -311,18 +311,18 @@ TP-UD: 00000000  00 67 00 65 00 2c 00 20  00 61 00 74 00 20 00 6c  |.g.e.,. .a.t
 
 ## Subpackages
 
-The [tpdu](encoding/tpdu) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=for-the-badge)](https://pkg.go.dev/github.com/warthog618/sms/encoding/tpdu) provides the core TPDU types and conversions to and from their binary form.
+The [tpdu](encoding/tpdu) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/warthog618/sms/encoding/tpdu) provides the core TPDU types and conversions to and from their binary form.
 
-The [pdumode](ms/pdumode) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=for-the-badge)](https://pkg.go.dev/github.com/warthog618/sms/ms/pdumode) provides encoding and decoding of PDUs exchanged with GSM modems in PDU mode.
+The [pdumode](ms/pdumode) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/warthog618/sms/ms/pdumode) provides encoding and decoding of PDUs exchanged with GSM modems in PDU mode.
 
 A number of packages provide functionality to encode and decode TPDU fields:
 
-The [bcd](encoding/bcd) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=for-the-badge)](https://pkg.go.dev/github.com/warthog618/sms/encoding/bcd) provides conversions to and from BCD format.
+The [bcd](encoding/bcd) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/warthog618/sms/encoding/bcd) provides conversions to and from BCD format.
 
-The [gsm7](encoding/gsm7) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=for-the-badge)](https://pkg.go.dev/github.com/warthog618/sms/encoding/gsm7) provides conversions to and from 7bit packed user data.
+The [gsm7](encoding/gsm7) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/warthog618/sms/encoding/gsm7) provides conversions to and from 7bit packed user data.
 
-The [charset](encoding/gsm7/charset) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=for-the-badge)](https://pkg.go.dev/github.com/warthog618/sms/encoding/gsm7/charset) provides the character sets used to encode user data in GSM 7bit format as specified in 3GPP TS 23.038.
+The [charset](encoding/gsm7/charset) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/warthog618/sms/encoding/gsm7/charset) provides the character sets used to encode user data in GSM 7bit format as specified in 3GPP TS 23.038.
 
-The [semioctet](encoding/semioctet) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=for-the-badge)](https://pkg.go.dev/github.com/warthog618/sms/encoding/semioctet) provides conversions to and from semioctet format.
+The [semioctet](encoding/semioctet) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/warthog618/sms/encoding/semioctet) provides conversions to and from semioctet format.
 
-The [ucs2](encoding/ucs2) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=for-the-badge)](https://pkg.go.dev/github.com/warthog618/sms/encoding/ucs2) provides conversions between UCS-2 and UTF-8.
+The [ucs2](encoding/ucs2) package [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/warthog618/sms/encoding/ucs2) provides conversions between UCS-2 and UTF-8.
