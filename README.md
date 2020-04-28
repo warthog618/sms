@@ -147,7 +147,8 @@ The full set of supplied options:
 Option | Category | Description
 ---|---|---
 *WithReassemblyTimeout(duration,handler)*|Collect|Limit the time allowed to wait for the TPDUs of a complete reassembly
-*WithTemplateOption(tpdu)*|Encode|Use the provided TPDU as the template for encoded TPDUs.
+*WithTemplate(tpdu)*|Encode|Use the provided TPDU as the template for encoded TPDUs.
+*WithTemplateOption(tpdu.Option)*|Encode|Apply the provided option to the template TPDU during encoding.
 *To(number)*|Encode|Set the DA of the encoded TPDU to the number provided
 *From(number)*|Encode|Set the OA of the encoded TPDU to the number provided
 *WithAllCharsets*|Decode,Encode|Make all GSM7 character sets available
