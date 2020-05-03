@@ -2,7 +2,7 @@
 //
 // Copyright © 2018 Kent Gibson <warthog618@gmail.com>.
 
-// smssubmit provides an example of encoding a message into a set of SMS-SUMIT
+// smssubmit provides an example of encoding a message into a set of SMS-SUBMIT
 // TPDUs.
 package main
 
