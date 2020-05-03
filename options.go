@@ -30,46 +30,42 @@ type tpduTemplate struct {
 	t tpdu.TPDU
 }
 
-// ApplyEncoderOption applies the template option to the Encoder template PDU.
 func (o tpduTemplate) ApplyEncoderOption(e *Encoder) {
 	e.pdu = o.t
 }
 
-// TemplateOption wraps a TPDU option so it can be applied to an Encoder
-// template PDU.
-type TemplateOption struct {
+type templateOption struct {
 	tpdu.Option
 }
 
-// ApplyEncoderOption applies the template option to the Encoder template PDU.
-func (o TemplateOption) ApplyEncoderOption(e *Encoder) {
+func (o templateOption) ApplyEncoderOption(e *Encoder) {
 	o.ApplyTPDUOption(&e.pdu)
 }
 
 // WithTemplateOption wraps a TPDU option in a TemplateOption so it can be
 // applied to an Encoder template PDU.
-func WithTemplateOption(option tpdu.Option) TemplateOption {
-	return TemplateOption{option}
+func WithTemplateOption(option tpdu.Option) EncoderOption {
+	return templateOption{option}
 }
 
 var (
 	// AsSubmit indicates that generated PDUs will be of type SmsSubmit.
-	AsSubmit = TemplateOption{tpdu.SmsSubmit}
+	AsSubmit = templateOption{tpdu.SmsSubmit}
 
 	// AsDeliver indicates that generated PDUs will be of type SmsDeliver.
-	AsDeliver = TemplateOption{tpdu.SmsDeliver}
+	AsDeliver = templateOption{tpdu.SmsDeliver}
 
 	// As8Bit indicates that generated PDUs encode user data as 8bit.
-	As8Bit = TemplateOption{tpdu.Dcs8BitData}
+	As8Bit = templateOption{tpdu.Dcs8BitData}
 
 	// AsUCS2 indicates that generated PDUs encode user data as UCS2.
-	AsUCS2 = TemplateOption{tpdu.DcsUCS2Data}
+	AsUCS2 = templateOption{tpdu.DcsUCS2Data}
 
 	// AsMO indicates that the TPDU originated from the mobile station.
-	AsMO = DirectionOption{tpdu.MO}
+	AsMO = directionOption{tpdu.MO}
 
 	// AsMT indicates that the TPDU as destined for the mobile station.
-	AsMT = DirectionOption{tpdu.MT}
+	AsMT = directionOption{tpdu.MT}
 
 	// WithAllCharsets specifies that all character sets are available for
 	// encoding or decoding.
@@ -85,15 +81,15 @@ var (
 )
 
 // To specifies the DA for a SMS-SUBMIT TPDU.
-func To(number string) TemplateOption {
+func To(number string) EncoderOption {
 	addr := tpdu.NewAddress(tpdu.FromNumber(number))
-	return TemplateOption{tpdu.WithDA(addr)}
+	return templateOption{tpdu.WithDA(addr)}
 }
 
 // From specifies the OA for a SMS-DELIVER TPDU.
-func From(number string) TemplateOption {
+func From(number string) EncoderOption {
 	addr := tpdu.NewAddress(tpdu.FromNumber(number))
-	return TemplateOption{tpdu.WithOA(addr)}
+	return templateOption{tpdu.WithOA(addr)}
 }
 
 // AllCharsetsOption specifies that all charactersets are available for encoding.
@@ -166,12 +162,10 @@ func (o ShiftCharsetOption) ApplyDecodeOption(cc *DecodeConfig) {
 	cc.dopts = append(cc.dopts, tpdu.WithShiftCharset(o.nli...))
 }
 
-// DirectionOption defines the direction.
-type DirectionOption struct {
+type directionOption struct {
 	d tpdu.Direction
 }
 
-// ApplyUnmarshalOption applies the Direction to unmarshalling.
-func (o DirectionOption) ApplyUnmarshalOption(d *UnmarshalConfig) {
+func (o directionOption) ApplyUnmarshalOption(d *UnmarshalConfig) {
 	d.dirn = o.d
 }
