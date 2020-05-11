@@ -11,10 +11,11 @@ const cr byte = 0x0d
 //
 // The padBits is the number of bits of pad to place at the beginning of the
 // packed array, as the packed septets may not start on an octet boundary.
-// Packed arrays containing 8n or 8n-1 digits both return 8n septets.
-// The caller must be aware of the number of expected digits in order to
-// distinguish between a 0 septet ending the sequence in the 8n case,
-// and 0 padding in the 8n-1 case.
+//
+// Packed arrays containing 8n or 8n-1 digits both return 8n septets. The
+// caller must be aware of the number of expected digits in order to
+// distinguish between a 0 septet ending the sequence in the 8n case, and 0
+// padding in the 8n-1 case.
 func Pack7Bit(u []byte, fillBits int) []byte {
 	if len(u) == 0 {
 		return append(u[:0:0], u...)
@@ -43,8 +44,8 @@ func Pack7Bit(u []byte, fillBits int) []byte {
 // Unpack7Bit unpacks septets, packed into an 8bit array as per the packing
 // rules defined in 3GPP TS 23.038 Section 6.1.2.1, into an array of septets.
 //
-// The fillBits is the number of bits of pad at the beginning of the src, as the
-// packed septets may not start on an octet boundary.
+// The fillBits is the number of bits of pad at the beginning of the src, as
+// the packed septets may not start on an octet boundary.
 func Unpack7Bit(p []byte, fillBits int) []byte {
 	if len(p) == 0 {
 		return append(p[:0:0], p...)
@@ -80,9 +81,10 @@ func Unpack7Bit(p []byte, fillBits int) []byte {
 //
 // The padBits is the number of bits of pad to place at the beginning of the
 // packed array, as the packed septets may not start on an octet boundary.
-// A filler CR is added to the final octet if there are 7 bits unused
-// (to distinguish from the 0x00 septet), or if the last septet is CR and
-// ends on an octet boundary (so it wont be considered filler).
+//
+// A filler CR is added to the final octet if there are 7 bits unused (to
+// distinguish from the 0x00 septet), or if the last septet is CR and ends on
+// an octet boundary (so it wont be considered filler).
 func Pack7BitUSSD(u []byte, fillBits int) []byte {
 	b := Pack7Bit(u, fillBits)
 	if len(b) == 0 {
@@ -97,13 +99,15 @@ func Pack7BitUSSD(u []byte, fillBits int) []byte {
 	return b
 }
 
-// Unpack7BitUSSD unpacks septets, packed into an 8bit array, as per the packing
-// rules defined in 3GPP TS 23.038 Section 6.1.2.3, into an array of septets.
+// Unpack7BitUSSD unpacks septets, packed into an 8bit array, as per the
+// packing rules defined in 3GPP TS 23.038 Section 6.1.2.3, into an array of
+// septets.
 //
-// The fillBits is the number of bits of pad at the beginning of the src, as the
-// packed septets may not start on an octet boundary.
-// Any trailing CR is assumed to be filler if it ends an octet boundary,
-// or if it starts on an octet boundary and the previous character is also CR.
+// The fillBits is the number of bits of pad at the beginning of the src, as
+// the packed septets may not start on an octet boundary.
+//
+// Any trailing CR is assumed to be filler if it ends on an octet boundary, or
+// if it starts on an octet boundary and the previous character is also CR.
 func Unpack7BitUSSD(p []byte, fillBits int) []byte {
 	u := Unpack7Bit(p, fillBits)
 	// remove any trailing filler
